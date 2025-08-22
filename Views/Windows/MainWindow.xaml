@@ -1,0 +1,216 @@
+﻿<Window x:Class="PrimeAppBooks.Views.Windows.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:fw="clr-namespace:SourceChord.FluentWPF;assembly=FluentWPF"
+        xmlns:vm="clr-namespace:PrimeAppBooks.ViewModels.Windows"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        Title="PrimeApp Systems — Accounting"
+        Width="1300" Height="670" MinWidth="980" MinHeight="560"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
+        Background="Transparent"
+        ResizeMode="CanResizeWithGrip"
+        AllowsTransparency="True"
+        FontFamily="Century Gothic">
+
+    <Grid>
+        <!-- Beautiful Stepped Gradient Background -->
+        <!-- First gradient: Diagonal top-left to bottom-right -->
+        <Rectangle RadiusX="8" RadiusY="8">
+            <Rectangle.Fill>
+                <StaticResource ResourceKey="BackgroundGradient1" />
+            </Rectangle.Fill>
+        </Rectangle>
+
+        <!-- Second gradient: Diagonal bottom-left to top-right -->
+        <Rectangle Opacity="0.5" RadiusX="8" RadiusY="8">
+            <Rectangle.Fill>
+                <StaticResource ResourceKey="BackgroundGradient2" />
+            </Rectangle.Fill>
+            <Rectangle.OpacityMask>
+                <StaticResource ResourceKey="BackgroundMaskGradient" />
+            </Rectangle.OpacityMask>
+        </Rectangle>
+
+        <!-- Main Glass Overlay with Transparency -->
+        <fw:AcrylicPanel TintColor="#0a0a0a" TintOpacity="0.1" NoiseOpacity="0.005" Opacity="0.9">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <!-- Enhanced Title Bar with Shadow -->
+                <Grid Grid.Row="0" Height="50">
+                    <Border CornerRadius="8,8,0,0">
+                        <Border.Background>
+                            <StaticResource ResourceKey="TitleBarGradient" />
+                        </Border.Background>
+                        <DockPanel LastChildFill="False" Margin="5">
+                            <!-- App Title with Icon and Toggle Button -->
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" DockPanel.Dock="Left">
+                                <Button Content="☰" Style="{StaticResource ToggleButtonStyle}"
+                                       Command="{Binding ToggleSidebarCommand}"
+                                       Margin="0,0,16,0" />
+                                <Ellipse Width="36" Height="36" Margin="0,0,16,0">
+                                    <Ellipse.Fill>
+                                        <StaticResource ResourceKey="AppIconGradient" />
+                                    </Ellipse.Fill>
+                                </Ellipse>
+                                <StackPanel>
+                                    <TextBlock Text="PrimeApp Books"
+                                              Foreground="White"
+                                              FontSize="18"
+                                              FontWeight="SemiBold" />
+                                    <TextBlock Text="Financial Management Suite"
+                                              Foreground="#D0FFFFFF"
+                                              FontSize="11"
+                                              Margin="2" />
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- Window Controls with ViewModel Commands - Now properly right-aligned -->
+                            <StackPanel Orientation="Horizontal" DockPanel.Dock="Right"
+                                       VerticalAlignment="Center" Margin="0,0,0,0">
+                                <Button Content="─" Style="{StaticResource TitleBarButtonStyle}"
+                                       Command="{Binding MinimizeCommand}"
+                                       CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                                       Margin="2,0" />
+                                <Button Content="⬜" Style="{StaticResource TitleBarButtonStyle}"
+                                       Command="{Binding MaximizeCommand}"
+                                       CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                                       Margin="2,0" />
+                                <Button Content="✕" Style="{StaticResource CloseButtonStyle}"
+                                       Command="{Binding CloseCommand}"
+                                       CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                                       Margin="2,0" />
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
+                </Grid>
+
+                <!-- Main Content with Floating Panels -->
+                <Grid Grid.Row="1" Margin="15">
+                    <!-- Increased left/right margin to push sidebar right -->
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="{Binding SidebarWidth}" />
+                        <ColumnDefinition Width="16" />
+                        <!-- Increased sidebar margin -->
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Floating Sidebar with Shadow and Collapsible Functionality -->
+                    <Grid Grid.Column="0">
+                        <!-- Main Sidebar Panel with rounded edges -->
+                        <Border Style="{StaticResource FloatingPanelStyle}" CornerRadius="16">
+                            <fw:AcrylicPanel TintColor="#000000" TintOpacity="0.2" NoiseOpacity="0.01" Opacity="0.85">
+                                <Grid>
+                                    <!-- Expanded Sidebar Content -->
+                                    <ScrollViewer VerticalScrollBarVisibility="Hidden"
+                                                 Visibility="{Binding SidebarContentVisibility}">
+                                        <StackPanel Margin="20,28,20,24">
+                                            <!-- User Profile with Floating Effect -->
+                                            <Border CornerRadius="16" Padding="20" Margin="0,0,0,28">
+                                                <Border.Background>
+                                                    <StaticResource ResourceKey="UserProfileGradient" />
+                                                </Border.Background>
+                                                <StackPanel>
+                                                    <Ellipse Width="52" Height="52" Margin="0,0,0,12">
+                                                        <Ellipse.Fill>
+                                                            <StaticResource ResourceKey="UserAvatarGradient" />
+                                                        </Ellipse.Fill>
+                                                    </Ellipse>
+                                                    <TextBlock Text="Sarah Williams" Foreground="White"
+                                                              FontWeight="SemiBold" HorizontalAlignment="Center" FontSize="14" />
+                                                    <TextBlock Text="Chief Financial Officer" Foreground="#D0FFFFFF"
+                                                              FontSize="11" HorizontalAlignment="Center" Margin="0,2,0,0" />
+                                                </StackPanel>
+                                            </Border>
+
+                                            <!-- Navigation -->
+                                            <TextBlock Text="NAVIGATION" Foreground="#90FFFFFF"
+                                                      FontWeight="Bold" FontSize="11"
+                                                      Margin="16,0,0,20" />
+
+                                            <Button Content="🏠  Dashboard" Style="{StaticResource ModernButtonStyle}"
+                                                   Command="{Binding NavigateToDashboardCommand}"
+                                                   Background="#40FF6B6B" />
+                                            <Button Content="📊  Chart of Accounts" Style="{StaticResource ModernButtonStyle}"
+                                                   Command="{Binding NavigateToChartOfAccountsCommand}" />
+                                            <Button Content="💸  Transactions" Style="{StaticResource ModernButtonStyle}"
+                                                   Command="{Binding NavigateToTransactionsCommand}" />
+                                            <Button Content="📈  Financial Reports" Style="{StaticResource ModernButtonStyle}"
+                                                   Command="{Binding NavigateToReportsCommand}" />
+                                            <Button Content="🔍  Audit Trail" Style="{StaticResource ModernButtonStyle}" />
+
+                                            <Rectangle Height="1" Fill="#40FFFFFF" Margin="16,20" RadiusX="0.5" RadiusY="0.5" />
+
+                                            <TextBlock Text="TOOLS" Foreground="#90FFFFFF"
+                                                      FontWeight="Bold" FontSize="11"
+                                                      Margin="16,12,0,20" />
+
+                                            <Button Content="⚙️  Settings" Style="{StaticResource ModernButtonStyle}" />
+                                            <Button Content="👥  User Management" Style="{StaticResource ModernButtonStyle}" />
+                                            <Button Content="🔐  Security Center" Style="{StaticResource ModernButtonStyle}" />
+                                            <Button Content="❓  Help and Support" Style="{StaticResource ModernButtonStyle}" />
+                                        </StackPanel>
+                                    </ScrollViewer>
+
+                                    <!-- Collapsed Sidebar Content -->
+                                    <StackPanel Margin="8,28,8,24" Visibility="{Binding CollapsedContentVisibility}">
+                                        <!-- Collapsed User Profile -->
+                                        <Border CornerRadius="12" Padding="8" Margin="0,0,0,20">
+                                            <Border.Background>
+                                                <StaticResource ResourceKey="UserProfileGradient" />
+                                            </Border.Background>
+                                            <Ellipse Width="32" Height="32">
+                                                <Ellipse.Fill>
+                                                    <StaticResource ResourceKey="UserAvatarGradient" />
+                                                </Ellipse.Fill>
+                                            </Ellipse>
+                                        </Border>
+
+                                        <!-- Collapsed Navigation -->
+                                        <Button Content="🏠" Style="{StaticResource CollapsedButtonStyle}"
+                                               Command="{Binding NavigateToDashboardCommand}"
+                                               Background="#40FF6B6B" ToolTip="Dashboard" />
+                                        <Button Content="📊" Style="{StaticResource CollapsedButtonStyle}"
+                                               Command="{Binding NavigateToChartOfAccountsCommand}"
+                                               ToolTip="Chart of Accounts" />
+                                        <Button Content="💸" Style="{StaticResource CollapsedButtonStyle}"
+                                               Command="{Binding NavigateToTransactionsCommand}"
+                                               ToolTip="Transactions" />
+                                        <Button Content="📈" Style="{StaticResource CollapsedButtonStyle}"
+                                               Command="{Binding NavigateToReportsCommand}"
+                                               ToolTip="Financial Reports" />
+                                        <Button Content="🔍" Style="{StaticResource CollapsedButtonStyle}"
+                                               ToolTip="Audit Trail" />
+
+                                        <Rectangle Height="1" Fill="#40FFFFFF" Margin="8,12,8,12" RadiusX="0.5" RadiusY="0.5" />
+
+                                        <Button Content="⚙️" Style="{StaticResource CollapsedButtonStyle}"
+                                               ToolTip="Settings" />
+                                        <Button Content="👥" Style="{StaticResource CollapsedButtonStyle}"
+                                               ToolTip="User Management" />
+                                        <Button Content="🔐" Style="{StaticResource CollapsedButtonStyle}"
+                                               ToolTip="Security Center" />
+                                        <Button Content="❓" Style="{StaticResource CollapsedButtonStyle}"
+                                               ToolTip="Help and Support" />
+                                    </StackPanel>
+                                </Grid>
+                            </fw:AcrylicPanel>
+                        </Border>
+                    </Grid>
+
+                    <!-- Navigation Frame - This replaces the hardcoded dashboard content -->
+                    <Grid Grid.Column="2">
+                        <Frame x:Name="MainContentFrame"
+                               NavigationUIVisibility="Hidden"
+                               Background="Transparent"
+                               BorderThickness="0" />
+                    </Grid>
+                </Grid>
+            </Grid>
+        </fw:AcrylicPanel>
+    </Grid>
+</Window>

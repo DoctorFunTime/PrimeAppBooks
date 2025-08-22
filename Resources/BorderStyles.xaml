@@ -1,0 +1,208 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:fw="clr-namespace:SourceChord.FluentWPF;assembly=FluentWPF">
+
+    <!--  Card Base Style  -->
+    <!-- Animation Durations -->
+    <Duration x:Key="Dur.Fast">0:0:0.15</Duration>
+    <Duration x:Key="Dur.Med">0:0:0.3</Duration>
+    <Duration x:Key="Dur.Slow">0:0:0.6</Duration>
+
+    <Style x:Key="CardBase" TargetType="Border">
+        <Setter Property="CornerRadius" Value="14" />
+        <Setter Property="Background" Value="#1A1A1A" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="Padding" Value="16" />
+        <Setter Property="RenderTransform">
+            <Setter.Value>
+                <ScaleTransform ScaleX="1" ScaleY="1" />
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Effect">
+            <Setter.Value>
+                <DropShadowEffect
+                    BlurRadius="0"
+                    Opacity="0"
+                    ShadowDepth="0" />
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Trigger.EnterActions>
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation
+                                Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.BlurRadius)"
+                                To="16"
+                                Duration="{StaticResource Dur.Med}" />
+                            <DoubleAnimation
+                                Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.Opacity)"
+                                To="0.35"
+                                Duration="{StaticResource Dur.Med}" />
+                            <DoubleAnimation
+                                Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
+                                To="1.02"
+                                Duration="{StaticResource Dur.Med}" />
+                            <DoubleAnimation
+                                Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
+                                To="1.02"
+                                Duration="{StaticResource Dur.Med}" />
+                        </Storyboard>
+                    </BeginStoryboard>
+                </Trigger.EnterActions>
+                <Trigger.ExitActions>
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation
+                                Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.BlurRadius)"
+                                To="0"
+                                Duration="{StaticResource Dur.Med}" />
+                            <DoubleAnimation
+                                Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.Opacity)"
+                                To="0"
+                                Duration="{StaticResource Dur.Med}" />
+                            <DoubleAnimation
+                                Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
+                                To="1"
+                                Duration="{StaticResource Dur.Med}" />
+                            <DoubleAnimation
+                                Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
+                                To="1"
+                                Duration="{StaticResource Dur.Med}" />
+                        </Storyboard>
+                    </BeginStoryboard>
+                </Trigger.ExitActions>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!--  Floating Panel Style with Shadow Effect  -->
+    <Style x:Key="FloatingPanelStyle" TargetType="Border">
+        <Setter Property="CornerRadius" Value="16" />
+        <Setter Property="RenderTransform">
+            <Setter.Value>
+                <TranslateTransform Y="0" />
+            </Setter.Value>
+        </Setter>
+        <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
+        <Style.Triggers>
+            <EventTrigger RoutedEvent="Loaded">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <DoubleAnimation
+                            Storyboard.TargetProperty="Opacity"
+                            From="0"
+                            To="1"
+                            Duration="0:0:0.8" />
+                        <DoubleAnimation
+                            Storyboard.TargetProperty="(RenderTransform).(TranslateTransform.Y)"
+                            From="20"
+                            To="0"
+                            Duration="0:0:0.6" />
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Trigger.EnterActions>
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation
+                                Storyboard.TargetProperty="(RenderTransform).(TranslateTransform.Y)"
+                                To="-3"
+                                Duration="0:0:0.3" />
+                        </Storyboard>
+                    </BeginStoryboard>
+                </Trigger.EnterActions>
+                <Trigger.ExitActions>
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation
+                                Storyboard.TargetProperty="(RenderTransform).(TranslateTransform.Y)"
+                                To="0"
+                                Duration="0:0:0.3" />
+                        </Storyboard>
+                    </BeginStoryboard>
+                </Trigger.ExitActions>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!--  KPI Card Style with Floating Effect  -->
+    <Style x:Key="KPICardStyle" TargetType="Border">
+        <Setter Property="CornerRadius" Value="14" />
+        <Setter Property="Margin" Value="8" />
+        <Setter Property="RenderTransform">
+            <Setter.Value>
+                <TransformGroup>
+                    <ScaleTransform ScaleX="1" ScaleY="1" />
+                    <TranslateTransform Y="0" />
+                </TransformGroup>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
+        <Style.Triggers>
+            <EventTrigger RoutedEvent="Loaded">
+                <BeginStoryboard>
+                    <Storyboard BeginTime="0:0:0.2">
+                        <DoubleAnimation
+                            Storyboard.TargetProperty="Opacity"
+                            From="0"
+                            To="1"
+                            Duration="0:0:0.6" />
+                        <DoubleAnimation
+                            Storyboard.TargetProperty="(RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)"
+                            From="0"
+                            To="1"
+                            Duration="0:0:0.5" />
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Trigger.EnterActions>
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation
+                                Storyboard.TargetProperty="(RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)"
+                                To="1.05"
+                                Duration="0:0:0.2" />
+                            <DoubleAnimation
+                                Storyboard.TargetProperty="(RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)"
+                                To="1.05"
+                                Duration="0:0:0.2" />
+                            <DoubleAnimation
+                                Storyboard.TargetProperty="(RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)"
+                                To="-5"
+                                Duration="0:0:0.2" />
+                        </Storyboard>
+                    </BeginStoryboard>
+                </Trigger.EnterActions>
+                <Trigger.ExitActions>
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation
+                                Storyboard.TargetProperty="(RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)"
+                                To="1"
+                                Duration="0:0:0.2" />
+                            <DoubleAnimation
+                                Storyboard.TargetProperty="(RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)"
+                                To="1"
+                                Duration="0:0:0.2" />
+                            <DoubleAnimation
+                                Storyboard.TargetProperty="(RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)"
+                                To="0"
+                                Duration="0:0:0.2" />
+                        </Storyboard>
+                    </BeginStoryboard>
+                </Trigger.ExitActions>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!--  Shadow Effect for Floating Elements  -->
+    <Style x:Key="ShadowStyle" TargetType="Border">
+        <Setter Property="Background" Value="#15000000" />
+        <Setter Property="CornerRadius" Value="0" />
+        <Setter Property="Margin" Value="2,6,2,0" />
+    </Style>
+</ResourceDictionary>

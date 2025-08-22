@@ -1,0 +1,725 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:hc="https://handyorg.github.io/handycontrol"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--  Color Brushes  -->
+    <SolidColorBrush x:Key="PrimaryBrush" Color="#4ECDC4" />
+    <SolidColorBrush x:Key="SecondaryBrush" Color="#45B7D1" />
+    <SolidColorBrush x:Key="AccentBrush" Color="#FF6B6B" />
+    <SolidColorBrush x:Key="PurpleBrush" Color="#DDA0DD" />
+    <SolidColorBrush x:Key="GreenBrush" Color="#50FA7B" />
+    <SolidColorBrush x:Key="YellowBrush" Color="#F1FA8C" />
+    <SolidColorBrush x:Key="OrangeBrush" Color="#FFB86C" />
+    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#F8F8F2" />
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#6272A4" />
+    <SolidColorBrush x:Key="DimWhiteBrush" Color="#D0FFFFFF" />
+    <SolidColorBrush x:Key="VeryDimWhiteBrush" Color="#90FFFFFF" />
+    <SolidColorBrush x:Key="LightOverlayBrush" Color="#20FFFFFF" />
+    <SolidColorBrush x:Key="DarkOverlayBrush" Color="#30000000" />
+
+    <!--  Gradient Brushes  -->
+    <LinearGradientBrush x:Key="CardGradientBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Offset="0" Color="#23252F" />
+        <!--  Lightened from #1A1B24  -->
+        <GradientStop Offset="1" Color="#2E303C" />
+        <!--  Lightened from #262833  -->
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="HoverGradientBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Offset="0" Color="#343746" />
+        <GradientStop Offset="1" Color="#404352" />
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="ButtonGradientBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Offset="0" Color="#4ECDC4" />
+        <GradientStop Offset="1" Color="#45B7D1" />
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="ButtonHoverGradientBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Offset="0" Color="#5FD3CA" />
+        <GradientStop Offset="1" Color="#56C2D7" />
+    </LinearGradientBrush>
+
+    <Style x:Key="ModernCardStyle" TargetType="Border">
+        <Setter Property="CornerRadius" Value="16" />
+        <Setter Property="Padding" Value="20" />
+        <Setter Property="Background" Value="{StaticResource CardGradientBrush}" />
+        <Setter Property="Margin" Value="5" />
+        <Setter Property="BorderBrush" Value="#444857" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource HoverGradientBrush}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="ShadowLayerStyle" TargetType="Border">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Margin" Value="0" />
+        <Setter Property="Effect">
+            <Setter.Value>
+                <DropShadowEffect
+                    BlurRadius="12"
+                    Opacity="0.15"
+                    ShadowDepth="1"
+                    Color="Black" />
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--  Button Styles  -->
+    <Style x:Key="ModernActionButton" TargetType="Button">
+        <Setter Property="Background" Value="{StaticResource ButtonGradientBrush}" />
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="15,8" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border
+                        Padding="{TemplateBinding Padding}"
+                        Background="{TemplateBinding Background}"
+                        CornerRadius="8">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="{StaticResource ButtonHoverGradientBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="ModernSecondaryButton" TargetType="Button">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="12,6" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border
+                        Padding="{TemplateBinding Padding}"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="6">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="{StaticResource LightOverlayBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="ModernMiniButton" TargetType="Button">
+        <Setter Property="Background" Value="{StaticResource PrimaryBrush}" />
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="8,4" />
+        <Setter Property="FontSize" Value="9" />
+        <Setter Property="MinWidth" Value="40" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border
+                        Padding="{TemplateBinding Padding}"
+                        Background="{TemplateBinding Background}"
+                        CornerRadius="4">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="{StaticResource SecondaryBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="ModernRefreshButton" TargetType="Button">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Width" Value="28" />
+        <Setter Property="Height" Value="28" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border
+                        Padding="{TemplateBinding Padding}"
+                        Background="{TemplateBinding Background}"
+                        CornerRadius="14">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="{StaticResource LightOverlayBrush}" />
+                            <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--  ComboBox Style  -->
+    <Style x:Key="ModernComboBox" TargetType="ComboBox">
+        <Setter Property="Background" Value="{StaticResource CardGradientBrush}" />
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource TextSecondaryBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="8,4" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ComboBox">
+                    <Grid>
+                        <Border
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="6">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="20" />
+                                </Grid.ColumnDefinitions>
+                                <ContentPresenter
+                                    Grid.Column="0"
+                                    Margin="{TemplateBinding Padding}"
+                                    VerticalAlignment="Center" />
+                                <Path
+                                    Grid.Column="1"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Data="M 0 0 L 4 4 L 8 0 Z"
+                                    Fill="{TemplateBinding Foreground}" />
+                            </Grid>
+                        </Border>
+                        <Popup
+                            x:Name="PART_Popup"
+                            IsOpen="{TemplateBinding IsDropDownOpen}"
+                            Placement="Bottom">
+                            <Border
+                                Background="{StaticResource CardGradientBrush}"
+                                BorderBrush="{StaticResource TextSecondaryBrush}"
+                                BorderThickness="1"
+                                CornerRadius="6">
+                                <ScrollViewer>
+                                    <ItemsPresenter />
+                                </ScrollViewer>
+                            </Border>
+                        </Popup>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--  Text Styles  -->
+    <Style x:Key="WelcomeTitleText" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+        <Setter Property="FontSize" Value="26" />
+        <Setter Property="FontWeight" Value="Light" />
+    </Style>
+
+    <Style x:Key="WelcomeSubtitleText" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource DimWhiteBrush}" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Margin" Value="5" />
+    </Style>
+
+    <Style x:Key="CardHeaderText" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Margin" Value="5" />
+    </Style>
+
+    <Style x:Key="CardValueText" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+        <Setter Property="FontSize" Value="20" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Margin" Value="5" />
+    </Style>
+
+    <Style x:Key="CardSubText" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource VeryDimWhiteBrush}" />
+        <Setter Property="Margin" Value="5" />
+        <Setter Property="FontSize" Value="10" />
+    </Style>
+
+    <!--  Specific Card Header Styles  -->
+    <Style
+        x:Key="CashHeaderText"
+        BasedOn="{StaticResource CardHeaderText}"
+        TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}" />
+    </Style>
+
+    <Style
+        x:Key="ReceivablesHeaderText"
+        BasedOn="{StaticResource CardHeaderText}"
+        TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource SecondaryBrush}" />
+    </Style>
+
+    <Style
+        x:Key="PayablesHeaderText"
+        BasedOn="{StaticResource CardHeaderText}"
+        TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+    </Style>
+
+    <Style
+        x:Key="IncomeHeaderText"
+        BasedOn="{StaticResource CardHeaderText}"
+        TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource PurpleBrush}" />
+    </Style>
+
+    <Style
+        x:Key="RevenueHeaderText"
+        BasedOn="{StaticResource CardHeaderText}"
+        TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource GreenBrush}" />
+    </Style>
+
+    <Style
+        x:Key="ExpensesHeaderText"
+        BasedOn="{StaticResource CardHeaderText}"
+        TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource OrangeBrush}" />
+    </Style>
+
+    <Style
+        x:Key="ProfitHeaderText"
+        BasedOn="{StaticResource CardHeaderText}"
+        TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource YellowBrush}" />
+    </Style>
+
+    <Style
+        x:Key="AlertHeaderText"
+        BasedOn="{StaticResource CardHeaderText}"
+        TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <Style
+        x:Key="DueHeaderText"
+        BasedOn="{StaticResource CardHeaderText}"
+        TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource YellowBrush}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <Style x:Key="AlertCountText" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="FontWeight" Value="Bold" />
+    </Style>
+
+    <Style x:Key="DueCountText" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource YellowBrush}" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="FontWeight" Value="Bold" />
+    </Style>
+
+    <!--  Section Header Text  -->
+    <Style x:Key="SectionHeaderText" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="Margin" Value="5" />
+    </Style>
+
+    <!--  Activity Item Styles  -->
+    <Style x:Key="ActivityItemBorder" TargetType="Border">
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Background" Value="{StaticResource LightOverlayBrush}" />
+        <Setter Property="Margin" Value="5" />
+        <Setter Property="Padding" Value="10" />
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource DarkOverlayBrush}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="ActivityTypeText" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}" />
+        <Setter Property="FontSize" Value="10" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <Style x:Key="ActivityAmountText" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="FontWeight" Value="Bold" />
+    </Style>
+
+    <Style x:Key="ActivityDescriptionText" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource DimWhiteBrush}" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <Style x:Key="ActivityTimeText" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource VeryDimWhiteBrush}" />
+        <Setter Property="FontSize" Value="9" />
+    </Style>
+
+    <!--  Alert/Due Item Styles  -->
+    <Style x:Key="OverdueItemBorder" TargetType="Border">
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="Background" Value="#20FF6B6B" />
+        <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+        <Setter Property="BorderThickness" Value="1,0,0,0" />
+        <Setter Property="Padding" Value="8" />
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="#30FF6B6B" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="DueItemBorder" TargetType="Border">
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="Background" Value="#20F1FA8C" />
+        <Setter Property="BorderBrush" Value="{StaticResource YellowBrush}" />
+        <Setter Property="BorderThickness" Value="1,0,0,0" />
+        <Setter Property="Padding" Value="8" />
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="#30F1FA8C" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="ExpenseItemBorder" TargetType="Border">
+        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="Background" Value="{StaticResource LightOverlayBrush}" />
+        <Setter Property="Padding" Value="8,4" />
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource DarkOverlayBrush}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!--  Layout Styles  -->
+    <Style x:Key="CardContentContainer" TargetType="StackPanel">
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style x:Key="MainScrollViewer" TargetType="ScrollViewer">
+        <Setter Property="Padding" Value="20" />
+    </Style>
+
+    <!--  Transactions cards and style  -->
+    <!--  ADD THESE STYLES TO YOUR EXISTING RESOURCE DICTIONARY  -->
+    <!--  New Header Text Styles for Stats Cards  -->
+    <Style
+        x:Key="DraftHeaderText"
+        BasedOn="{StaticResource CardHeaderText}"
+        TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource YellowBrush}" />
+    </Style>
+
+    <Style
+        x:Key="PostedHeaderText"
+        BasedOn="{StaticResource CardHeaderText}"
+        TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource GreenBrush}" />
+    </Style>
+
+    <Style
+        x:Key="MonthlyHeaderText"
+        BasedOn="{StaticResource CardHeaderText}"
+        TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource SecondaryBrush}" />
+    </Style>
+
+    <Style
+        x:Key="BalanceHeaderText"
+        BasedOn="{StaticResource CardHeaderText}"
+        TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource PurpleBrush}" />
+    </Style>
+
+    <!--  Filter and Form Controls  -->
+    <Style x:Key="FilterLabelText" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource DimWhiteBrush}" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <!--  Base textBox Style  -->
+    <Style
+        x:Key="ModernSearchTextBox" TargetType="TextBox">
+        <Setter Property="FontFamily" Value="Century Gothic" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Foreground" Value="Gainsboro" />
+        <Setter Property="Width" Value="300" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Height" Value="30" />
+        <Setter Property="Margin" Value="5" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+
+    <Style x:Key="HandyModernTextBox" TargetType="hc:TextBox">
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Padding" Value="10,4" />
+        <Setter Property="Margin" Value="10" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="BorderBrush" Value="#4ECDC4" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+
+    <!-- HandyControl DatePicker Style -->
+    <Style x:Key="ModernHandyDatePicker" TargetType="hc:DatePicker">
+        <Setter Property="Background" Value="{StaticResource CardGradientBrush}" />
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource TextSecondaryBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="8,6" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Height" Value="32" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="hc:TitleElement.Foreground" Value="{StaticResource PrimaryBrush}" />
+    </Style>
+
+    <!-- CalendarItem Style -->
+    <Style x:Key="ModernCalendarItemStyle" TargetType="CalendarItem">
+        <Setter Property="Background" Value="#1E1E2A" />
+        <Setter Property="Foreground" Value="#F0F0F0" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="CalendarItem">
+                    <Border Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}">
+                        <Grid>
+                            <Grid.Resources>
+                                <!-- Day Button Style -->
+                                <Style TargetType="Button" x:Key="DayButtonStyle">
+                                    <Setter Property="Background" Value="Transparent" />
+                                    <Setter Property="Foreground" Value="#F0F0F0" />
+                                    <Setter Property="BorderThickness" Value="0" />
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border Background="{TemplateBinding Background}"
+                                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                                    CornerRadius="2">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#2A2A3A" />
+                                        </Trigger>
+                                        <Trigger Property="IsPressed" Value="True">
+                                            <Setter Property="Background" Value="#4ECDC4" />
+                                            <Setter Property="Foreground" Value="White" />
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Grid.Resources>
+
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+
+                                <!-- Header -->
+                                <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">
+                                    <Button x:Name="PART_PreviousButton" Content="◀" Style="{StaticResource ModernIconButton}" />
+                                    <TextBlock x:Name="PART_HeaderButton" Margin="8,0" VerticalAlignment="Center" Foreground="#4ECDC4" />
+                                    <Button x:Name="PART_NextButton" Content="▶" Style="{StaticResource ModernIconButton}" />
+                                </StackPanel>
+
+                                <!-- Calendar Content -->
+                                <Grid Grid.Row="1" />
+                            </Grid>
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Shadow Effect (if needed) -->
+    <DropShadowEffect x:Key="ShadowEffect" BlurRadius="12" ShadowDepth="2" Opacity="0.2" Color="Black" />
+
+    <!--  Add these styles to your existing ResourceDictionary  -->
+
+    <!--  Transaction Status Badge  -->
+    <Style x:Key="TransactionStatusBadge" TargetType="Border">
+        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="Padding" Value="6,2" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+    </Style>
+
+    <Style x:Key="StatusBadgeText" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="FontSize" Value="10" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <!--  Detail View Styles  -->
+    <Style x:Key="DetailInfoBorder" TargetType="Border">
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Background" Value="{StaticResource LightOverlayBrush}" />
+        <Setter Property="Padding" Value="12" />
+    </Style>
+
+    <Style x:Key="DetailHeaderText" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontWeight" Value="Bold" />
+    </Style>
+
+    <Style x:Key="DetailSubText" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource DimWhiteBrush}" />
+        <Setter Property="FontSize" Value="12" />
+    </Style>
+
+    <Style x:Key="DetailLabelText" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Margin" Value="0,0,0,4" />
+    </Style>
+
+    <Style x:Key="DetailValueText" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+        <Setter Property="FontSize" Value="12" />
+    </Style>
+
+    <!--  Pending Action Item Styles  -->
+    <Style x:Key="PendingActionItemBorder" TargetType="Border">
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="Background" Value="{StaticResource LightOverlayBrush}" />
+        <Setter Property="Padding" Value="10" />
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource DarkOverlayBrush}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="ActionTypeText" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}" />
+        <Setter Property="FontSize" Value="10" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <Style x:Key="ActionDescriptionText" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource DimWhiteBrush}" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <!--  Icon Button Style  -->
+    <Style x:Key="ModernIconButton" TargetType="Button">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="6" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border
+                        Padding="{TemplateBinding Padding}"
+                        Background="{TemplateBinding Background}"
+                        CornerRadius="4">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource LightOverlayBrush}" />
+                <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!--  DataGrid Style  -->
+    <Style x:Key="ModernDataGridStyle" TargetType="DataGrid">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource TextSecondaryBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="HeadersVisibility" Value="Column" />
+        <Setter Property="GridLinesVisibility" Value="None" />
+        <Setter Property="ColumnHeaderHeight" Value="36" />
+        <Setter Property="HorizontalGridLinesBrush" Value="{StaticResource TextSecondaryBrush}" />
+        <Setter Property="VerticalGridLinesBrush" Value="{StaticResource TextSecondaryBrush}" />
+    </Style>
+
+    <!--  Complete the FilterToggleButton style  -->
+    <Style x:Key="FilterToggleButton" TargetType="ToggleButton">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource TextSecondaryBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="12,6" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ToggleButton">
+                    <Border
+                        Padding="{TemplateBinding Padding}"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="4">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="IsChecked" Value="True">
+                <Setter Property="Background" Value="{StaticResource PrimaryBrush}" />
+                <Setter Property="Foreground" Value="White" />
+                <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}" />
+            </Trigger>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource LightOverlayBrush}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+</ResourceDictionary>

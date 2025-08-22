@@ -1,0 +1,39 @@
+﻿<Application
+    x:Class="PrimeAppBooks.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="clr-namespace:PrimeAppBooks.Conveters"
+    xmlns:hc="https://handyorg.github.io/handycontrol"
+    StartupUri="Views/Windows/MainWindow.xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!-- Merged Resource Dictionaries -->
+
+                <!-- Resources -->
+                <ResourceDictionary Source="pack://application:,,,/Resources/Colors.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/Resources/ButtonStyles.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/Resources/BorderStyles.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/Resources/ScrollBarStyles.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/Resources/PageTransitions.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/Resources/Controls.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/Resources/Cards.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/Resources/ModernDatePickerStyles.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/Resources/ModernDataGridStyle.xaml" />
+
+                <!-- Handy Controls -->
+                <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/Theme.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- Converters -->
+            <converters:LengthToVisibilityConverter x:Key="LengthToVisibilityConverter" />
+            <converters:StatusIndicatorConverter x:Key="StatusIndicatorConverter" />
+            <converters:StatusColorConverter x:Key="StatusColorConverter" />
+            <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+            <converters:NegativeAmountConverter x:Key="NegativeAmountConverter" />
+            <converters:IconPathConverter x:Key="IconPathConverter" />
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

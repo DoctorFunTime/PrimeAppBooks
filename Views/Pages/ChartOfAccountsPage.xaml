@@ -1,0 +1,33 @@
+﻿<Page x:Class="PrimeAppBooks.Views.Pages.ChartOfAccountsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Background="Transparent">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+            <TextBlock Text="Chart of Accounts" Foreground="White" FontSize="24" FontWeight="Light" />
+            <Button Content="+ New Account" Margin="20,0,0,0" Style="{StaticResource ModernButtonStyle}" />
+        </StackPanel>
+
+        <!-- Accounts Tree -->
+        <Border Style="{StaticResource ModernCardStyle}" Grid.Row="1">
+            <TreeView ItemsSource="{Binding Accounts}" Foreground="White">
+                <TreeView.ItemTemplate>
+                    <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding AccountNumber}" Width="80" />
+                            <TextBlock Text="{Binding Name}" Width="200" Margin="10,0" />
+                            <TextBlock Text="{Binding Balance, StringFormat=C}" Width="100" />
+                        </StackPanel>
+                    </HierarchicalDataTemplate>
+                </TreeView.ItemTemplate>
+            </TreeView>
+        </Border>
+    </Grid>
+</Page>
