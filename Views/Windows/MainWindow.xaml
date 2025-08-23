@@ -141,7 +141,8 @@
                                                    Command="{Binding NavigateToTransactionsCommand}" />
                                             <Button Content="📈  Financial Reports" Style="{StaticResource ModernButtonStyle}"
                                                    Command="{Binding NavigateToReportsCommand}" />
-                                            <Button Content="🔍  Audit Trail" Style="{StaticResource ModernButtonStyle}" />
+                                            <Button Content="🔍  Audit Trail" Style="{StaticResource ModernButtonStyle}"
+                                                    Command="{Binding NavigateToAuditTrailsCommand}" />
 
                                             <Rectangle Height="1" Fill="#40FFFFFF" Margin="16,20" RadiusX="0.5" RadiusY="0.5" />
 
@@ -149,7 +150,7 @@
                                                       FontWeight="Bold" FontSize="11"
                                                       Margin="16,12,0,20" />
 
-                                            <Button Content="⚙️  Settings" Style="{StaticResource ModernButtonStyle}" />
+                                            <Button Content="⚙️  Settings" Style="{StaticResource ModernButtonStyle}" Command="{Binding NavigateToSettingsCommand}" />
                                             <Button Content="👥  User Management" Style="{StaticResource ModernButtonStyle}" />
                                             <Button Content="🔐  Security Center" Style="{StaticResource ModernButtonStyle}" />
                                             <Button Content="❓  Help and Support" Style="{StaticResource ModernButtonStyle}" />
@@ -184,12 +185,13 @@
                                                Command="{Binding NavigateToReportsCommand}"
                                                ToolTip="Financial Reports" />
                                         <Button Content="🔍" Style="{StaticResource CollapsedButtonStyle}"
-                                               ToolTip="Audit Trail" />
+                                                    Command="{Binding NavigateToAuditTrailsCommand}"
+                                                ToolTip="Audit Trail" />
 
                                         <Rectangle Height="1" Fill="#40FFFFFF" Margin="8,12,8,12" RadiusX="0.5" RadiusY="0.5" />
 
-                                        <Button Content="⚙️" Style="{StaticResource CollapsedButtonStyle}"
-                                               ToolTip="Settings" />
+                                        <Button Content="⚙️" Style="{StaticResource CollapsedButtonStyle}" Command="{Binding NavigateToSettingsCommand}"
+                                                 ToolTip="Settings" />
                                         <Button Content="👥" Style="{StaticResource CollapsedButtonStyle}"
                                                ToolTip="User Management" />
                                         <Button Content="🔐" Style="{StaticResource CollapsedButtonStyle}"

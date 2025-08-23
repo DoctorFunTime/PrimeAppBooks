@@ -722,4 +722,18 @@
             </Trigger>
         </Style.Triggers>
     </Style>
+
+    <!--  Report cards  -->
+    <Style x:Key="ReportCardStyle" TargetType="Border">
+        <Setter Property="Background" Value="#2A2A2A" />
+        <Setter Property="CornerRadius" Value="12" />
+        <Setter Property="Padding" Value="20" />
+        <Setter Property="Margin" Value="0,0,0,15" />
+    </Style>
+
+    <Style x:Key="ReportActionButton" TargetType="Button" BasedOn="{StaticResource ModernSecondaryButton}">
+        <Setter Property="Margin" Value="5,0" />
+        <Setter Property="Padding" Value="12,8" />
+        <Setter Property="FontSize" Value="13" />
+    </Style>
 </ResourceDictionary>

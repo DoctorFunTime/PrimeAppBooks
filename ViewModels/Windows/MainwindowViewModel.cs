@@ -69,6 +69,12 @@ namespace PrimeAppBooks.ViewModels.Windows
         private void NavigateToReports() => _navigationService.NavigateTo<ReportsPage>();
 
         [RelayCommand]
+        private void NavigateToAuditTrails() => _navigationService.NavigateTo<Audit>();
+
+        [RelayCommand]
+        private void NavigateToSettings() => _navigationService.NavigateTo<Settings>();
+
+        [RelayCommand]
         private void GoBack() => _navigationService.GoBack();
 
         public bool CanGoBack => _navigationService.CanGoBack;

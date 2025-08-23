@@ -20,6 +20,7 @@
                 <ResourceDictionary Source="pack://application:,,,/Resources/Cards.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/Resources/ModernDatePickerStyles.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/Resources/ModernDataGridStyle.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/Resources/SettingsStyles.xaml" />
 
                 <!-- Handy Controls -->
                 <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml" />
@@ -33,6 +34,18 @@
             <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
             <converters:NegativeAmountConverter x:Key="NegativeAmountConverter" />
             <converters:IconPathConverter x:Key="IconPathConverter" />
+            <converters:AccountTypeToColorConverter x:Key="AccountTypeToColorConverter" />
+            <converters:BalanceToColorConverter x:Key="BalanceToColorConverter" />
+            <converters:BooleanToStatusColorConverter x:Key="BooleanToStatusColorConverter" />
+            <converters:BooleanToStatusTextConverter x:Key="BooleanToStatusTextConverter" />
+            <converters:ToggleStatusTextConverter x:Key="ToggleStatusTextConverter" />
+            <converters:ReportStatusToColorConverter x:Key="ReportStatusToColorConverter" />
+            <converters:ReportTypeToIconConverter x:Key="ReportTypeToIconConverter" />
+            <converters:AuditActionToColorConverter x:Key="AuditActionToColorConverter" />
+            <converters:MonitorStatusConverter x:Key="MonitorStatusConverter" />
+            <converters:BooleanToIntConverter x:Key="BooleanToIntConverter" />
+
+            <!-- System Converters -->
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         </ResourceDictionary>
     </Application.Resources>

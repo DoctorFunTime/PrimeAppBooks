@@ -1,35 +1,240 @@
 ﻿<Page x:Class="PrimeAppBooks.Views.Pages.ReportsPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      Background="Transparent">
+      xmlns:converters="clr-namespace:PrimeAppBooks.Conveters"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:hc="https://handyorg.github.io/handycontrol"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      d:DesignHeight="900"
+      d:DesignWidth="1280"
+      Background="Transparent"
+      mc:Ignorable="d">
 
-    <Grid Margin="20">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
+    <ScrollViewer Style="{StaticResource ModernScrollViewer}">
+        <Grid Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
 
-        <!-- Header -->
-        <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
-            <TextBlock Text="Financial Reports" Foreground="White" FontSize="24" FontWeight="Light" />
-            <Button Content="+ Generate Report" Margin="20,0,0,0" Style="{StaticResource ModernButtonStyle}" />
-        </StackPanel>
+            <!-- Header Section Matching Chart of Accounts -->
+            <Border Grid.Row="0" Margin="0,0,0,20" Style="{StaticResource ModernCardStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
 
-        <!-- Reports Grid -->
-        <Border Style="{StaticResource ModernCardStyle}" Grid.Row="1">
-            <StackPanel>
-                <TextBlock Text="Available Reports" Foreground="White" FontSize="16" Margin="0,0,0,15" />
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Style="{StaticResource WelcomeTitleText}" Text="Financial Reports" />
+                        <TextBlock Style="{StaticResource WelcomeSubtitleText}" Text="Generate, print, and manage your financial reports" />
+                    </StackPanel>
 
-                <!-- Report Buttons -->
-                <Button Content="📄 Balance Sheet" Style="{StaticResource ModernButtonStyle}"
-                       Command="{Binding GenerateBalanceSheetCommand}" />
-                <Button Content="📄 Income Statement" Style="{StaticResource ModernButtonStyle}"
-                       Command="{Binding GenerateIncomeStatementCommand}" />
-                <Button Content="📄 Cash Flow Statement" Style="{StaticResource ModernButtonStyle}"
-                       Command="{Binding GenerateCashFlowCommand}" />
-                <Button Content="📄 Trial Balance" Style="{StaticResource ModernButtonStyle}"
-                       Command="{Binding GenerateTrialBalanceCommand}" />
-            </StackPanel>
-        </Border>
-    </Grid>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                        <Button
+                            Margin="5,0"
+                            Command="{Binding GenerateReportCommand}"
+                            Content="📄 Generate Report"
+                            Style="{StaticResource ModernActionButton}" />
+                        <Button
+                            Margin="5,0"
+                            Command="{Binding PrintAllCommand}"
+                            Content="🖨️ Print All"
+                            Style="{StaticResource ModernSecondaryButton}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Date Range Filter Section -->
+            <Border Grid.Row="1" Margin="0,0,0,20" Style="{StaticResource ModernCardStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock
+                        Grid.Column="0"
+                        Margin="0,0,15,0"
+                        VerticalAlignment="Center"
+                        Style="{StaticResource SectionHeaderText}"
+                        Text="📅 Date Range" />
+
+                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                        <DatePicker
+                            Width="120"
+                            Margin="0,0,10,0"
+                            SelectedDate="{Binding StartDate}"
+                            Style="{StaticResource CompactDatePickerStyle}" />
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            Foreground="White"
+                            Text="to" />
+                        <DatePicker
+                            Width="120"
+                            Margin="10,0,10,0"
+                            SelectedDate="{Binding EndDate}"
+                            Style="{StaticResource CompactDatePickerStyle}" />
+                        <ComboBox
+                            Width="120"
+                            ItemsSource="{Binding DatePresets}"
+                            SelectedItem="{Binding SelectedDatePreset}"
+                            Style="{StaticResource ModernComboBox}">
+                            <ComboBoxItem Content="Custom" />
+                            <ComboBoxItem Content="This Month" />
+                            <ComboBoxItem Content="Last Month" />
+                            <ComboBoxItem Content="This Quarter" />
+                            <ComboBoxItem Content="This Year" />
+                        </ComboBox>
+                    </StackPanel>
+
+                    <Button
+                        Grid.Column="2"
+                        Command="{Binding ApplyDateFilterCommand}"
+                        Content="Apply"
+                        Style="{StaticResource ModernActionButton}" />
+                </Grid>
+            </Border>
+
+            <!-- Main Content -->
+            <Grid Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="2*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Report Types -->
+                <Border Grid.Column="0" Margin="0,0,15,0" Style="{StaticResource ModernCardStyle}">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource SectionHeaderText}" Text="📋 Report Types" Margin="0,0,0,15" />
+
+                        <!-- Standard Reports -->
+                        <Expander IsExpanded="True" Margin="0,0,0,10">
+                            <Expander.Header>
+                                <TextBlock Style="{StaticResource DetailHeaderText}" Text="📄 Financial Statements" />
+                            </Expander.Header>
+                            <StackPanel>
+                                <Button Content="Balance Sheet" Style="{StaticResource ModernSecondaryButton}" Margin="0,5" Command="{Binding GenerateBalanceSheetCommand}" />
+                                <Button Content="Income Statement" Style="{StaticResource ModernSecondaryButton}" Margin="0,5" Command="{Binding GenerateIncomeStatementCommand}" />
+                                <Button Content="Cash Flow Statement" Style="{StaticResource ModernSecondaryButton}" Margin="0,5" Command="{Binding GenerateCashFlowCommand}" />
+                                <Button Content="Trial Balance" Style="{StaticResource ModernSecondaryButton}" Margin="0,5" Command="{Binding GenerateTrialBalanceCommand}" />
+                            </StackPanel>
+                        </Expander>
+
+                        <!-- Management Reports -->
+                        <Expander Margin="0,0,0,10">
+                            <Expander.Header>
+                                <TextBlock Style="{StaticResource DetailHeaderText}" Text="📊 Management Reports" />
+                            </Expander.Header>
+                            <StackPanel>
+                                <Button Content="A/R Aging Summary" Style="{StaticResource ModernSecondaryButton}" Margin="0,5" />
+                                <Button Content="A/P Aging Summary" Style="{StaticResource ModernSecondaryButton}" Margin="0,5" />
+                                <Button Content="Budget vs Actual" Style="{StaticResource ModernSecondaryButton}" Margin="0,5" />
+                                <Button Content="Profit and Loss" Style="{StaticResource ModernSecondaryButton}" Margin="0,5" />
+                            </StackPanel>
+                        </Expander>
+
+                        <!-- Tax Reports -->
+                        <Expander Margin="0,0,0,10">
+                            <Expander.Header>
+                                <TextBlock Style="{StaticResource DetailHeaderText}" Text="🧾 Tax Reports" />
+                            </Expander.Header>
+                            <StackPanel>
+                                <Button Content="VAT Report" Style="{StaticResource ModernSecondaryButton}" Margin="0,5" />
+                                <Button Content="Tax Summary" Style="{StaticResource ModernSecondaryButton}" Margin="0,5" />
+                                <Button Content="1099 Preparation" Style="{StaticResource ModernSecondaryButton}" Margin="0,5" />
+                            </StackPanel>
+                        </Expander>
+                    </StackPanel>
+                </Border>
+
+                <!-- Report Configuration & Recent -->
+                <Border Grid.Column="1" Style="{StaticResource ModernCardStyle}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <!-- Report Configuration -->
+                        <StackPanel Grid.Row="0" Margin="0,0,0,15">
+                            <TextBlock Style="{StaticResource SectionHeaderText}" Text="⚙️ Report Configuration" Margin="0,0,0,10" />
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <ComboBox
+                                    Grid.Column="0"
+                                    Margin="0,0,10,0"
+                                    ItemsSource="{Binding OutputFormats}"
+                                    SelectedItem="{Binding SelectedFormat}"
+                                    Style="{StaticResource ModernComboBox}">
+                                    <ComboBoxItem Content="PDF" />
+                                    <ComboBoxItem Content="Excel" />
+                                    <ComboBoxItem Content="Print" />
+                                </ComboBox>
+
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,10,0">
+                                    <TextBlock Text="Copies:" VerticalAlignment="Center" Foreground="White" Margin="0,0,10,0" />
+                                    <TextBox
+                                        Width="40"
+                                        Text="{Binding Copies}"
+                                        Style="{StaticResource ModernSearchTextBox}"
+                                        TextAlignment="Center" />
+                                </StackPanel>
+
+                                <Button
+                                    Grid.Column="2"
+                                    Command="{Binding GenerateSelectedCommand}"
+                                    Content="Generate"
+                                    Style="{StaticResource ModernActionButton}" />
+                            </Grid>
+                        </StackPanel>
+
+                        <!-- Recent Reports -->
+                        <Border Grid.Row="1" Style="{StaticResource ModernCardStyle}">
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource SectionHeaderText}" Text="🕐 Recent Reports" Margin="0,0,0,10" />
+
+                                <ListView ItemsSource="{Binding RecentReports}" Height="300">
+                                    <ListView.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Padding="10" Background="#2A2A2A" CornerRadius="8" Margin="0,2">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto" />
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <TextBlock Grid.Column="0" Text="{Binding Icon}" FontSize="16" Margin="0,0,10,0" />
+                                                    <StackPanel Grid.Column="1">
+                                                        <TextBlock Text="{Binding Name}" Foreground="White" FontWeight="SemiBold" />
+                                                        <TextBlock Text="{Binding GeneratedDate, StringFormat='Generated: {0:MMM dd, yyyy}'}" Foreground="#AAAAAA" FontSize="12" />
+                                                    </StackPanel>
+                                                    <TextBlock Grid.Column="2"
+           Text="{Binding PageCount, StringFormat={}{0} pages}"
+           Foreground="#AAAAAA"
+           Margin="10,0"
+           VerticalAlignment="Center" />
+                                                    <Button Grid.Column="3" Content="📄" Style="{StaticResource ModernIconButton}" Command="{Binding ViewCommand}" />
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ListView.ItemTemplate>
+                                </ListView>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+    </ScrollViewer>
 </Page>

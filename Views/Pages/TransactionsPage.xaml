@@ -72,7 +72,6 @@
                 <!--  Summary Cards  -->
                 <UniformGrid
                     Grid.Column="0"
-                    Margin="0,0,10,0"
                     Columns="4">
                     <!--  Draft Entries  -->
                     <Border Style="{StaticResource ModernCardStyle}">
