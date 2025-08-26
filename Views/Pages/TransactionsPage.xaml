@@ -6,14 +6,14 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:fw="clr-namespace:SourceChord.FluentWPF;assembly=FluentWPF"
     xmlns:hc="https://handyorg.github.io/handycontrol"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:pages="clr-namespace:PrimeAppBooks.ViewModels.Pages" d:DataContext="{d:DesignInstance Type=pages:TransactionsPageViewModel}"
     d:DesignHeight="900"
     d:DesignWidth="1280"
     Background="Transparent"
     mc:Ignorable="d">
 
     <ScrollViewer Style="{StaticResource ModernScrollViewer}">
-        <Grid Margin="20">
+        <Grid Margin="10">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
@@ -40,7 +40,7 @@
                     <StackPanel Grid.Column="1" Orientation="Horizontal">
                         <Button
                             Margin="5,0"
-                            Command="{Binding CreateJournalEntryCommand}"
+                            Command="{Binding NavigateToJournalPageCommand}"
                             Content="📝 New Journal Entry"
                             Style="{StaticResource ModernActionButton}" />
                         <Button
@@ -70,9 +70,7 @@
                 </Grid.ColumnDefinitions>
 
                 <!--  Summary Cards  -->
-                <UniformGrid
-                    Grid.Column="0"
-                    Columns="4">
+                <UniformGrid Grid.Column="0" Columns="4">
                     <!--  Draft Entries  -->
                     <Border Style="{StaticResource ModernCardStyle}">
                         <StackPanel Style="{StaticResource CardContentContainer}">

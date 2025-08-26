@@ -1,0 +1,532 @@
+﻿<Page
+    x:Class="PrimeAppBooks.Views.Pages.SubTransactionsPage.JournalPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="clr-namespace:PrimeAppBooks.Conveters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:fw="clr-namespace:SourceChord.FluentWPF;assembly=FluentWPF"
+    xmlns:hc="https://handyorg.github.io/handycontrol"
+    xmlns:local="clr-namespace:PrimeAppBooks.Views.Pages.SubTransactionsPage"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="Journal Entry"
+    d:DesignHeight="900"
+    d:DesignWidth="1280"
+    Background="Transparent"
+    mc:Ignorable="d">
+
+    <ScrollViewer Style="{StaticResource ModernScrollViewer}">
+        <Grid Margin="10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!--  Header Section with Title and Actions  -->
+            <Border
+                Grid.Row="0"
+                Margin="0,0,0,20"
+                Style="{StaticResource ModernCardStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <!--  Back button  -->
+                        <ColumnDefinition Width="*" />
+                        <!--  Title  -->
+                        <ColumnDefinition Width="Auto" />
+                        <!--  Action buttons  -->
+                    </Grid.ColumnDefinitions>
+
+                    <Button
+                        Grid.Column="0"
+                        Margin="0,0,15,0"
+                        Command="{Binding GoBackCommand}"
+                        Content="◀"
+                        Height="Auto"
+                        FontSize="16"
+                        Foreground="White"
+                        IsEnabled="{Binding CanGoBack}"
+                        Style="{StaticResource ModernIconButton}"
+                        ToolTip="Go back" />
+
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Style="{StaticResource WelcomeTitleText}" Text="Create Journal Entry" />
+                        <TextBlock Style="{StaticResource WelcomeSubtitleText}" Text="Record debits and credits with proper double-entry bookkeeping" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2" Orientation="Horizontal">
+                        <Button
+                            Margin="5,0"
+                            Command="{Binding SaveDraftCommand}"
+                            Content="💾 Save Draft"
+                            Style="{StaticResource ModernSecondaryButton}" />
+                        <Button
+                            Margin="5,0"
+                            Command="{Binding PostEntryCommand}"
+                            Content="✅ Post Entry"
+                            IsEnabled="{Binding CanPost}"
+                            Style="{StaticResource ModernActionButton}" />
+                        <Button
+                            Margin="5,0"
+                            Command="{Binding CancelCommand}"
+                            Content="❌ Cancel"
+                            Style="{StaticResource ModernSecondaryButton}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!--  Entry Header Information  -->
+            <Border
+                Grid.Row="1"
+                Margin="0,0,0,20"
+                Style="{StaticResource ModernCardStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <!--  Entry Description  -->
+                    <StackPanel Grid.Column="0" Margin="0,0,15,0">
+                        <TextBlock Style="{StaticResource FilterLabelText}" Text="Entry Description *" />
+                        <hc:TextBox
+                            Margin="0,5,0,0"
+                            Style="{StaticResource HandyModernTextBox}"
+                            Text="{Binding EntryDescription, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock
+                            Margin="0,2,0,0"
+                            FontSize="11"
+                            Foreground="#E74C3C"
+                            Text="{Binding DescriptionValidationError}"
+                            Visibility="{Binding HasDescriptionError, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    </StackPanel>
+
+                    <!--  Reference Number  -->
+                    <StackPanel Grid.Column="1" Margin="0,0,15,0">
+                        <TextBlock Style="{StaticResource FilterLabelText}" Text="Reference Number" />
+                        <hc:TextBox
+                            Margin="0,5,0,0"
+                            Style="{StaticResource HandyModernTextBox}"
+                            Text="{Binding ReferenceNumber, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock
+                            Margin="0,2,0,0"
+                            FontSize="10"
+                            Foreground="#95A5A6"
+                            Text="Auto-generated if empty" />
+                    </StackPanel>
+
+                    <!--  Entry Date  -->
+                    <StackPanel Grid.Column="2" Margin="0,0,15,0">
+                        <TextBlock Style="{StaticResource FilterLabelText}" Text="Entry Date *" />
+                        <DatePicker
+                            Margin="0,5,0,0"
+                            SelectedDate="{Binding EntryDate}"
+                            Style="{StaticResource CompactDatePickerStyle}" />
+                        <TextBlock
+                            Margin="0,2,0,0"
+                            FontSize="11"
+                            Foreground="#E74C3C"
+                            Text="{Binding DateValidationError}"
+                            Visibility="{Binding HasDateError, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    </StackPanel>
+
+                    <!--  Entry Status  -->
+                    <StackPanel Grid.Column="3">
+                        <TextBlock Style="{StaticResource FilterLabelText}" Text="Status" />
+                        <Border
+                            Margin="0,8,0,0"
+                            HorizontalAlignment="Left"
+                            Background="{Binding CurrentStatus, Converter={StaticResource StatusColorConverter}}"
+                            Style="{StaticResource TransactionStatusBadge}">
+                            <TextBlock Style="{StaticResource StatusBadgeText}" Text="{Binding CurrentStatus}" />
+                        </Border>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!--  Main Content Area - Journal Lines  -->
+            <Grid Grid.Row="2" Margin="0,0,0,20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="3*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!--  Journal Lines Grid  -->
+                <Border
+                    Grid.Column="0"
+                    Margin="0,0,10,0"
+                    Style="{StaticResource ModernCardStyle}">
+                    <StackPanel>
+                        <!--  Lines Header  -->
+                        <Grid Margin="0,0,0,15">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock
+                                Grid.Column="0"
+                                Style="{StaticResource SectionHeaderText}"
+                                Text="📋 Journal Lines" />
+
+                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                <Button
+                                    Command="{Binding AddLineCommand}"
+                                    Content="➕ Add Line"
+                                    Style="{StaticResource ModernActionButton}" />
+                            </StackPanel>
+                        </Grid>
+
+                        <!--  Journal Lines DataGrid  -->
+                        <Border Style="{StaticResource ModernDataGridContainer}">
+                            <DataGrid
+                                MaxHeight="400"
+                                AutoGenerateColumns="False"
+                                CellStyle="{StaticResource ModernCellStyle}"
+                                ColumnHeaderStyle="{StaticResource ModernColumnHeaderStyle}"
+                                ItemsSource="{Binding JournalLines}"
+                                RowHeight="40"
+                                RowStyle="{StaticResource ModernRowStyle}"
+                                SelectedItem="{Binding SelectedLine}"
+                                SelectionMode="Single"
+                                Style="{StaticResource ModernDataGridStyle}">
+
+                                <DataGrid.Resources>
+                                    <Style BasedOn="{StaticResource ModernScrollBarStyle}" TargetType="{x:Type ScrollBar}" />
+                                </DataGrid.Resources>
+
+                                <DataGrid.Columns>
+                                    <!--  Line Number  -->
+                                    <DataGridTextColumn
+                                        Width="60"
+                                        Binding="{Binding LineNumber}"
+                                        Header="#"
+                                        IsReadOnly="True">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="HorizontalAlignment" Value="Center" />
+                                                <Setter Property="FontWeight" Value="Medium" />
+                                                <Setter Property="Foreground" Value="#7F8C8D" />
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+
+                                    <!--  Account Selection  -->
+                                    <DataGridTemplateColumn Width="*" Header="Account *">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <ComboBox
+                                                    DisplayMemberPath="FullName"
+                                                    ItemsSource="{Binding DataContext.AvailableAccounts, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                    SelectedValue="{Binding AccountId, UpdateSourceTrigger=PropertyChanged}"
+                                                    SelectedValuePath="Id"
+                                                    Style="{StaticResource ModernComboBox}" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+
+                                    <!--  Description  -->
+                                    <DataGridTemplateColumn Width="200" Header="Line Description">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <hc:TextBox Style="{StaticResource HandyModernTextBox}" Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+
+                                    <!--  Debit Amount  -->
+                                    <DataGridTemplateColumn Width="120" Header="Debit">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <hc:TextBox
+                                                    HorizontalAlignment="Stretch"
+                                                    Style="{StaticResource HandyModernTextBox}"
+                                                    Text="{Binding DebitAmount, UpdateSourceTrigger=PropertyChanged}" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+
+                                    <!--  Credit Amount  -->
+                                    <DataGridTemplateColumn Width="120" Header="Credit">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <hc:TextBox
+                                                    HorizontalAlignment="Stretch"
+                                                    Style="{StaticResource HandyModernTextBox}"
+                                                    Text="{Binding CreditAmount, UpdateSourceTrigger=PropertyChanged}" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+
+                                    <!--  Actions  -->
+                                    <DataGridTemplateColumn Width="80" Header="Actions">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                                                    <Button
+                                                        Command="{Binding DataContext.RemoveLineCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                        CommandParameter="{Binding}"
+                                                        Style="{StaticResource ModernIconButton}"
+                                                        ToolTip="Remove Line">
+                                                        <Path
+                                                            Width="12"
+                                                            Height="12"
+                                                            Data="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"
+                                                            Fill="#E74C3C"
+                                                            Stretch="Uniform" />
+                                                    </Button>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Border>
+
+                        <!--  Balance Summary  -->
+                        <Border
+                            Margin="0,15,0,0"
+                            Padding="15"
+                            Background="#3A506B"
+                            CornerRadius="8">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsBalanced}" Value="True">
+                                            <Setter Property="Background" Value="#27AE60" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding IsBalanced}" Value="False">
+                                            <Setter Property="Background" Value="#E74C3C" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                                    <TextBlock Style="{StaticResource FilterLabelText}" Text="Total Debits" />
+                                    <TextBlock
+                                        FontSize="16"
+                                        FontWeight="SemiBold"
+                                        Foreground="White"
+                                        Text="{Binding TotalDebits, StringFormat=C}" />
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                                    <TextBlock Style="{StaticResource FilterLabelText}" Text="Total Credits" />
+                                    <TextBlock
+                                        FontSize="16"
+                                        FontWeight="SemiBold"
+                                        Foreground="White"
+                                        Text="{Binding TotalCredits, StringFormat=C}" />
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                                    <TextBlock Style="{StaticResource FilterLabelText}" Text="Difference" />
+                                    <TextBlock
+                                        FontSize="16"
+                                        FontWeight="SemiBold"
+                                        Foreground="{Binding DifferenceColor}"
+                                        Text="{Binding Difference, StringFormat=C}" />
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="3" HorizontalAlignment="Center">
+                                    <TextBlock Style="{StaticResource FilterLabelText}" Text="Balance Status" />
+                                    <TextBlock
+                                        FontSize="16"
+                                        FontWeight="SemiBold"
+                                        Foreground="White"
+                                        Text="{Binding BalanceStatus}" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <!--  Right Panel - Tools and Preview  -->
+                <Border
+                    Grid.Column="1"
+                    Margin="10,0,0,0"
+                    Style="{StaticResource ModernCardStyle}">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource SectionHeaderText}" Text="📋 Entry Tools" />
+
+                        <!--  Quick Account Search  -->
+                        <Border Margin="0,10,0,15" Style="{StaticResource DetailInfoBorder}">
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource DetailLabelText}" Text="Quick Account Search" />
+                                <hc:TextBox
+                                    Margin="0,5,0,0"
+                                    Style="{StaticResource HandyModernTextBox}"
+                                    Text="{Binding AccountSearchText, UpdateSourceTrigger=PropertyChanged}" />
+                                <ListBox
+                                    MaxHeight="120"
+                                    Margin="0,5,0,0"
+                                    Background="#15FFFFFF"
+                                    BorderBrush="#40FFFFFF"
+                                    ItemsSource="{Binding FilteredAccounts}"
+                                    SelectedItem="{Binding SelectedQuickAccount}"
+                                    Visibility="{Binding HasAccountResults, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock FontSize="11" Text="{Binding FullName}" />
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </StackPanel>
+                        </Border>
+
+                        <!--  Common Templates  -->
+                        <Border Margin="0,0,0,15" Style="{StaticResource DetailInfoBorder}">
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource DetailLabelText}" Text="Entry Templates" />
+                                <ComboBox
+                                    Margin="0,5,0,0"
+                                    DisplayMemberPath="Name"
+                                    ItemsSource="{Binding EntryTemplates}"
+                                    SelectedItem="{Binding SelectedTemplate}"
+                                    Style="{StaticResource ModernComboBox}" />
+                                <Button
+                                    Margin="0,5,0,0"
+                                    Command="{Binding ApplyTemplateCommand}"
+                                    Content="Apply Template"
+                                    IsEnabled="{Binding HasSelectedTemplate}"
+                                    Style="{StaticResource ModernSecondaryButton}" />
+                            </StackPanel>
+                        </Border>
+
+                        <!--  Recent Accounts  -->
+                        <Border Margin="0,0,0,15" Style="{StaticResource DetailInfoBorder}">
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource DetailLabelText}" Text="Recent Accounts" />
+                                <ListBox
+                                    MaxHeight="150"
+                                    Margin="0,5,0,0"
+                                    Background="#15FFFFFF"
+                                    BorderBrush="#40FFFFFF"
+                                    ItemsSource="{Binding RecentAccounts}"
+                                    SelectedItem="{Binding SelectedRecentAccount}">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Margin="5">
+                                                <TextBlock
+                                                    FontSize="12"
+                                                    FontWeight="Medium"
+                                                    Text="{Binding Name}" />
+                                                <TextBlock
+                                                    FontSize="10"
+                                                    Foreground="#7F8C8D"
+                                                    Text="{Binding Code}" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </StackPanel>
+                        </Border>
+
+                        <!--  Validation Summary  -->
+                        <Border Style="{StaticResource DetailInfoBorder}" Visibility="{Binding HasValidationErrors, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <StackPanel>
+                                <TextBlock
+                                    Foreground="#E74C3C"
+                                    Style="{StaticResource DetailLabelText}"
+                                    Text="⚠️ Validation Issues" />
+                                <ItemsControl Margin="0,5,0,0" ItemsSource="{Binding ValidationErrors}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock
+                                                Margin="0,2"
+                                                FontSize="11"
+                                                Foreground="#E74C3C"
+                                                Text="{Binding}"
+                                                TextWrapping="Wrap" />
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+
+                        <!--  Entry Preview  -->
+                        <Border
+                            Margin="0,15,0,0"
+                            Style="{StaticResource DetailInfoBorder}"
+                            Visibility="{Binding HasValidLines, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource DetailLabelText}" Text="📄 Entry Preview" />
+                                <ScrollViewer
+                                    MaxHeight="200"
+                                    Margin="0,5,0,0"
+                                    VerticalScrollBarVisibility="Auto">
+                                    <TextBlock
+                                        FontFamily="Consolas"
+                                        FontSize="10"
+                                        Foreground="#2C3E50"
+                                        Text="{Binding EntryPreview}"
+                                        TextWrapping="Wrap" />
+                                </ScrollViewer>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!--  Footer Actions  -->
+            <Border Grid.Row="3" Style="{StaticResource ModernCardStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <!--  Entry Summary  -->
+                    <StackPanel Grid.Column="0" Orientation="Horizontal">
+                        <TextBlock
+                            Margin="0,0,20,0"
+                            VerticalAlignment="Center"
+                            Style="{StaticResource FilterLabelText}"
+                            Text="{Binding EntrySummary}" />
+                        <Border
+                            Padding="8,4"
+                            Background="{Binding IsBalanced, Converter={StaticResource BalanceIndicatorConverter}}"
+                            CornerRadius="4">
+                            <TextBlock
+                                FontSize="11"
+                                FontWeight="Medium"
+                                Foreground="White"
+                                Text="{Binding BalanceIndicator}" />
+                        </Border>
+                    </StackPanel>
+
+                    <!--  Final Actions  -->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                        <Button
+                            Margin="0,0,10,0"
+                            Command="{Binding ResetEntryCommand}"
+                            Content="🔄 Reset"
+                            Style="{StaticResource ModernSecondaryButton}" />
+                        <Button
+                            Margin="0,0,10,0"
+                            Command="{Binding SaveTemplateCommand}"
+                            Content="💾 Save as Template"
+                            IsEnabled="{Binding CanSaveAsTemplate}"
+                            Style="{StaticResource ModernSecondaryButton}" />
+                        <Button
+                            Command="{Binding PostEntryCommand}"
+                            Content="✅ Post Entry"
+                            IsEnabled="{Binding CanPost}"
+                            Style="{StaticResource ModernActionButton}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+    </ScrollViewer>
+</Page>

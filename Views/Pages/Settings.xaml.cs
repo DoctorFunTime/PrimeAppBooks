@@ -15,11 +15,16 @@ using System.Windows.Shapes;
 
 namespace PrimeAppBooks.Views.Pages
 {
-    public partial class Settings : Page
+    public partial class Settings : Page, Interfaces.IAnimatedPage
     {
+        public string AnimationStyle => "SlideFromBottom";
+
         public Settings()
         {
             InitializeComponent();
+
+            // Set initial selection after InitializeComponent()
+            SettingsTabControl.SelectedIndex = 0;
         }
 
         private void CategoryButton_Checked(object sender, RoutedEventArgs e)

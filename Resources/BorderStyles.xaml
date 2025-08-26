@@ -4,7 +4,7 @@
     xmlns:fw="clr-namespace:SourceChord.FluentWPF;assembly=FluentWPF">
 
     <!--  Card Base Style  -->
-    <!-- Animation Durations -->
+    <!--  Animation Durations  -->
     <Duration x:Key="Dur.Fast">0:0:0.15</Duration>
     <Duration x:Key="Dur.Med">0:0:0.3</Duration>
     <Duration x:Key="Dur.Slow">0:0:0.6</Duration>

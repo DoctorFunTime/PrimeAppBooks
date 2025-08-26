@@ -2,15 +2,34 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <TargetFramework>net8.0-windows7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>NewLogoIconDark.ico</ApplicationIcon>
+    <GenerateDocumentationFile>False</GenerateDocumentationFile>
+    <Title>PrimeApp Books</Title>
+    <PackageIcon>NewLogoIconDark.png</PackageIcon>
+    <NeutralLanguage>en-US</NeutralLanguage>
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Images\NewLogoIconDark.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="NewLogoIconDark.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Models\" />
-    <Folder Include="Images\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\Logo\NewLogoIconDark.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
@@ -20,6 +39,12 @@
     <PackageReference Include="LiveCharts.Wpf" Version="0.9.7" />
     <PackageReference Include="MaterialDesignColors" Version="5.3.0-ci1095" />
     <PackageReference Include="MaterialDesignThemes" Version="5.3.0-ci1095" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Images\NewLogoIconDark.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
 </Project>

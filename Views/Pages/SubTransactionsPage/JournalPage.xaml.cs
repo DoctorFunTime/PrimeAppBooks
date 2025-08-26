@@ -14,16 +14,16 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace PrimeAppBooks.Views.Pages
+namespace PrimeAppBooks.Views.Pages.SubTransactionsPage
 {
     /// <summary>
-    /// Interaction logic for Audit.xaml
+    /// Interaction logic for JournalPage.xaml
     /// </summary>
-    public partial class Audit : Page, IAnimatedPage
+    public partial class JournalPage : Page, IAnimatedPage
     {
-        public string AnimationStyle => "SlideFromBottom";
+        public string AnimationStyle => "SlideFromRight";
 
-        public Audit()
+        public JournalPage()
         {
             InitializeComponent();
         }

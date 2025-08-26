@@ -460,8 +460,7 @@
         <Setter Property="Foreground" Value="{StaticResource SecondaryBrush}" />
     </Style>
 
-    <Style
-        x:Key="BalanceHeaderText"
+    <Style x:Key="BalanceHeaderText"
         BasedOn="{StaticResource CardHeaderText}"
         TargetType="TextBlock">
         <Setter Property="Foreground" Value="{StaticResource PurpleBrush}" />
@@ -475,8 +474,7 @@
     </Style>
 
     <!--  Base textBox Style  -->
-    <Style
-        x:Key="ModernSearchTextBox" TargetType="TextBox">
+    <Style x:Key="ModernSearchTextBox" TargetType="TextBox">
         <Setter Property="FontFamily" Value="Century Gothic" />
         <Setter Property="FontSize" Value="14" />
         <Setter Property="Foreground" Value="Gainsboro" />
@@ -735,5 +733,11 @@
         <Setter Property="Margin" Value="5,0" />
         <Setter Property="Padding" Value="12,8" />
         <Setter Property="FontSize" Value="13" />
+    </Style>
+
+    <!--  Audit cards  -->
+    <Style x:Key="WrapTextBlockStyle" TargetType="TextBlock">
+        <Setter Property="TextWrapping" Value="Wrap" />
+        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
     </Style>
 </ResourceDictionary>

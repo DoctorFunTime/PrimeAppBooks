@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PrimeAppBooks.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,8 +19,10 @@ namespace PrimeAppBooks.Views.Pages
     /// <summary>
     /// Interaction logic for ChartOfAccountsPage.xaml
     /// </summary>
-    public partial class ChartOfAccountsPage : Page
+    public partial class ChartOfAccountsPage : Page, IAnimatedPage
     {
+        public string AnimationStyle => "SlideFromBottom";
+
         public ChartOfAccountsPage()
         {
             InitializeComponent();

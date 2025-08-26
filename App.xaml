@@ -44,6 +44,8 @@
             <converters:AuditActionToColorConverter x:Key="AuditActionToColorConverter" />
             <converters:MonitorStatusConverter x:Key="MonitorStatusConverter" />
             <converters:BooleanToIntConverter x:Key="BooleanToIntConverter" />
+            <converters:WidthToVisibilityConverter x:Key="WidthToVisibilityConverter" />
+            <converters:BalanceIndicatorConverter x:Key="BalanceIndicatorConverter" />
 
             <!-- System Converters -->
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />

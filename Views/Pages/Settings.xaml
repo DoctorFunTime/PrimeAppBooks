@@ -1,23 +1,28 @@
-﻿<Page x:Class="PrimeAppBooks.Views.Pages.Settings"
-      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-      xmlns:hc="https://handyorg.github.io/handycontrol"
-      d:DesignHeight="900"
-      d:DesignWidth="1280"
-      Background="Transparent"
-      mc:Ignorable="d">
+﻿<Page
+    x:Class="PrimeAppBooks.Views.Pages.Settings"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:hc="https://handyorg.github.io/handycontrol"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="900"
+    d:DesignWidth="1280"
+    Background="Transparent"
+    mc:Ignorable="d">
 
     <ScrollViewer Style="{StaticResource ModernScrollViewer}">
-        <Grid Margin="20">
+        <Grid MaxWidth="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=ScrollViewer}}" Margin="10">
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <!-- Header Section -->
-            <Border Grid.Row="0" Margin="0,0,0,20" Style="{StaticResource ModernCardStyle}">
+            <!--  Header Section  -->
+            <Border
+                Grid.Row="0"
+                Margin="5,5,5,20"
+                Style="{StaticResource ModernCardStyle}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -29,7 +34,10 @@
                         <TextBlock Style="{StaticResource WelcomeSubtitleText}" Text="Configure your accounting system preferences and business settings" />
                     </StackPanel>
 
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <StackPanel
+                        Grid.Column="1"
+                        VerticalAlignment="Center"
+                        Orientation="Horizontal">
                         <Button
                             Margin="5,0"
                             Command="{Binding SaveSettingsCommand}"
@@ -49,451 +57,902 @@
                 </Grid>
             </Border>
 
-            <!-- Settings Content Area -->
-            <Grid Grid.Row="1">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="280" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
+            <!--  Settings Navigation  -->
+            <Border
+                Grid.Row="1"
+                Padding="5,0,5,0"
+                Style="{StaticResource ModernCardStyle}">
+                <StackPanel>
+                    <TextBlock
+                        Margin="10"
+                        Style="{StaticResource WelcomeTitleText}"
+                        Text="Categories" />
+                    <WrapPanel>
+                        <RadioButton
+                            Name="GeneralTab"
+                            Margin="0,0,15,0"
+                            Checked="CategoryButton_Checked"
+                            Content="⚙️ General &amp; Company"
+                            GroupName="SettingsCategories"
+                            IsChecked="True"
+                            Style="{StaticResource SettingsCategoryRadioButton}"
+                            Tag="0" />
+                        <RadioButton
+                            Name="AccountingTab"
+                            Margin="0,0,15,0"
+                            Checked="CategoryButton_Checked"
+                            Content="📊 Accounting Rules"
+                            GroupName="SettingsCategories"
+                            Style="{StaticResource SettingsCategoryRadioButton}"
+                            Tag="1" />
+                        <RadioButton
+                            Name="TaxTab"
+                            Margin="0,0,15,0"
+                            Checked="CategoryButton_Checked"
+                            Content="💰 Tax Configuration"
+                            GroupName="SettingsCategories"
+                            Style="{StaticResource SettingsCategoryRadioButton}"
+                            Tag="2" />
+                        <RadioButton
+                            Name="SecurityTab"
+                            Margin="0,0,15,0"
+                            Checked="CategoryButton_Checked"
+                            Content="🔒 Security &amp; Access"
+                            GroupName="SettingsCategories"
+                            Style="{StaticResource SettingsCategoryRadioButton}"
+                            Tag="3" />
+                        <RadioButton
+                            Name="BackupTab"
+                            Margin="0,0,15,0"
+                            Checked="CategoryButton_Checked"
+                            Content="💾 Backup &amp; Data"
+                            GroupName="SettingsCategories"
+                            Style="{StaticResource SettingsCategoryRadioButton}"
+                            Tag="4" />
+                        <RadioButton
+                            Name="ReportsTab"
+                            Margin="0,0,15,0"
+                            Checked="CategoryButton_Checked"
+                            Content="📋 Reports &amp; Print"
+                            GroupName="SettingsCategories"
+                            Style="{StaticResource SettingsCategoryRadioButton}"
+                            Tag="5" />
+                        <RadioButton
+                            Name="NotificationTab"
+                            Margin="0,0,15,0"
+                            Checked="CategoryButton_Checked"
+                            Content="🔔 Notifications"
+                            GroupName="SettingsCategories"
+                            Style="{StaticResource SettingsCategoryRadioButton}"
+                            Tag="6" />
+                        <RadioButton
+                            Name="IntegrationTab"
+                            Checked="CategoryButton_Checked"
+                            Content="🔗 Integrations"
+                            GroupName="SettingsCategories"
+                            Style="{StaticResource SettingsCategoryRadioButton}"
+                            Tag="7" />
+                    </WrapPanel>
+                </StackPanel>
+            </Border>
 
-                <!-- Settings Navigation -->
-                <Border Grid.Column="0" Margin="0,0,15,0" Style="{StaticResource ModernCardStyle}">
-                    <StackPanel>
-                        <TextBlock Text="Categories" Style="{StaticResource SectionHeaderText}" Margin="0,0,0,15" />
-                        <RadioButton Name="GeneralTab" GroupName="SettingsCategories" Content="⚙️ General &amp; Company" Style="{StaticResource SettingsCategoryRadioButton}" IsChecked="True"
-                                   Checked="CategoryButton_Checked" Tag="0" />
-                        <RadioButton Name="AccountingTab" GroupName="SettingsCategories" Content="📊 Accounting Rules" Style="{StaticResource SettingsCategoryRadioButton}"
-                                   Checked="CategoryButton_Checked" Tag="1" />
-                        <RadioButton Name="TaxTab" GroupName="SettingsCategories" Content="💰 Tax Configuration" Style="{StaticResource SettingsCategoryRadioButton}"
-                                   Checked="CategoryButton_Checked" Tag="2" />
-                        <RadioButton Name="SecurityTab" GroupName="SettingsCategories" Content="🔒 Security &amp; Access" Style="{StaticResource SettingsCategoryRadioButton}"
-                                   Checked="CategoryButton_Checked" Tag="3" />
-                        <RadioButton Name="BackupTab" GroupName="SettingsCategories" Content="💾 Backup &amp; Data" Style="{StaticResource SettingsCategoryRadioButton}"
-                                   Checked="CategoryButton_Checked" Tag="4" />
-                        <RadioButton Name="ReportsTab" GroupName="SettingsCategories" Content="📋 Reports &amp; Print" Style="{StaticResource SettingsCategoryRadioButton}"
-                                   Checked="CategoryButton_Checked" Tag="5" />
-                        <RadioButton Name="NotificationTab" GroupName="SettingsCategories" Content="🔔 Notifications" Style="{StaticResource SettingsCategoryRadioButton}"
-                                   Checked="CategoryButton_Checked" Tag="6" />
-                        <RadioButton Name="IntegrationTab" GroupName="SettingsCategories" Content="🔗 Integrations" Style="{StaticResource SettingsCategoryRadioButton}"
-                                   Checked="CategoryButton_Checked" Tag="7" />
-                    </StackPanel>
-                </Border>
+            <!--  Settings Content  -->
+            <Border Grid.Row="2" Style="{StaticResource ModernCardStyle}">
+                <TabControl
+                    x:Name="SettingsTabControl"
+                    Background="Transparent"
+                    BorderThickness="0">
+                    <TabControl.Style>
+                        <Style TargetType="TabControl">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="TabControl">
+                                        <ContentPresenter ContentSource="SelectedContent" />
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </TabControl.Style>
 
-                <!-- Settings Content -->
-                <Border Grid.Column="1" Style="{StaticResource ModernCardStyle}">
-                    <TabControl x:Name="SettingsTabControl" BorderThickness="0" Background="Transparent">
-                        <TabControl.Style>
-                            <Style TargetType="TabControl">
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="TabControl">
-                                            <ContentPresenter ContentSource="SelectedContent" />
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>
-                        </TabControl.Style>
+                    <!--  General & Company Settings  -->
+                    <TabItem>
+                        <StackPanel Margin="25">
+                            <TextBlock
+                                Margin="0,0,0,20"
+                                Style="{StaticResource SectionHeaderText}"
+                                Text="⚙️ General &amp; Company Settings" />
 
-                        <!-- General & Company Settings -->
-                        <TabItem>
-                            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-                                <StackPanel Margin="25" MaxWidth="1000">
-                                    <TextBlock Style="{StaticResource SectionHeaderText}" Text="⚙️ General &amp; Company Settings" Margin="0,0,0,20" />
+                            <!--  Company Information  -->
+                            <Border Style="{StaticResource SettingsGroupStyle}">
+                                <StackPanel>
+                                    <TextBlock
+                                        Margin="0,0,0,15"
+                                        FontWeight="SemiBold"
+                                        Style="{StaticResource DetailLabelText}"
+                                        Text="Company Information" />
 
-                                    <!-- Company Information -->
-                                    <Border Style="{StaticResource SettingsGroupStyle}">
-                                        <StackPanel>
-                                            <TextBlock Text="Company Information" Style="{StaticResource DetailLabelText}" FontWeight="SemiBold" Margin="0,0,0,15" />
+                                    <Grid Style="{StaticResource SettingsRowStyle}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="180" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock
+                                            Grid.Column="0"
+                                            Style="{StaticResource SettingsLabelStyle}"
+                                            Text="Company Name:" />
+                                        <hc:TextBox
+                                            Grid.Column="1"
+                                            hc:InfoElement.Placeholder="Enter company name"
+                                            Style="{StaticResource ModernTextBoxStyle}"
+                                            Text="{Binding CompanyName}" />
+                                    </Grid>
 
-                                            <Grid Style="{StaticResource SettingsRowStyle}">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="180" />
-                                                    <ColumnDefinition Width="*" />
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock Grid.Column="0" Text="Company Name:" Style="{StaticResource SettingsLabelStyle}" />
-                                                <TextBox Grid.Column="1" Style="{StaticResource ModernTextBoxStyle}" Text="{Binding CompanyName}" hc:InfoElement.Placeholder="Enter company name" />
-                                            </Grid>
+                                    <Grid Style="{StaticResource SettingsRowStyle}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="180" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock
+                                            Grid.Column="0"
+                                            Style="{StaticResource SettingsLabelStyle}"
+                                            Text="Legal Name:" />
+                                        <hc:TextBox
+                                            Grid.Column="1"
+                                            hc:InfoElement.Placeholder="Full legal business name"
+                                            Style="{StaticResource ModernTextBoxStyle}"
+                                            Text="{Binding CompanyLegalName}" />
+                                    </Grid>
 
-                                            <Grid Style="{StaticResource SettingsRowStyle}">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="180" />
-                                                    <ColumnDefinition Width="*" />
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock Grid.Column="0" Text="Legal Name:" Style="{StaticResource SettingsLabelStyle}" />
-                                                <TextBox Grid.Column="1" Style="{StaticResource ModernTextBoxStyle}" Text="{Binding CompanyLegalName}" hc:InfoElement.Placeholder="Full legal business name" />
-                                            </Grid>
+                                    <Grid Style="{StaticResource SettingsRowStyle}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="180" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock
+                                            Grid.Column="0"
+                                            Style="{StaticResource SettingsLabelStyle}"
+                                            Text="Address:" />
+                                        <TextBox
+                                            Grid.Column="1"
+                                            Height="60"
+                                            hc:InfoElement.Placeholder="Complete business address"
+                                            AcceptsReturn="True"
+                                            Style="{StaticResource ModernTextBoxStyle}"
+                                            Text="{Binding CompanyAddress}" />
+                                    </Grid>
 
-                                            <Grid Style="{StaticResource SettingsRowStyle}">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="180" />
-                                                    <ColumnDefinition Width="*" />
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock Grid.Column="0" Text="Address:" Style="{StaticResource SettingsLabelStyle}" />
-                                                <TextBox Grid.Column="1" Style="{StaticResource ModernTextBoxStyle}" Text="{Binding CompanyAddress}" AcceptsReturn="True" Height="60" hc:InfoElement.Placeholder="Complete business address" />
-                                            </Grid>
-
-                                            <Grid Style="{StaticResource SettingsRowStyle}">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="180" />
-                                                    <ColumnDefinition Width="*" />
-                                                    <ColumnDefinition Width="20" />
-                                                    <ColumnDefinition Width="180" />
-                                                    <ColumnDefinition Width="*" />
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock Grid.Column="0" Text="Tax ID:" Style="{StaticResource SettingsLabelStyle}" />
-                                                <TextBox Grid.Column="1" Style="{StaticResource ModernTextBoxStyle}" Text="{Binding TaxId}" hc:InfoElement.Placeholder="Tax ID/EIN" />
-                                                <TextBlock Grid.Column="3" Text="Business Number:" Style="{StaticResource SettingsLabelStyle}" />
-                                                <TextBox Grid.Column="4" Style="{StaticResource ModernTextBoxStyle}" Text="{Binding BusinessNumber}" hc:InfoElement.Placeholder="Registration number" />
-                                            </Grid>
-                                        </StackPanel>
-                                    </Border>
-
-                                    <!-- Regional Settings -->
-                                    <Border Style="{StaticResource SettingsGroupStyle}">
-                                        <StackPanel>
-                                            <TextBlock Text="Regional &amp; Format Settings" Style="{StaticResource DetailLabelText}" FontWeight="SemiBold" Margin="0,0,0,15" />
-
-                                            <Grid Style="{StaticResource SettingsRowStyle}">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="180" />
-                                                    <ColumnDefinition Width="*" />
-                                                    <ColumnDefinition Width="20" />
-                                                    <ColumnDefinition Width="180" />
-                                                    <ColumnDefinition Width="*" />
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock Grid.Column="0" Text="Currency:" Style="{StaticResource SettingsLabelStyle}" />
-                                                <ComboBox Grid.Column="1" ItemsSource="{Binding Currencies}" SelectedItem="{Binding SelectedCurrency}" Style="{StaticResource ModernComboBox}" />
-                                                <TextBlock Grid.Column="3" Text="Date Format:" Style="{StaticResource SettingsLabelStyle}" />
-                                                <ComboBox Grid.Column="4" ItemsSource="{Binding DateFormats}" SelectedItem="{Binding DateFormat}" Style="{StaticResource ModernComboBox}" />
-                                            </Grid>
-
-                                            <Grid Style="{StaticResource SettingsRowStyle}">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="180" />
-                                                    <ColumnDefinition Width="*" />
-                                                    <ColumnDefinition Width="20" />
-                                                    <ColumnDefinition Width="180" />
-                                                    <ColumnDefinition Width="*" />
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock Grid.Column="0" Text="Number Format:" Style="{StaticResource SettingsLabelStyle}" />
-                                                <ComboBox Grid.Column="1" ItemsSource="{Binding NumberFormats}" SelectedItem="{Binding NumberFormat}" Style="{StaticResource ModernComboBox}" />
-                                                <TextBlock Grid.Column="3" Text="Time Zone:" Style="{StaticResource SettingsLabelStyle}" />
-                                                <ComboBox Grid.Column="4" ItemsSource="{Binding TimeZones}" SelectedItem="{Binding TimeZone}" Style="{StaticResource ModernComboBox}" />
-                                            </Grid>
-                                        </StackPanel>
-                                    </Border>
-
-                                    <!-- Interface Preferences -->
-                                    <Border Style="{StaticResource SettingsGroupStyle}">
-                                        <StackPanel>
-                                            <TextBlock Text="Interface Preferences" Style="{StaticResource DetailLabelText}" FontWeight="SemiBold" Margin="0,0,0,15" />
-                                            <UniformGrid Columns="3">
-                                                <CheckBox Content="Dark Theme" IsChecked="{Binding DarkMode}" Margin="0,0,15,10" Foreground="White" />
-                                                <CheckBox Content="Enable Animations" IsChecked="{Binding EnableAnimations}" Margin="0,0,15,10" Foreground="White" />
-                                                <CheckBox Content="Show Tooltips" IsChecked="{Binding ShowTooltips}" Margin="0,0,15,10" Foreground="White" />
-                                                <CheckBox Content="Compact View" IsChecked="{Binding CompactView}" Margin="0,0,15,10" Foreground="White" />
-                                                <CheckBox Content="Show Grid Lines" IsChecked="{Binding ShowGridLines}" Margin="0,0,15,10" Foreground="White" />
-                                                <CheckBox Content="Auto-save Changes" IsChecked="{Binding AutoSave}" Margin="0,0,15,10" Foreground="White" />
-                                            </UniformGrid>
-                                        </StackPanel>
-                                    </Border>
+                                    <Grid Style="{StaticResource SettingsRowStyle}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="180" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="20" />
+                                            <ColumnDefinition Width="180" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock
+                                            Grid.Column="0"
+                                            Style="{StaticResource SettingsLabelStyle}"
+                                            Text="Tax ID:" />
+                                        <TextBox
+                                            Grid.Column="1"
+                                            hc:InfoElement.Placeholder="Tax ID/EIN"
+                                            Style="{StaticResource ModernTextBoxStyle}"
+                                            Text="{Binding TaxId}" />
+                                        <TextBlock
+                                            Grid.Column="3"
+                                            Style="{StaticResource SettingsLabelStyle}"
+                                            Text="Business Number:" />
+                                        <TextBox
+                                            Grid.Column="4"
+                                            hc:InfoElement.Placeholder="Registration number"
+                                            Style="{StaticResource ModernTextBoxStyle}"
+                                            Text="{Binding BusinessNumber}" />
+                                    </Grid>
                                 </StackPanel>
-                            </ScrollViewer>
-                        </TabItem>
+                            </Border>
 
-                        <!-- Accounting Rules -->
-                        <TabItem>
-                            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-                                <StackPanel Margin="25" MaxWidth="1000">
-                                    <TextBlock Style="{StaticResource SectionHeaderText}" Text="📊 Accounting Rules &amp; Policies" Margin="0,0,0,20" />
+                            <!--  Regional Settings  -->
+                            <Border Style="{StaticResource SettingsGroupStyle}">
+                                <StackPanel>
+                                    <TextBlock
+                                        Margin="0,0,0,15"
+                                        FontWeight="SemiBold"
+                                        Style="{StaticResource DetailLabelText}"
+                                        Text="Regional &amp; Format Settings" />
 
-                                    <!-- Fiscal Year Settings -->
-                                    <Border Style="{StaticResource SettingsGroupStyle}">
-                                        <StackPanel>
-                                            <TextBlock Text="Fiscal Year Configuration" Style="{StaticResource DetailLabelText}" FontWeight="SemiBold" Margin="0,0,0,15" />
+                                    <Grid Style="{StaticResource SettingsRowStyle}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="180" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="20" />
+                                            <ColumnDefinition Width="180" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock
+                                            Grid.Column="0"
+                                            Style="{StaticResource SettingsLabelStyle}"
+                                            Text="Currency:" />
+                                        <ComboBox
+                                            Grid.Column="1"
+                                            ItemsSource="{Binding Currencies}"
+                                            SelectedItem="{Binding SelectedCurrency}"
+                                            Style="{StaticResource ModernComboBox}" />
+                                        <TextBlock
+                                            Grid.Column="3"
+                                            Style="{StaticResource SettingsLabelStyle}"
+                                            Text="Date Format:" />
+                                        <ComboBox
+                                            Grid.Column="4"
+                                            ItemsSource="{Binding DateFormats}"
+                                            SelectedItem="{Binding DateFormat}"
+                                            Style="{StaticResource ModernComboBox}" />
+                                    </Grid>
 
-                                            <Grid Style="{StaticResource SettingsRowStyle}">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="180" />
-                                                    <ColumnDefinition Width="200" />
-                                                    <ColumnDefinition Width="*" />
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock Grid.Column="0" Text="Fiscal Year Starts:" Style="{StaticResource SettingsLabelStyle}" />
-                                                <ComboBox Grid.Column="1" ItemsSource="{Binding FiscalYearStarts}" SelectedItem="{Binding FiscalYearStart}" Style="{StaticResource ModernComboBox}" />
-                                                <CheckBox Grid.Column="2" Content="Auto-close previous fiscal year" IsChecked="{Binding AutoCloseFiscalYear}" Margin="15,0,0,0" VerticalAlignment="Center" Foreground="White" />
-                                            </Grid>
-
-                                            <UniformGrid Columns="2" Margin="0,10,0,0">
-                                                <CheckBox Content="Lock closed periods" IsChecked="{Binding LockClosedPeriods}" Margin="0,0,15,5" Foreground="White" />
-                                                <CheckBox Content="Warn when posting to closed periods" IsChecked="{Binding WarnClosedPeriods}" Margin="0,0,15,5" Foreground="White" />
-                                            </UniformGrid>
-                                        </StackPanel>
-                                    </Border>
-
-                                    <!-- Transaction Settings -->
-                                    <Border Style="{StaticResource SettingsGroupStyle}">
-                                        <StackPanel>
-                                            <TextBlock Text="Transaction &amp; Journal Settings" Style="{StaticResource DetailLabelText}" FontWeight="SemiBold" Margin="0,0,0,15" />
-
-                                            <Grid Style="{StaticResource SettingsRowStyle}">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="180" />
-                                                    <ColumnDefinition Width="*" />
-                                                    <ColumnDefinition Width="20" />
-                                                    <ColumnDefinition Width="180" />
-                                                    <ColumnDefinition Width="*" />
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock Grid.Column="0" Text="Invoice Prefix:" Style="{StaticResource SettingsLabelStyle}" />
-                                                <TextBox Grid.Column="1" Style="{StaticResource ModernTextBoxStyle}" Text="{Binding InvoicePrefix}" hc:InfoElement.Placeholder="INV-" />
-                                                <TextBlock Grid.Column="3" Text="Receipt Prefix:" Style="{StaticResource SettingsLabelStyle}" />
-                                                <TextBox Grid.Column="4" Style="{StaticResource ModernTextBoxStyle}" Text="{Binding ReceiptPrefix}" hc:InfoElement.Placeholder="RCP-" />
-                                            </Grid>
-
-                                            <Grid Style="{StaticResource SettingsRowStyle}">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="180" />
-                                                    <ColumnDefinition Width="200" />
-                                                    <ColumnDefinition Width="*" />
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock Grid.Column="0" Text="Starting Number:" Style="{StaticResource SettingsLabelStyle}" />
-                                                <TextBox Grid.Column="1" Style="{StaticResource ModernTextBoxStyle}" Text="{Binding StartingNumber}" hc:InfoElement.Placeholder="1000" />
-                                                <CheckBox Grid.Column="2" Content="Auto-number all transactions" IsChecked="{Binding AutoNumberTransactions}" Margin="15,0,0,0" VerticalAlignment="Center" Foreground="White" />
-                                            </Grid>
-
-                                            <UniformGrid Columns="2" Margin="0,10,0,0">
-                                                <CheckBox Content="Require approval for journal entries" IsChecked="{Binding RequireJournalApproval}" Margin="0,0,15,5" Foreground="White" />
-                                                <CheckBox Content="Allow negative inventory" IsChecked="{Binding AllowNegativeInventory}" Margin="0,0,15,5" Foreground="White" />
-                                                <CheckBox Content="Track cost center in transactions" IsChecked="{Binding TrackCostCenter}" Margin="0,0,15,5" Foreground="White" />
-                                                <CheckBox Content="Enable multi-currency transactions" IsChecked="{Binding MultiCurrency}" Margin="0,0,15,5" Foreground="White" />
-                                            </UniformGrid>
-                                        </StackPanel>
-                                    </Border>
+                                    <Grid Style="{StaticResource SettingsRowStyle}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="180" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="20" />
+                                            <ColumnDefinition Width="180" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock
+                                            Grid.Column="0"
+                                            Style="{StaticResource SettingsLabelStyle}"
+                                            Text="Number Format:" />
+                                        <ComboBox
+                                            Grid.Column="1"
+                                            ItemsSource="{Binding NumberFormats}"
+                                            SelectedItem="{Binding NumberFormat}"
+                                            Style="{StaticResource ModernComboBox}" />
+                                        <TextBlock
+                                            Grid.Column="3"
+                                            Style="{StaticResource SettingsLabelStyle}"
+                                            Text="Time Zone:" />
+                                        <ComboBox
+                                            Grid.Column="4"
+                                            ItemsSource="{Binding TimeZones}"
+                                            SelectedItem="{Binding TimeZone}"
+                                            Style="{StaticResource ModernComboBox}" />
+                                    </Grid>
                                 </StackPanel>
-                            </ScrollViewer>
-                        </TabItem>
+                            </Border>
 
-                        <!-- Tax Configuration -->
-                        <TabItem>
-                            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-                                <StackPanel Margin="25" MaxWidth="1000">
-                                    <TextBlock Style="{StaticResource SectionHeaderText}" Text="💰 Tax Configuration" Margin="0,0,0,20" />
-
-                                    <!-- Default Tax Settings -->
-                                    <Border Style="{StaticResource SettingsGroupStyle}">
-                                        <StackPanel>
-                                            <TextBlock Text="Default Tax Settings" Style="{StaticResource DetailLabelText}" FontWeight="SemiBold" Margin="0,0,0,15" />
-
-                                            <Grid Style="{StaticResource SettingsRowStyle}">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="180" />
-                                                    <ColumnDefinition Width="120" />
-                                                    <ColumnDefinition Width="20" />
-                                                    <ColumnDefinition Width="180" />
-                                                    <ColumnDefinition Width="120" />
-                                                    <ColumnDefinition Width="30" />
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock Grid.Column="0" Text="Default Sales Tax:" Style="{StaticResource SettingsLabelStyle}" />
-                                                <TextBox Grid.Column="1" Style="{StaticResource ModernTextBoxStyle}" Text="{Binding DefaultSalesTaxRate}" hc:InfoElement.Placeholder="15.00" />
-                                                <TextBlock Grid.Column="3" Text="Default Purchase Tax:" Style="{StaticResource SettingsLabelStyle}" />
-                                                <TextBox Grid.Column="4" Style="{StaticResource ModernTextBoxStyle}" Text="{Binding DefaultPurchaseTaxRate}" hc:InfoElement.Placeholder="15.00" />
-                                                <TextBlock Grid.Column="5" Text="%" VerticalAlignment="Center" Margin="5,0,0,0" />
-                                            </Grid>
-
-                                            <UniformGrid Columns="2" Margin="0,10,0,0">
-                                                <CheckBox Content="Prices include tax by default" IsChecked="{Binding TaxInclusive}" Margin="0,0,15,5" Foreground="White" />
-                                                <CheckBox Content="Auto-calculate taxes on transactions" IsChecked="{Binding AutoCalculateTaxes}" Margin="0,0,15,5" Foreground="White" />
-                                                <CheckBox Content="Track tax by line item" IsChecked="{Binding TrackTaxByLine}" Margin="0,0,15,5" Foreground="White" />
-                                                <CheckBox Content="Generate tax reports automatically" IsChecked="{Binding AutoGenerateTaxReports}" Margin="0,0,15,5" Foreground="White" />
-                                            </UniformGrid>
-                                        </StackPanel>
-                                    </Border>
+                            <!--  Interface Preferences  -->
+                            <Border Style="{StaticResource SettingsGroupStyle}">
+                                <StackPanel>
+                                    <TextBlock
+                                        Margin="0,0,0,15"
+                                        FontWeight="SemiBold"
+                                        Style="{StaticResource DetailLabelText}"
+                                        Text="Interface Preferences" />
+                                    <UniformGrid Columns="3">
+                                        <CheckBox
+                                            Margin="0,0,15,10"
+                                            Content="Dark Theme"
+                                            Foreground="White"
+                                            IsChecked="{Binding DarkMode}" />
+                                        <CheckBox
+                                            Margin="0,0,15,10"
+                                            Content="Enable Animations"
+                                            Foreground="White"
+                                            IsChecked="{Binding EnableAnimations}" />
+                                        <CheckBox
+                                            Margin="0,0,15,10"
+                                            Content="Show Tooltips"
+                                            Foreground="White"
+                                            IsChecked="{Binding ShowTooltips}" />
+                                        <CheckBox
+                                            Margin="0,0,15,10"
+                                            Content="Compact View"
+                                            Foreground="White"
+                                            IsChecked="{Binding CompactView}" />
+                                        <CheckBox
+                                            Margin="0,0,15,10"
+                                            Content="Show Grid Lines"
+                                            Foreground="White"
+                                            IsChecked="{Binding ShowGridLines}" />
+                                        <CheckBox
+                                            Margin="0,0,15,10"
+                                            Content="Auto-save Changes"
+                                            Foreground="White"
+                                            IsChecked="{Binding AutoSave}" />
+                                    </UniformGrid>
                                 </StackPanel>
-                            </ScrollViewer>
-                        </TabItem>
+                            </Border>
+                        </StackPanel>
+                    </TabItem>
 
-                        <!-- Security & Access -->
-                        <TabItem>
-                            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-                                <StackPanel Margin="25" MaxWidth="1000">
-                                    <TextBlock Style="{StaticResource SectionHeaderText}" Text="🔒 Security &amp; Access Control" Margin="0,0,0,20" />
+                    <!--  Accounting Rules  -->
+                    <TabItem>
+                        <StackPanel Margin="25">
+                            <TextBlock
+                                Margin="0,0,0,20"
+                                Style="{StaticResource SectionHeaderText}"
+                                Text="📊 Accounting Rules &amp; Policies" />
 
-                                    <!-- User Authentication -->
-                                    <Border Style="{StaticResource SettingsGroupStyle}">
-                                        <StackPanel>
-                                            <TextBlock Text="User Authentication" Style="{StaticResource DetailLabelText}" FontWeight="SemiBold" Margin="0,0,0,15" />
+                            <!--  Fiscal Year Settings  -->
+                            <Border Style="{StaticResource SettingsGroupStyle}">
+                                <StackPanel>
+                                    <TextBlock
+                                        Margin="0,0,0,15"
+                                        FontWeight="SemiBold"
+                                        Style="{StaticResource DetailLabelText}"
+                                        Text="Fiscal Year Configuration" />
 
-                                            <Grid Style="{StaticResource SettingsRowStyle}">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="180" />
-                                                    <ColumnDefinition Width="120" />
-                                                    <ColumnDefinition Width="20" />
-                                                    <ColumnDefinition Width="180" />
-                                                    <ColumnDefinition Width="120" />
-                                                    <ColumnDefinition Width="60" />
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock Grid.Column="0" Text="Session Timeout:" Style="{StaticResource SettingsLabelStyle}" />
-                                                <TextBox Grid.Column="1" Style="{StaticResource ModernTextBoxStyle}" Text="{Binding SessionTimeout}" hc:InfoElement.Placeholder="30" />
-                                                <TextBlock Grid.Column="3" Text="Password Expiry:" Style="{StaticResource SettingsLabelStyle}" />
-                                                <TextBox Grid.Column="4" Style="{StaticResource ModernTextBoxStyle}" Text="{Binding PasswordExpirationDays}" hc:InfoElement.Placeholder="90" />
-                                                <TextBlock Grid.Column="5" Text="days" VerticalAlignment="Center" Margin="5,0,0,0" />
-                                            </Grid>
+                                    <Grid Style="{StaticResource SettingsRowStyle}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="180" />
+                                            <ColumnDefinition Width="200" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock
+                                            Grid.Column="0"
+                                            Style="{StaticResource SettingsLabelStyle}"
+                                            Text="Fiscal Year Starts:" />
+                                        <ComboBox
+                                            Grid.Column="1"
+                                            ItemsSource="{Binding FiscalYearStarts}"
+                                            SelectedItem="{Binding FiscalYearStart}"
+                                            Style="{StaticResource ModernComboBox}" />
+                                        <CheckBox
+                                            Grid.Column="2"
+                                            Margin="15,0,0,0"
+                                            VerticalAlignment="Center"
+                                            Content="Auto-close previous fiscal year"
+                                            Foreground="White"
+                                            IsChecked="{Binding AutoCloseFiscalYear}" />
+                                    </Grid>
 
-                                            <UniformGrid Columns="2" Margin="0,10,0,0">
-                                                <CheckBox Content="Require strong passwords" IsChecked="{Binding RequireStrongPasswords}" Margin="0,0,15,5" Foreground="White" />
-                                                <CheckBox Content="Enable two-factor authentication" IsChecked="{Binding TwoFactorAuth}" Margin="0,0,15,5" Foreground="White" />
-                                                <CheckBox Content="Auto-logout inactive users" IsChecked="{Binding AutoLogout}" Margin="0,0,15,5" Foreground="White" />
-                                                <CheckBox Content="Lock account after failed attempts" IsChecked="{Binding LockAfterFailedAttempts}" Margin="0,0,15,5" Foreground="White" />
-                                            </UniformGrid>
-                                        </StackPanel>
-                                    </Border>
+                                    <UniformGrid Margin="0,10,0,0" Columns="2">
+                                        <CheckBox
+                                            Margin="0,0,15,5"
+                                            Content="Lock closed periods"
+                                            Foreground="White"
+                                            IsChecked="{Binding LockClosedPeriods}" />
+                                        <CheckBox
+                                            Margin="0,0,15,5"
+                                            Content="Warn when posting to closed periods"
+                                            Foreground="White"
+                                            IsChecked="{Binding WarnClosedPeriods}" />
+                                    </UniformGrid>
                                 </StackPanel>
-                            </ScrollViewer>
-                        </TabItem>
+                            </Border>
 
-                        <!-- Backup & Data -->
-                        <TabItem>
-                            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-                                <StackPanel Margin="25" MaxWidth="1000">
-                                    <TextBlock Style="{StaticResource SectionHeaderText}" Text="💾 Backup &amp; Data Management" Margin="0,0,0,20" />
+                            <!--  Transaction Settings  -->
+                            <Border Style="{StaticResource SettingsGroupStyle}">
+                                <StackPanel>
+                                    <TextBlock
+                                        Margin="0,0,0,15"
+                                        FontWeight="SemiBold"
+                                        Style="{StaticResource DetailLabelText}"
+                                        Text="Transaction &amp; Journal Settings" />
 
-                                    <!-- Automated Backup -->
-                                    <Border Style="{StaticResource SettingsGroupStyle}">
-                                        <StackPanel>
-                                            <TextBlock Text="Automated Backup Configuration" Style="{StaticResource DetailLabelText}" FontWeight="SemiBold" Margin="0,0,0,15" />
+                                    <Grid Style="{StaticResource SettingsRowStyle}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="180" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="20" />
+                                            <ColumnDefinition Width="180" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock
+                                            Grid.Column="0"
+                                            Style="{StaticResource SettingsLabelStyle}"
+                                            Text="Invoice Prefix:" />
+                                        <TextBox
+                                            Grid.Column="1"
+                                            hc:InfoElement.Placeholder="INV-"
+                                            Style="{StaticResource ModernTextBoxStyle}"
+                                            Text="{Binding InvoicePrefix}" />
+                                        <TextBlock
+                                            Grid.Column="3"
+                                            Style="{StaticResource SettingsLabelStyle}"
+                                            Text="Receipt Prefix:" />
+                                        <TextBox
+                                            Grid.Column="4"
+                                            hc:InfoElement.Placeholder="RCP-"
+                                            Style="{StaticResource ModernTextBoxStyle}"
+                                            Text="{Binding ReceiptPrefix}" />
+                                    </Grid>
 
-                                            <Grid Style="{StaticResource SettingsRowStyle}">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="180" />
-                                                    <ColumnDefinition Width="*" />
-                                                    <ColumnDefinition Width="20" />
-                                                    <ColumnDefinition Width="180" />
-                                                    <ColumnDefinition Width="*" />
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock Grid.Column="0" Text="Backup Frequency:" Style="{StaticResource SettingsLabelStyle}" />
-                                                <ComboBox Grid.Column="1" ItemsSource="{Binding BackupFrequencies}" SelectedItem="{Binding BackupFrequency}" Style="{StaticResource ModernComboBox}" />
-                                                <TextBlock Grid.Column="3" Text="Retention Period:" Style="{StaticResource SettingsLabelStyle}" />
-                                                <ComboBox Grid.Column="4" ItemsSource="{Binding RetentionPeriods}" SelectedItem="{Binding RetentionPeriod}" Style="{StaticResource ModernComboBox}" />
-                                            </Grid>
+                                    <Grid Style="{StaticResource SettingsRowStyle}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="180" />
+                                            <ColumnDefinition Width="200" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock
+                                            Grid.Column="0"
+                                            Style="{StaticResource SettingsLabelStyle}"
+                                            Text="Starting Number:" />
+                                        <TextBox
+                                            Grid.Column="1"
+                                            hc:InfoElement.Placeholder="1000"
+                                            Style="{StaticResource ModernTextBoxStyle}"
+                                            Text="{Binding StartingNumber}" />
+                                        <CheckBox
+                                            Grid.Column="2"
+                                            Margin="15,0,0,0"
+                                            VerticalAlignment="Center"
+                                            Content="Auto-number all transactions"
+                                            Foreground="White"
+                                            IsChecked="{Binding AutoNumberTransactions}" />
+                                    </Grid>
 
-                                            <Grid Style="{StaticResource SettingsRowStyle}">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="180" />
-                                                    <ColumnDefinition Width="*" />
-                                                    <ColumnDefinition Width="Auto" />
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock Grid.Column="0" Text="Backup Location:" Style="{StaticResource SettingsLabelStyle}" />
-                                                <TextBox Grid.Column="1" Style="{StaticResource ModernTextBoxStyle}" Text="{Binding BackupLocation}" hc:InfoElement.Placeholder="Select backup directory" />
-                                                <Button Grid.Column="2" Content="📁 Browse" Style="{StaticResource ModernSecondaryButton}" Margin="10,0,0,0" />
-                                            </Grid>
-
-                                            <UniformGrid Columns="3" Margin="0,10,0,0">
-                                                <CheckBox Content="Enable automatic backups" IsChecked="{Binding AutoBackupEnabled}" Margin="0,0,15,5" Foreground="White" />
-                                                <CheckBox Content="Compress backup files" IsChecked="{Binding CompressBackups}" Margin="0,0,15,5" Foreground="White" />
-                                                <CheckBox Content="Encrypt backup files" IsChecked="{Binding EncryptBackups}" Margin="0,0,15,5" Foreground="White" />
-                                                <CheckBox Content="Verify backup integrity" IsChecked="{Binding VerifyBackups}" Margin="0,0,15,5" Foreground="White" />
-                                                <CheckBox Content="Email backup notifications" IsChecked="{Binding EmailBackupNotifications}" Margin="0,0,15,5" Foreground="White" />
-                                                <CheckBox Content="Cloud backup sync" IsChecked="{Binding CloudBackupSync}" Margin="0,0,15,5" Foreground="White" />
-                                            </UniformGrid>
-                                        </StackPanel>
-                                    </Border>
+                                    <UniformGrid Margin="0,10,0,0" Columns="2">
+                                        <CheckBox
+                                            Margin="0,0,15,5"
+                                            Content="Require approval for journal entries"
+                                            Foreground="White"
+                                            IsChecked="{Binding RequireJournalApproval}" />
+                                        <CheckBox
+                                            Margin="0,0,15,5"
+                                            Content="Allow negative inventory"
+                                            Foreground="White"
+                                            IsChecked="{Binding AllowNegativeInventory}" />
+                                        <CheckBox
+                                            Margin="0,0,15,5"
+                                            Content="Track cost center in transactions"
+                                            Foreground="White"
+                                            IsChecked="{Binding TrackCostCenter}" />
+                                        <CheckBox
+                                            Margin="0,0,15,5"
+                                            Content="Enable multi-currency transactions"
+                                            Foreground="White"
+                                            IsChecked="{Binding MultiCurrency}" />
+                                    </UniformGrid>
                                 </StackPanel>
-                            </ScrollViewer>
-                        </TabItem>
+                            </Border>
+                        </StackPanel>
+                    </TabItem>
 
-                        <!-- Reports & Print -->
-                        <TabItem>
-                            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-                                <StackPanel Margin="25" MaxWidth="1000">
-                                    <TextBlock Style="{StaticResource SectionHeaderText}" Text="📋 Reports &amp; Print Configuration" Margin="0,0,0,20" />
+                    <!--  Tax Configuration  -->
+                    <TabItem>
+                        <StackPanel Margin="25">
+                            <TextBlock
+                                Margin="0,0,0,20"
+                                Style="{StaticResource SectionHeaderText}"
+                                Text="💰 Tax Configuration" />
 
-                                    <!-- Report Preferences -->
-                                    <Border Style="{StaticResource SettingsGroupStyle}">
-                                        <StackPanel>
-                                            <TextBlock Text="Report Preferences" Style="{StaticResource DetailLabelText}" FontWeight="SemiBold" Margin="0,0,0,15" />
+                            <!--  Default Tax Settings  -->
+                            <Border Style="{StaticResource SettingsGroupStyle}">
+                                <StackPanel>
+                                    <TextBlock
+                                        Margin="0,0,0,15"
+                                        FontWeight="SemiBold"
+                                        Style="{StaticResource DetailLabelText}"
+                                        Text="Default Tax Settings" />
+                                    <StackPanel>
+                                        <StackPanel Orientation="Horizontal">
+                                            <!--  Sales Tax  -->
+                                            <StackPanel
+                                                Margin="10"
+                                                VerticalAlignment="Center"
+                                                Orientation="Horizontal">
+                                                <TextBlock
+                                                    Margin="5"
+                                                    Style="{StaticResource SettingsLabelStyle}"
+                                                    Text="Sales Tax:" />
+                                                <TextBox
+                                                    Width="80"
+                                                    Style="{StaticResource ModernTextBoxStyle}"
+                                                    Text="{Binding DefaultSalesTaxRate}" />
+                                                <TextBlock
+                                                    Margin="5"
+                                                    VerticalAlignment="Center"
+                                                    Text="%" />
+                                            </StackPanel>
 
-                                            <Grid Style="{StaticResource SettingsRowStyle}">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="180" />
-                                                    <ColumnDefinition Width="*" />
-                                                    <ColumnDefinition Width="20" />
-                                                    <ColumnDefinition Width="180" />
-                                                    <ColumnDefinition Width="*" />
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock Grid.Column="0" Text="Default Format:" Style="{StaticResource SettingsLabelStyle}" />
-                                                <ComboBox Grid.Column="1" ItemsSource="{Binding ReportFormats}" SelectedItem="{Binding DefaultReportFormat}" Style="{StaticResource ModernComboBox}" />
-                                                <TextBlock Grid.Column="3" Text="Auto-refresh:" Style="{StaticResource SettingsLabelStyle}" />
-                                                <ComboBox Grid.Column="4" ItemsSource="{Binding RefreshIntervals}" SelectedItem="{Binding ReportRefreshInterval}" Style="{StaticResource ModernComboBox}" />
-                                            </Grid>
-
-                                            <UniformGrid Columns="3" Margin="0,10,0,0">
-                                                <CheckBox Content="Show company logo on reports" IsChecked="{Binding ShowLogoOnReports}" Margin="0,0,15,5" Foreground="White" />
-                                                <CheckBox Content="Include page numbers" IsChecked="{Binding IncludePageNumbers}" Margin="0,0,15,5" Foreground="White" />
-                                                <CheckBox Content="Show report generation time" IsChecked="{Binding ShowGenerationTime}" Margin="0,0,15,5" Foreground="White" />
-                                                <CheckBox Content="Enable drill-down in reports" IsChecked="{Binding EnableReportDrillDown}" Margin="0,0,15,5" Foreground="White" />
-                                                <CheckBox Content="Auto-email scheduled reports" IsChecked="{Binding AutoEmailReports}" Margin="0,0,15,5" Foreground="White" />
-                                                <CheckBox Content="Save reports automatically" IsChecked="{Binding AutoSaveReports}" Margin="0,0,15,5" Foreground="White" />
-                                            </UniformGrid>
+                                            <!--  Purchase Tax  -->
+                                            <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+                                                <TextBlock
+                                                    Margin="0,0,10,0"
+                                                    Style="{StaticResource SettingsLabelStyle}"
+                                                    Text="Purchase Tax:" />
+                                                <TextBox
+                                                    Width="80"
+                                                    hc:InfoElement.Placeholder="15.00"
+                                                    Style="{StaticResource ModernTextBoxStyle}"
+                                                    Text="{Binding DefaultPurchaseTaxRate}" />
+                                                <TextBlock
+                                                    Margin="5,0,0,0"
+                                                    VerticalAlignment="Center"
+                                                    Text="%" />
+                                            </StackPanel>
                                         </StackPanel>
-                                    </Border>
+                                    </StackPanel>
+
+                                    <UniformGrid Margin="0,10,0,0" Columns="2">
+                                        <CheckBox
+                                            Margin="0,0,15,5"
+                                            Content="Prices include tax by default"
+                                            Foreground="White"
+                                            IsChecked="{Binding TaxInclusive}" />
+                                        <CheckBox
+                                            Margin="0,0,15,5"
+                                            Content="Auto-calculate taxes on transactions"
+                                            Foreground="White"
+                                            IsChecked="{Binding AutoCalculateTaxes}" />
+                                        <CheckBox
+                                            Margin="0,0,15,5"
+                                            Content="Track tax by line item"
+                                            Foreground="White"
+                                            IsChecked="{Binding TrackTaxByLine}" />
+                                        <CheckBox
+                                            Margin="0,0,15,5"
+                                            Content="Generate tax reports automatically"
+                                            Foreground="White"
+                                            IsChecked="{Binding AutoGenerateTaxReports}" />
+                                    </UniformGrid>
                                 </StackPanel>
-                            </ScrollViewer>
-                        </TabItem>
+                            </Border>
+                        </StackPanel>
+                    </TabItem>
 
-                        <!-- Notifications -->
-                        <TabItem>
-                            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-                                <StackPanel Margin="25" MaxWidth="1000">
-                                    <TextBlock Style="{StaticResource SectionHeaderText}" Text="🔔 Notification Settings" Margin="0,0,0,20" />
+                    <!--  Security & Access  -->
+                    <TabItem>
+                        <StackPanel Margin="25">
+                            <TextBlock
+                                Margin="0,0,0,20"
+                                Style="{StaticResource SectionHeaderText}"
+                                Text="🔒 Security &amp; Access Control" />
 
-                                    <!-- System Notifications -->
-                                    <Border Style="{StaticResource SettingsGroupStyle}">
-                                        <StackPanel>
-                                            <TextBlock Text="System Notifications" Style="{StaticResource DetailLabelText}" FontWeight="SemiBold" Margin="0,0,0,15" />
+                            <!--  User Authentication  -->
+                            <Border Style="{StaticResource SettingsGroupStyle}">
+                                <StackPanel>
+                                    <TextBlock
+                                        Margin="0,0,0,15"
+                                        FontWeight="SemiBold"
+                                        Style="{StaticResource DetailLabelText}"
+                                        Text="User Authentication" />
 
-                                            <UniformGrid Columns="2" Margin="0,10,0,0">
-                                                <CheckBox Content="Show desktop notifications" IsChecked="{Binding ShowDesktopNotifications}" Margin="0,0,15,5" Foreground="White" />
-                                                <CheckBox Content="Play notification sounds" IsChecked="{Binding PlayNotificationSounds}" Margin="0,0,15,5" Foreground="White" />
-                                                <CheckBox Content="Show system tray notifications" IsChecked="{Binding ShowTrayNotifications}" Margin="0,0,15,5" Foreground="White" />
-                                                <CheckBox Content="Notify on application updates" IsChecked="{Binding NotifyOnUpdates}" Margin="0,0,15,5" Foreground="White" />
-                                            </UniformGrid>
-                                        </StackPanel>
-                                    </Border>
+                                    <Grid Style="{StaticResource SettingsRowStyle}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="180" />
+                                            <ColumnDefinition Width="120" />
+                                            <ColumnDefinition Width="20" />
+                                            <ColumnDefinition Width="180" />
+                                            <ColumnDefinition Width="120" />
+                                            <ColumnDefinition Width="60" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock
+                                            Grid.Column="0"
+                                            Style="{StaticResource SettingsLabelStyle}"
+                                            Text="Session Timeout:" />
+                                        <TextBox
+                                            Grid.Column="1"
+                                            hc:InfoElement.Placeholder="30"
+                                            Style="{StaticResource ModernTextBoxStyle}"
+                                            Text="{Binding SessionTimeout}" />
+                                        <TextBlock
+                                            Grid.Column="3"
+                                            Style="{StaticResource SettingsLabelStyle}"
+                                            Text="Password Expiry:" />
+                                        <TextBox
+                                            Grid.Column="4"
+                                            hc:InfoElement.Placeholder="90"
+                                            Style="{StaticResource ModernTextBoxStyle}"
+                                            Text="{Binding PasswordExpirationDays}" />
+                                        <TextBlock
+                                            Grid.Column="5"
+                                            Margin="5,0,0,0"
+                                            VerticalAlignment="Center"
+                                            Text="days" />
+                                    </Grid>
+
+                                    <UniformGrid Margin="0,10,0,0" Columns="2">
+                                        <CheckBox
+                                            Margin="0,0,15,5"
+                                            Content="Require strong passwords"
+                                            Foreground="White"
+                                            IsChecked="{Binding RequireStrongPasswords}" />
+                                        <CheckBox
+                                            Margin="0,0,15,5"
+                                            Content="Enable two-factor authentication"
+                                            Foreground="White"
+                                            IsChecked="{Binding TwoFactorAuth}" />
+                                        <CheckBox
+                                            Margin="0,0,15,5"
+                                            Content="Auto-logout inactive users"
+                                            Foreground="White"
+                                            IsChecked="{Binding AutoLogout}" />
+                                        <CheckBox
+                                            Margin="0,0,15,5"
+                                            Content="Lock account after failed attempts"
+                                            Foreground="White"
+                                            IsChecked="{Binding LockAfterFailedAttempts}" />
+                                    </UniformGrid>
                                 </StackPanel>
-                            </ScrollViewer>
-                        </TabItem>
+                            </Border>
+                        </StackPanel>
+                    </TabItem>
 
-                        <!-- Integrations -->
-                        <TabItem>
-                            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-                                <StackPanel Margin="25" MaxWidth="1000">
-                                    <TextBlock Style="{StaticResource SectionHeaderText}" Text="🔗 System Integrations" Margin="0,0,0,20" />
+                    <!--  Backup & Data  -->
+                    <TabItem>
+                        <StackPanel Margin="25">
+                            <TextBlock
+                                Margin="0,0,0,20"
+                                Style="{StaticResource SectionHeaderText}"
+                                Text="💾 Backup &amp; Data Management" />
 
-                                    <!-- Banking Integration -->
-                                    <Border Style="{StaticResource SettingsGroupStyle}">
-                                        <StackPanel>
-                                            <Grid Margin="0,0,0,15">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*" />
-                                                    <ColumnDefinition Width="Auto" />
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock Grid.Column="0" Text="Banking &amp; Payment Integration" Style="{StaticResource DetailLabelText}" FontWeight="SemiBold" />
-                                                <Button Grid.Column="1" Content="🔗 Manage Connections" Style="{StaticResource ModernSecondaryButton}" />
-                                            </Grid>
+                            <!--  Automated Backup  -->
+                            <Border Style="{StaticResource SettingsGroupStyle}">
+                                <StackPanel>
+                                    <TextBlock
+                                        Margin="0,0,0,15"
+                                        FontWeight="SemiBold"
+                                        Style="{StaticResource DetailLabelText}"
+                                        Text="Automated Backup Configuration" />
 
-                                            <UniformGrid Columns="2" Margin="0,10,0,0">
-                                                <CheckBox Content="Enable bank feed imports" IsChecked="{Binding EnableBankFeeds}" Margin="0,0,15,5" Foreground="White" />
-                                                <CheckBox Content="Auto-match transactions" IsChecked="{Binding AutoMatchTransactions}" Margin="0,0,15,5" Foreground="White" />
-                                                <CheckBox Content="Enable online payments" IsChecked="{Binding EnableOnlinePayments}" Margin="0,0,15,5" Foreground="White" />
-                                                <CheckBox Content="Sync payment confirmations" IsChecked="{Binding SyncPaymentConfirmations}" Margin="0,0,15,5" Foreground="White" />
-                                            </UniformGrid>
-                                        </StackPanel>
-                                    </Border>
+                                    <Grid Style="{StaticResource SettingsRowStyle}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="180" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="20" />
+                                            <ColumnDefinition Width="180" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock
+                                            Grid.Column="0"
+                                            Style="{StaticResource SettingsLabelStyle}"
+                                            Text="Backup Frequency:" />
+                                        <ComboBox
+                                            Grid.Column="1"
+                                            ItemsSource="{Binding BackupFrequencies}"
+                                            SelectedItem="{Binding BackupFrequency}"
+                                            Style="{StaticResource ModernComboBox}" />
+                                        <TextBlock
+                                            Grid.Column="3"
+                                            Style="{StaticResource SettingsLabelStyle}"
+                                            Text="Retention Period:" />
+                                        <ComboBox
+                                            Grid.Column="4"
+                                            ItemsSource="{Binding RetentionPeriods}"
+                                            SelectedItem="{Binding RetentionPeriod}"
+                                            Style="{StaticResource ModernComboBox}" />
+                                    </Grid>
+
+                                    <Grid Style="{StaticResource SettingsRowStyle}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="180" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock
+                                            Grid.Column="0"
+                                            Style="{StaticResource SettingsLabelStyle}"
+                                            Text="Backup Location:" />
+                                        <TextBox
+                                            Grid.Column="1"
+                                            hc:InfoElement.Placeholder="Select backup directory"
+                                            Style="{StaticResource ModernTextBoxStyle}"
+                                            Text="{Binding BackupLocation}" />
+                                        <Button
+                                            Grid.Column="2"
+                                            Margin="10,0,0,0"
+                                            Content="📁 Browse"
+                                            Style="{StaticResource ModernSecondaryButton}" />
+                                    </Grid>
+
+                                    <UniformGrid Margin="0,10,0,0" Columns="3">
+                                        <CheckBox
+                                            Margin="0,0,15,5"
+                                            Content="Enable automatic backups"
+                                            Foreground="White"
+                                            IsChecked="{Binding AutoBackupEnabled}" />
+                                        <CheckBox
+                                            Margin="0,0,15,5"
+                                            Content="Compress backup files"
+                                            Foreground="White"
+                                            IsChecked="{Binding CompressBackups}" />
+                                        <CheckBox
+                                            Margin="0,0,15,5"
+                                            Content="Encrypt backup files"
+                                            Foreground="White"
+                                            IsChecked="{Binding EncryptBackups}" />
+                                        <CheckBox
+                                            Margin="0,0,15,5"
+                                            Content="Verify backup integrity"
+                                            Foreground="White"
+                                            IsChecked="{Binding VerifyBackups}" />
+                                        <CheckBox
+                                            Margin="0,0,15,5"
+                                            Content="Email backup notifications"
+                                            Foreground="White"
+                                            IsChecked="{Binding EmailBackupNotifications}" />
+                                        <CheckBox
+                                            Margin="0,0,15,5"
+                                            Content="Cloud backup sync"
+                                            Foreground="White"
+                                            IsChecked="{Binding CloudBackupSync}" />
+                                    </UniformGrid>
                                 </StackPanel>
-                            </ScrollViewer>
-                        </TabItem>
-                    </TabControl>
-                </Border>
-            </Grid>
+                            </Border>
+                        </StackPanel>
+                    </TabItem>
+
+                    <!--  Reports & Print  -->
+                    <TabItem>
+                        <StackPanel Margin="25">
+                            <TextBlock
+                                Margin="0,0,0,20"
+                                Style="{StaticResource SectionHeaderText}"
+                                Text="📋 Reports &amp; Print Configuration" />
+
+                            <!--  Report Preferences  -->
+                            <Border Style="{StaticResource SettingsGroupStyle}">
+                                <StackPanel>
+                                    <TextBlock
+                                        Margin="0,0,0,15"
+                                        FontWeight="SemiBold"
+                                        Style="{StaticResource DetailLabelText}"
+                                        Text="Report Preferences" />
+
+                                    <Grid Style="{StaticResource SettingsRowStyle}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="180" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="20" />
+                                            <ColumnDefinition Width="180" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock
+                                            Grid.Column="0"
+                                            Style="{StaticResource SettingsLabelStyle}"
+                                            Text="Default Format:" />
+                                        <ComboBox
+                                            Grid.Column="1"
+                                            ItemsSource="{Binding ReportFormats}"
+                                            SelectedItem="{Binding DefaultReportFormat}"
+                                            Style="{StaticResource ModernComboBox}" />
+                                        <TextBlock
+                                            Grid.Column="3"
+                                            Style="{StaticResource SettingsLabelStyle}"
+                                            Text="Auto-refresh:" />
+                                        <ComboBox
+                                            Grid.Column="4"
+                                            ItemsSource="{Binding RefreshIntervals}"
+                                            SelectedItem="{Binding ReportRefreshInterval}"
+                                            Style="{StaticResource ModernComboBox}" />
+                                    </Grid>
+
+                                    <UniformGrid Margin="0,10,0,0" Columns="3">
+                                        <CheckBox
+                                            Margin="0,0,15,5"
+                                            Content="Show company logo on reports"
+                                            Foreground="White"
+                                            IsChecked="{Binding ShowLogoOnReports}" />
+                                        <CheckBox
+                                            Margin="0,0,15,5"
+                                            Content="Include page numbers"
+                                            Foreground="White"
+                                            IsChecked="{Binding IncludePageNumbers}" />
+                                        <CheckBox
+                                            Margin="0,0,15,5"
+                                            Content="Show report generation time"
+                                            Foreground="White"
+                                            IsChecked="{Binding ShowGenerationTime}" />
+                                        <CheckBox
+                                            Margin="0,0,15,5"
+                                            Content="Enable drill-down in reports"
+                                            Foreground="White"
+                                            IsChecked="{Binding EnableReportDrillDown}" />
+                                        <CheckBox
+                                            Margin="0,0,15,5"
+                                            Content="Auto-email scheduled reports"
+                                            Foreground="White"
+                                            IsChecked="{Binding AutoEmailReports}" />
+                                        <CheckBox
+                                            Margin="0,0,15,5"
+                                            Content="Save reports automatically"
+                                            Foreground="White"
+                                            IsChecked="{Binding AutoSaveReports}" />
+                                    </UniformGrid>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </TabItem>
+
+                    <!--  Notifications  -->
+                    <TabItem>
+                        <StackPanel Margin="25">
+                            <TextBlock
+                                Margin="0,0,0,20"
+                                Style="{StaticResource SectionHeaderText}"
+                                Text="🔔 Notification Settings" />
+
+                            <!--  System Notifications  -->
+                            <Border Style="{StaticResource SettingsGroupStyle}">
+                                <StackPanel>
+                                    <TextBlock
+                                        Margin="0,0,0,15"
+                                        FontWeight="SemiBold"
+                                        Style="{StaticResource DetailLabelText}"
+                                        Text="System Notifications" />
+
+                                    <UniformGrid Margin="0,10,0,0" Columns="2">
+                                        <CheckBox
+                                            Margin="0,0,15,5"
+                                            Content="Show desktop notifications"
+                                            Foreground="White"
+                                            IsChecked="{Binding ShowDesktopNotifications}" />
+                                        <CheckBox
+                                            Margin="0,0,15,5"
+                                            Content="Play notification sounds"
+                                            Foreground="White"
+                                            IsChecked="{Binding PlayNotificationSounds}" />
+                                        <CheckBox
+                                            Margin="0,0,15,5"
+                                            Content="Show system tray notifications"
+                                            Foreground="White"
+                                            IsChecked="{Binding ShowTrayNotifications}" />
+                                        <CheckBox
+                                            Margin="0,0,15,5"
+                                            Content="Notify on application updates"
+                                            Foreground="White"
+                                            IsChecked="{Binding NotifyOnUpdates}" />
+                                    </UniformGrid>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </TabItem>
+
+                    <!--  Integrations  -->
+                    <TabItem>
+                        <StackPanel Margin="25">
+                            <TextBlock
+                                Margin="0,0,0,20"
+                                Style="{StaticResource SectionHeaderText}"
+                                Text="🔗 System Integrations" />
+
+                            <!--  Banking Integration  -->
+                            <Border Style="{StaticResource SettingsGroupStyle}">
+                                <StackPanel>
+                                    <Grid Margin="0,0,0,15">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock
+                                            Grid.Column="0"
+                                            FontWeight="SemiBold"
+                                            Style="{StaticResource DetailLabelText}"
+                                            Text="Banking &amp; Payment Integration" />
+                                        <Button
+                                            Grid.Column="1"
+                                            Content="🔗 Manage Connections"
+                                            Style="{StaticResource ModernSecondaryButton}" />
+                                    </Grid>
+
+                                    <UniformGrid Margin="0,10,0,0" Columns="2">
+                                        <CheckBox
+                                            Margin="0,0,15,5"
+                                            Content="Enable bank feed imports"
+                                            Foreground="White"
+                                            IsChecked="{Binding EnableBankFeeds}" />
+                                        <CheckBox
+                                            Margin="0,0,15,5"
+                                            Content="Auto-match transactions"
+                                            Foreground="White"
+                                            IsChecked="{Binding AutoMatchTransactions}" />
+                                        <CheckBox
+                                            Margin="0,0,15,5"
+                                            Content="Enable online payments"
+                                            Foreground="White"
+                                            IsChecked="{Binding EnableOnlinePayments}" />
+                                        <CheckBox
+                                            Margin="0,0,15,5"
+                                            Content="Sync payment confirmations"
+                                            Foreground="White"
+                                            IsChecked="{Binding SyncPaymentConfirmations}" />
+                                    </UniformGrid>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </TabItem>
+                </TabControl>
+            </Border>
         </Grid>
     </ScrollViewer>
 </Page>

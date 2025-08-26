@@ -1,25 +1,29 @@
-﻿<Page x:Class="PrimeAppBooks.Views.Pages.Audit"
-      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:converters="clr-namespace:PrimeAppBooks.Conveters"
-      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-      xmlns:hc="https://handyorg.github.io/handycontrol"
-      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-      d:DesignHeight="900"
-      d:DesignWidth="1280"
-      Background="Transparent"
-      mc:Ignorable="d">
+﻿<Page
+    x:Class="PrimeAppBooks.Views.Pages.Audit"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="clr-namespace:PrimeAppBooks.Conveters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:hc="https://handyorg.github.io/handycontrol"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="900"
+    d:DesignWidth="1280"
+    Background="Transparent"
+    mc:Ignorable="d">
 
-    <ScrollViewer Style="{StaticResource ModernScrollViewer}">
-        <Grid Margin="20">
+    <ScrollViewer HorizontalScrollBarVisibility="Auto" Style="{StaticResource ModernScrollViewer}">
+        <Grid MaxWidth="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=ScrollViewer}}" Margin="10">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <!-- Header Section -->
-            <Border Grid.Row="0" Margin="0,0,0,20" Style="{StaticResource ModernCardStyle}">
+            <!--  Header Section  -->
+            <Border
+                Grid.Row="0"
+                Margin="0,0,0,20"
+                Style="{StaticResource ModernCardStyle}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -51,63 +55,86 @@
                 </Grid>
             </Border>
 
-            <!-- Audit Summary Cards -->
-            <UniformGrid Grid.Row="1" Columns="5" Margin="0,0,0,20">
-                <!-- Total Activities -->
-                <Border Style="{StaticResource ModernCardStyle}">
-                    <StackPanel Style="{StaticResource CardContentContainer}">
-                        <TextBlock Style="{StaticResource DraftHeaderText}" Text="📊 Total Activities" />
-                        <TextBlock Style="{StaticResource CardValueText}" Text="{Binding TotalActivities}" />
-                        <TextBlock Style="{StaticResource CardSubText}" Text="All time" />
-                    </StackPanel>
-                </Border>
+            <!--  Audit Summary Cards - Made responsive  -->
+            <ScrollViewer
+                Grid.Row="1"
+                Margin="0,0,0,20"
+                HorizontalScrollBarVisibility="Auto">
+                <StackPanel Orientation="Horizontal">
+                    <!--  Total Activities  -->
+                    <Border
+                        MinWidth="180"
+                        Margin="0,0,10,0"
+                        Style="{StaticResource ModernCardStyle}">
+                        <StackPanel Style="{StaticResource CardContentContainer}">
+                            <TextBlock Style="{StaticResource DraftHeaderText}" Text="📊 Total Activities" />
+                            <TextBlock Style="{StaticResource CardValueText}" Text="{Binding TotalActivities}" />
+                            <TextBlock Style="{StaticResource CardSubText}" Text="All time" />
+                        </StackPanel>
+                    </Border>
 
-                <!-- Today's Activities -->
-                <Border Style="{StaticResource ModernCardStyle}">
-                    <StackPanel Style="{StaticResource CardContentContainer}">
-                        <TextBlock Style="{StaticResource PostedHeaderText}" Text="📈 Today" />
-                        <TextBlock Style="{StaticResource CardValueText}" Text="{Binding TodaysActivities}" />
-                        <TextBlock Style="{StaticResource CardSubText}" Text="Activities today" />
-                    </StackPanel>
-                </Border>
+                    <!--  Today's Activities  -->
+                    <Border
+                        MinWidth="180"
+                        Margin="0,0,10,0"
+                        Style="{StaticResource ModernCardStyle}">
+                        <StackPanel Style="{StaticResource CardContentContainer}">
+                            <TextBlock Style="{StaticResource PostedHeaderText}" Text="📈 Today" />
+                            <TextBlock Style="{StaticResource CardValueText}" Text="{Binding TodaysActivities}" />
+                            <TextBlock Style="{StaticResource CardSubText}" Text="Activities today" />
+                        </StackPanel>
+                    </Border>
 
-                <!-- Critical Events -->
-                <Border Style="{StaticResource ModernCardStyle}">
-                    <StackPanel Style="{StaticResource CardContentContainer}">
-                        <TextBlock Style="{StaticResource MonthlyHeaderText}" Text="⚠️ Critical" />
-                        <TextBlock Style="{StaticResource CardValueText}" Text="{Binding CriticalEvents}" />
-                        <TextBlock Style="{StaticResource CardSubText}" Text="Require attention" />
-                    </StackPanel>
-                </Border>
+                    <!--  Critical Events  -->
+                    <Border
+                        MinWidth="180"
+                        Margin="0,0,10,0"
+                        Style="{StaticResource ModernCardStyle}">
+                        <StackPanel Style="{StaticResource CardContentContainer}">
+                            <TextBlock Style="{StaticResource MonthlyHeaderText}" Text="⚠️ Critical" />
+                            <TextBlock Style="{StaticResource CardValueText}" Text="{Binding CriticalEvents}" />
+                            <TextBlock Style="{StaticResource CardSubText}" Text="Require attention" />
+                        </StackPanel>
+                    </Border>
 
-                <!-- User Activities -->
-                <Border Style="{StaticResource ModernCardStyle}">
-                    <StackPanel Style="{StaticResource CardContentContainer}">
-                        <TextBlock Style="{StaticResource BalanceHeaderText}" Text="👥 Active Users" />
-                        <TextBlock Style="{StaticResource CardValueText}" Text="{Binding ActiveUsers}" />
-                        <TextBlock Style="{StaticResource CardSubText}" Text="Recent activity" />
-                    </StackPanel>
-                </Border>
+                    <!--  User Activities  -->
+                    <Border
+                        MinWidth="180"
+                        Margin="0,0,10,0"
+                        Style="{StaticResource ModernCardStyle}">
+                        <StackPanel Style="{StaticResource CardContentContainer}">
+                            <TextBlock Style="{StaticResource BalanceHeaderText}" Text="👥 Active Users" />
+                            <TextBlock Style="{StaticResource CardValueText}" Text="{Binding ActiveUsers}" />
+                            <TextBlock Style="{StaticResource CardSubText}" Text="Recent activity" />
+                        </StackPanel>
+                    </Border>
 
-                <!-- Data Changes -->
-                <Border Style="{StaticResource ModernCardStyle}">
-                    <StackPanel Style="{StaticResource CardContentContainer}">
-                        <TextBlock Style="{StaticResource BalanceHeaderText}" Text="🔄 Data Changes" />
-                        <TextBlock Style="{StaticResource CardValueText}" Text="{Binding DataChanges}" />
-                        <TextBlock Style="{StaticResource CardSubText}" Text="Modifications" />
-                    </StackPanel>
-                </Border>
-            </UniformGrid>
+                    <!--  Data Changes  -->
+                    <Border
+                        MinWidth="180"
+                        Margin="0,0,10,0"
+                        Style="{StaticResource ModernCardStyle}">
+                        <StackPanel Style="{StaticResource CardContentContainer}">
+                            <TextBlock Style="{StaticResource BalanceHeaderText}" Text="🔄 Data Changes" />
+                            <TextBlock Style="{StaticResource CardValueText}" Text="{Binding DataChanges}" />
+                            <TextBlock Style="{StaticResource CardSubText}" Text="Modifications" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
 
-            <!-- Main Content Area -->
+            <!--  Main Content Area - Made responsive  -->
             <Grid Grid.Row="2">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="400" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <!-- Audit Log Table -->
-                <Border Grid.Column="0" Margin="0,0,15,0" Style="{StaticResource ModernCardStyle}">
+                <!--  Audit Log Table  -->
+                <Border
+                    Grid.Column="0"
+                    Margin="0,0,10,0"
+                    Style="{StaticResource ModernCardStyle}">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
@@ -115,7 +142,7 @@
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
 
-                        <!-- Filter Header -->
+                        <!--  Filter Header  -->
                         <Grid Grid.Row="0" Margin="0,0,0,15">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
@@ -141,39 +168,44 @@
                             </StackPanel>
                         </Grid>
 
-                        <!-- Quick Filters -->
-                        <Border Grid.Row="1" Margin="0,0,0,15" Style="{StaticResource DetailInfoBorder}">
-                            <StackPanel Orientation="Horizontal">
+                        <!--  Quick Filters - Made responsive  -->
+                        <Border
+                            Grid.Row="1"
+                            Margin="0,0,0,15"
+                            Style="{StaticResource DetailInfoBorder}">
+                            <WrapPanel>
                                 <TextBlock
-                                    Margin="0,0,10,0"
+                                    Margin="0,0,10,5"
                                     VerticalAlignment="Center"
                                     Style="{StaticResource FilterLabelText}"
                                     Text="Quick filters:" />
 
                                 <ToggleButton
+                                    Margin="0,0,5,5"
                                     Content="Critical Only"
                                     IsChecked="{Binding ShowCriticalOnly}"
                                     Style="{StaticResource FilterToggleButton}" />
                                 <ToggleButton
-                                    Margin="5,0"
+                                    Margin="0,0,5,5"
                                     Content="Data Changes"
                                     IsChecked="{Binding ShowDataChangesOnly}"
                                     Style="{StaticResource FilterToggleButton}" />
                                 <ToggleButton
+                                    Margin="0,0,10,5"
                                     Content="User Logins"
                                     IsChecked="{Binding ShowLoginsOnly}"
                                     Style="{StaticResource FilterToggleButton}" />
 
                                 <hc:TextBox
                                     Width="200"
-                                    Margin="10,0,0,0"
+                                    Margin="0,0,0,5"
                                     hc:InfoElement.Placeholder="Search audit trail..."
                                     Style="{StaticResource HandyModernTextBox}"
                                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
-                            </StackPanel>
+                            </WrapPanel>
                         </Border>
 
-                        <!-- Audit DataGrid -->
+                        <!--  Audit DataGrid - Simplified columns  -->
                         <Border Grid.Row="2" Style="{StaticResource ModernDataGridContainer}">
                             <DataGrid
                                 AutoGenerateColumns="False"
@@ -182,67 +214,81 @@
                                 Style="{StaticResource ModernDataGridStyle}">
 
                                 <DataGrid.Columns>
-                                    <!-- Severity Indicator -->
-                                    <DataGridTemplateColumn Width="50">
+                                    <!--  Severity Indicator  -->
+                                    <DataGridTemplateColumn Width="40">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
-                                                <Border Background="{Binding Severity, Converter={StaticResource AuditActionToColorConverter}}"
-                                                        Style="{StaticResource AuditSeverityIndicator}" />
+                                                <Border
+                                                    Width="12"
+                                                    Height="12"
+                                                    Background="{Binding Severity, Converter={StaticResource AuditActionToColorConverter}}"
+                                                    CornerRadius="6"
+                                                    ToolTip="{Binding Severity}" />
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
 
-                                    <!-- Timestamp -->
-                                    <DataGridTextColumn
-                                        Width="150"
-                                        Binding="{Binding Timestamp, StringFormat='MMM dd, yyyy HH:mm'}"
-                                        Header="Time" />
-
-                                    <!-- User -->
+                                    <!--  Timestamp  -->
                                     <DataGridTextColumn
                                         Width="120"
+                                        Binding="{Binding Timestamp, StringFormat='MM/dd HH:mm'}"
+                                        Header="Time" />
+
+                                    <!--  User  -->
+                                    <DataGridTextColumn
+                                        Width="100"
                                         Binding="{Binding Username}"
                                         Header="User" />
 
-                                    <!-- Action Type -->
+                                    <!--  Action Type  -->
                                     <DataGridTextColumn
-                                        Width="120"
+                                        Width="100"
                                         Binding="{Binding ActionType}"
                                         Header="Action" />
 
-                                    <!-- Description -->
+                                    <!--  Description  -->
                                     <DataGridTextColumn
                                         Width="*"
                                         MinWidth="200"
                                         Binding="{Binding Description}"
+                                        ElementStyle="{StaticResource WrapTextBlockStyle}"
                                         Header="Description" />
 
-                                    <!-- Entity Type -->
+                                    <!--  Entity Type (collapsed on small screens)  -->
                                     <DataGridTextColumn
-                                        Width="120"
+                                        Width="80"
                                         Binding="{Binding EntityType}"
-                                        Header="Entity" />
+                                        Header="Entity"
+                                        Visibility="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource WidthToVisibilityConverter}, ConverterParameter=800}" />
 
-                                    <!-- Entity ID -->
-                                    <DataGridTextColumn
-                                        Width="100"
-                                        Binding="{Binding EntityId}"
-                                        Header="Entity ID" />
-
-                                    <!-- IP Address -->
-                                    <DataGridTextColumn
-                                        Width="120"
-                                        Binding="{Binding IpAddress}"
-                                        Header="IP Address" />
-
-                                    <!-- Status -->
-                                    <DataGridTemplateColumn Width="80" Header="Status">
+                                    <!--  Status  -->
+                                    <DataGridTemplateColumn Width="70" Header="Status">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
-                                                <Border Background="{Binding Status, Converter={StaticResource StatusColorConverter}}"
-                                                        Style="{StaticResource TransactionStatusBadge}">
-                                                    <TextBlock Style="{StaticResource StatusBadgeText}" Text="{Binding Status}" />
+                                                <Border
+                                                    Padding="4,2"
+                                                    Background="{Binding Status, Converter={StaticResource StatusColorConverter}}"
+                                                    CornerRadius="10">
+                                                    <TextBlock
+                                                        FontSize="11"
+                                                        Foreground="White"
+                                                        Text="{Binding Status}"
+                                                        TextAlignment="Center" />
                                                 </Border>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+
+                                    <!--  View Details Button  -->
+                                    <DataGridTemplateColumn Width="60" Header="Actions">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Button
+                                                    Command="{Binding DataContext.ViewDetailsCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                    CommandParameter="{Binding}"
+                                                    Content="👁️"
+                                                    Style="{StaticResource ModernIconButton}"
+                                                    ToolTip="View Details" />
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
@@ -252,110 +298,135 @@
                     </Grid>
                 </Border>
 
-                <!-- Audit Detail Panel -->
-                <Border Grid.Column="1" Style="{StaticResource ModernCardStyle}">
-                    <StackPanel>
-                        <TextBlock Style="{StaticResource SectionHeaderText}" Text="🔍 Audit Details" />
+                <!--  Audit Detail Panel - Now collapsible and responsive  -->
+                <GridSplitter
+                    Grid.Column="1"
+                    Width="5"
+                    HorizontalAlignment="Left"
+                    Background="Transparent"
+                    IsEnabled="True" />
 
-                        <StackPanel Margin="0,15,0,0" Visibility="{Binding SelectedAuditEntry, Converter={StaticResource NullToVisibilityConverter}}">
-                            <!-- Basic Info -->
-                            <Border Style="{StaticResource DetailInfoBorder}">
-                                <StackPanel>
-                                    <TextBlock Style="{StaticResource DetailHeaderText}" Text="{Binding SelectedAuditEntry.ActionType}" />
-                                    <TextBlock Style="{StaticResource DetailSubText}" Text="{Binding SelectedAuditEntry.Timestamp, StringFormat='MMM dd, yyyy HH:mm:ss'}" />
+                <Border
+                    Grid.Column="1"
+                    MinWidth="300"
+                    MaxWidth="400"
+                    Style="{StaticResource ModernCardStyle}"
+                    Visibility="{Binding SelectedAuditEntry, Converter={StaticResource NullToVisibilityConverter}}">
+                    <ScrollViewer>
+                        <StackPanel>
+                            <Grid>
+                                <TextBlock Style="{StaticResource SectionHeaderText}" Text="🔍 Audit Details" />
+                                <Button
+                                    HorizontalAlignment="Right"
+                                    Command="{Binding ClearSelectionCommand}"
+                                    Content="✕"
+                                    Style="{StaticResource ModernIconButton}"
+                                    ToolTip="Close details" />
+                            </Grid>
 
-                                    <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                                        <Border Background="{Binding SelectedAuditEntry.Severity, Converter={StaticResource AuditActionToColorConverter}}"
-                                                Style="{StaticResource TransactionStatusBadge}">
-                                            <TextBlock Style="{StaticResource StatusBadgeText}" Text="{Binding SelectedAuditEntry.Severity}" />
-                                        </Border>
+                            <StackPanel Margin="0,15,0,0">
+                                <!--  Basic Info  -->
+                                <Border Style="{StaticResource DetailInfoBorder}">
+                                    <StackPanel>
+                                        <TextBlock Style="{StaticResource DetailHeaderText}" Text="{Binding SelectedAuditEntry.ActionType}" />
+                                        <TextBlock Style="{StaticResource DetailSubText}" Text="{Binding SelectedAuditEntry.Timestamp, StringFormat='MMM dd, yyyy HH:mm:ss'}" />
+
+                                        <StackPanel Margin="0,5,0,0" Orientation="Horizontal">
+                                            <Border
+                                                Padding="6,2"
+                                                Background="{Binding SelectedAuditEntry.Severity, Converter={StaticResource AuditActionToColorConverter}}"
+                                                CornerRadius="10">
+                                                <TextBlock
+                                                    FontSize="11"
+                                                    Foreground="White"
+                                                    Text="{Binding SelectedAuditEntry.Severity}" />
+                                            </Border>
+                                            <TextBlock
+                                                Margin="10,0,0,0"
+                                                Style="{StaticResource DetailSubText}"
+                                                Text="{Binding SelectedAuditEntry.Username}" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+
+                                <!--  Changes Made  -->
+                                <Border Style="{StaticResource DetailInfoBorder}" Visibility="{Binding SelectedAuditEntry.HasChanges, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <StackPanel>
+                                        <TextBlock Style="{StaticResource DetailLabelText}" Text="Changes Made" />
+                                        <ItemsControl Margin="0,5,0,0" ItemsSource="{Binding SelectedAuditEntry.Changes}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border
+                                                        Margin="0,0,0,5"
+                                                        Padding="8"
+                                                        Background="#2A2A2A"
+                                                        CornerRadius="4">
+                                                        <StackPanel>
+                                                            <TextBlock Style="{StaticResource DetailValueText}" Text="{Binding PropertyName}" />
+                                                            <Grid Margin="0,2,0,0">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*" />
+                                                                    <ColumnDefinition Width="*" />
+                                                                </Grid.ColumnDefinitions>
+                                                                <TextBlock
+                                                                    Grid.Column="0"
+                                                                    FontSize="11"
+                                                                    Foreground="#E74C3C"
+                                                                    Text="{Binding OldValue}" />
+                                                                <TextBlock
+                                                                    Grid.Column="1"
+                                                                    FontSize="11"
+                                                                    Foreground="#27AE60"
+                                                                    Text="{Binding NewValue}" />
+                                                            </Grid>
+                                                        </StackPanel>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </Border>
+
+                                <!--  Additional Context  -->
+                                <Border Style="{StaticResource DetailInfoBorder}">
+                                    <StackPanel>
+                                        <TextBlock Style="{StaticResource DetailLabelText}" Text="Additional Context" />
                                         <TextBlock
-                                            Margin="10,0,0,0"
-                                            Style="{StaticResource DetailSubText}"
-                                            Text="{Binding SelectedAuditEntry.Username}" />
+                                            Style="{StaticResource DetailValueText}"
+                                            Text="{Binding SelectedAuditEntry.Description}"
+                                            TextWrapping="Wrap" />
+
+                                        <StackPanel Margin="0,5,0,0" Orientation="Horizontal">
+                                            <TextBlock Style="{StaticResource DetailSubText}" Text="IP: " />
+                                            <TextBlock Style="{StaticResource DetailValueText}" Text="{Binding SelectedAuditEntry.IpAddress}" />
+                                        </StackPanel>
+
+                                        <StackPanel Margin="0,2,0,0" Orientation="Horizontal">
+                                            <TextBlock Style="{StaticResource DetailSubText}" Text="Entity: " />
+                                            <TextBlock Style="{StaticResource DetailValueText}" Text="{Binding SelectedAuditEntry.EntityType}" />
+                                            <TextBlock Style="{StaticResource DetailSubText}" Text=" ID: " />
+                                            <TextBlock Style="{StaticResource DetailValueText}" Text="{Binding SelectedAuditEntry.EntityId}" />
+                                        </StackPanel>
                                     </StackPanel>
+                                </Border>
+
+                                <!--  Actions  -->
+                                <StackPanel Margin="0,10,0,0">
+                                    <Button
+                                        Margin="0,0,0,5"
+                                        Command="{Binding InvestigateCommand}"
+                                        CommandParameter="{Binding SelectedAuditEntry}"
+                                        Content="🔍 Investigate"
+                                        Style="{StaticResource ModernSecondaryButton}" />
+                                    <Button
+                                        Command="{Binding ExportEntryCommand}"
+                                        CommandParameter="{Binding SelectedAuditEntry}"
+                                        Content="📄 Export Entry"
+                                        Style="{StaticResource ModernSecondaryButton}" />
                                 </StackPanel>
-                            </Border>
-
-                            <!-- Changes Made -->
-                            <Border Style="{StaticResource DetailInfoBorder}" Visibility="{Binding SelectedAuditEntry.HasChanges, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                <StackPanel>
-                                    <TextBlock Style="{StaticResource DetailLabelText}" Text="Changes Made" />
-                                    <ItemsControl ItemsSource="{Binding SelectedAuditEntry.Changes}" Margin="0,5,0,0">
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <Border Margin="0,0,0,5" Background="#2A2A2A" Padding="8" CornerRadius="4">
-                                                    <StackPanel>
-                                                        <TextBlock Style="{StaticResource DetailValueText}" Text="{Binding PropertyName}" />
-                                                        <Grid Margin="0,2,0,0">
-                                                            <Grid.ColumnDefinitions>
-                                                                <ColumnDefinition Width="*" />
-                                                                <ColumnDefinition Width="*" />
-                                                            </Grid.ColumnDefinitions>
-                                                            <TextBlock Grid.Column="0" Text="{Binding OldValue}" Foreground="#E74C3C" FontSize="11" />
-                                                            <TextBlock Grid.Column="1" Text="{Binding NewValue}" Foreground="#27AE60" FontSize="11" />
-                                                        </Grid>
-                                                    </StackPanel>
-                                                </Border>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                </StackPanel>
-                            </Border>
-
-                            <!-- Additional Context -->
-                            <Border Style="{StaticResource DetailInfoBorder}">
-                                <StackPanel>
-                                    <TextBlock Style="{StaticResource DetailLabelText}" Text="Additional Context" />
-                                    <TextBlock Style="{StaticResource DetailValueText}" Text="{Binding SelectedAuditEntry.Description}" TextWrapping="Wrap" />
-
-                                    <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                                        <TextBlock Style="{StaticResource DetailSubText}" Text="IP: " />
-                                        <TextBlock Style="{StaticResource DetailValueText}" Text="{Binding SelectedAuditEntry.IpAddress}" />
-                                    </StackPanel>
-
-                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
-                                        <TextBlock Style="{StaticResource DetailSubText}" Text="Entity: " />
-                                        <TextBlock Style="{StaticResource DetailValueText}" Text="{Binding SelectedAuditEntry.EntityType}" />
-                                        <TextBlock Style="{StaticResource DetailSubText}" Text=" ID: " />
-                                        <TextBlock Style="{StaticResource DetailValueText}" Text="{Binding SelectedAuditEntry.EntityId}" />
-                                    </StackPanel>
-                                </StackPanel>
-                            </Border>
-
-                            <!-- Actions -->
-                            <StackPanel Margin="0,10,0,0">
-                                <Button
-                                    Command="{Binding InvestigateCommand}"
-                                    CommandParameter="{Binding SelectedAuditEntry}"
-                                    Content="🔍 Investigate"
-                                    Style="{StaticResource ModernSecondaryButton}"
-                                    Margin="0,0,0,5" />
-                                <Button
-                                    Command="{Binding ExportEntryCommand}"
-                                    CommandParameter="{Binding SelectedAuditEntry}"
-                                    Content="📄 Export Entry"
-                                    Style="{StaticResource ModernSecondaryButton}" />
                             </StackPanel>
                         </StackPanel>
-
-                        <!-- Empty State -->
-                        <StackPanel
-                            Margin="0,20,0,0"
-                            HorizontalAlignment="Center"
-                            Visibility="{Binding SelectedAuditEntry, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Invert}">
-                            <TextBlock
-                                Margin="0,0,0,10"
-                                HorizontalAlignment="Center"
-                                FontSize="48"
-                                Opacity="0.3"
-                                Text="🔍" />
-                            <TextBlock
-                                HorizontalAlignment="Center"
-                                Style="{StaticResource DetailSubText}"
-                                Text="Select an audit entry to view details" />
-                        </StackPanel>
-                    </StackPanel>
+                    </ScrollViewer>
                 </Border>
             </Grid>
         </Grid>

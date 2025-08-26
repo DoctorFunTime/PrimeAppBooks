@@ -1,4 +1,8 @@
-﻿using System;
+﻿using PrimeAppBooks.Interfaces;
+using PrimeAppBooks.Services;
+using PrimeAppBooks.ViewModels.Pages;
+using PrimeAppBooks.ViewModels.Windows;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,7 +14,6 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 namespace PrimeAppBooks.Views.Pages
@@ -18,11 +21,18 @@ namespace PrimeAppBooks.Views.Pages
     /// <summary>
     /// Interaction logic for TransactionsPage.xaml
     /// </summary>
-    public partial class TransactionsPage : Page
+    public partial class TransactionsPage : Page, IAnimatedPage
     {
+        public string AnimationStyle => "SlideFromBottom"; // Or "SlideFromBottom"
+
         public TransactionsPage()
         {
             InitializeComponent();
+
+            // Just set DataContext, navigation service is already injected into VM
+            DataContext = new TransactionsPageViewModel(
+                ServiceLocator.GetService<INavigationService>()
+            );
         }
     }
 }

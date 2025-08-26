@@ -1,4 +1,5 @@
-﻿using PrimeAppBooks.Services;
+﻿using PrimeAppBooks.Interfaces;
+using PrimeAppBooks.Services;
 using PrimeAppBooks.ViewModels.Windows;
 using PrimeAppBooks.Views.Pages;
 using System.Text;
@@ -22,15 +23,26 @@ namespace PrimeAppBooks.Views.Windows
         {
             InitializeComponent();
 
-            // Create navigation service with the frame
+            // Create navigation service once
             var navigationService = new NavigationService(MainContentFrame);
 
-            // Create view model with navigation service dependency
+            // Register for dependency injection
+            ServiceLocator.RegisterSingleton<INavigationService>(navigationService);
+
+            // Create view model with injected navigation service
             var viewModel = new MainWindowViewModel(navigationService);
             DataContext = viewModel;
 
             // Navigate to default page
             navigationService.NavigateTo<DashboardPage>();
+        }
+
+        private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed)
+            {
+                DragMove();
+            }
         }
     }
 }

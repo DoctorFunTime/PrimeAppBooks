@@ -1,8 +1,9 @@
-﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:fw="clr-namespace:SourceChord.FluentWPF;assembly=FluentWPF">
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:fw="clr-namespace:SourceChord.FluentWPF;assembly=FluentWPF">
 
-    <!-- Fluent ComboBox Style -->
+    <!--  Fluent ComboBox Style  -->
     <Style x:Key="FluentComboBoxStyle" TargetType="ComboBox">
         <Setter Property="Background" Value="#20FFFFFF" />
         <Setter Property="Foreground" Value="White" />
@@ -12,21 +13,23 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ComboBox">
-                    <Border Background="{TemplateBinding Background}"
-                            CornerRadius="6"
-                            BorderThickness="{TemplateBinding BorderThickness}">
-                        <ContentPresenter Content="{TemplateBinding SelectionBoxItem}"
-                                        ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
-                                        ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
-                                        Margin="{TemplateBinding Padding}"
-                                        VerticalAlignment="Center" />
+                    <Border
+                        Background="{TemplateBinding Background}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="6">
+                        <ContentPresenter
+                            Margin="{TemplateBinding Padding}"
+                            VerticalAlignment="Center"
+                            Content="{TemplateBinding SelectionBoxItem}"
+                            ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                            ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}" />
                     </Border>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>
 
-    <!-- Fluent DatePicker Style -->
+    <!--  Fluent DatePicker Style  -->
     <Style x:Key="FluentDatePickerStyle" TargetType="DatePicker">
         <Setter Property="Background" Value="#20FFFFFF" />
         <Setter Property="Foreground" Value="White" />
@@ -36,22 +39,24 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="DatePicker">
-                    <Border Background="{TemplateBinding Background}"
-                            CornerRadius="6"
-                            BorderThickness="{TemplateBinding BorderThickness}">
-                        <DatePickerTextBox Text="{Binding SelectedDate, StringFormat=d, RelativeSource={RelativeSource TemplatedParent}}"
-                                         Foreground="{TemplateBinding Foreground}"
-                                         Background="Transparent"
-                                         BorderThickness="0"
-                                         Padding="{TemplateBinding Padding}"
-                                         VerticalAlignment="Center" />
+                    <Border
+                        Background="{TemplateBinding Background}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="6">
+                        <DatePickerTextBox
+                            Padding="{TemplateBinding Padding}"
+                            VerticalAlignment="Center"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            Foreground="{TemplateBinding Foreground}"
+                            Text="{Binding SelectedDate, StringFormat=d, RelativeSource={RelativeSource TemplatedParent}}" />
                     </Border>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>
 
-    <!-- Fluent TextBox Style -->
+    <!--  Fluent TextBox Style  -->
     <Style x:Key="FluentTextBoxStyle" TargetType="TextBox">
         <Setter Property="Background" Value="#20FFFFFF" />
         <Setter Property="Foreground" Value="White" />
@@ -61,21 +66,23 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="TextBox">
-                    <Border Background="{TemplateBinding Background}"
-                            CornerRadius="6"
-                            BorderThickness="{TemplateBinding BorderThickness}">
-                        <ScrollViewer x:Name="PART_ContentHost"
-                                    Foreground="{TemplateBinding Foreground}"
-                                    Background="Transparent"
-                                    Padding="{TemplateBinding Padding}"
-                                    VerticalAlignment="Center" />
+                    <Border
+                        Background="{TemplateBinding Background}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="6">
+                        <ScrollViewer
+                            x:Name="PART_ContentHost"
+                            Padding="{TemplateBinding Padding}"
+                            VerticalAlignment="Center"
+                            Background="Transparent"
+                            Foreground="{TemplateBinding Foreground}" />
                     </Border>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>
 
-    <!-- DataGrid Header Style -->
+    <!--  DataGrid Header Style  -->
     <Style x:Key="DataGridHeaderStyle" TargetType="DataGridColumnHeader">
         <Setter Property="Foreground" Value="#90FFFFFF" />
         <Setter Property="FontWeight" Value="SemiBold" />
@@ -85,9 +92,10 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="DataGridColumnHeader">
-                    <Border Background="{TemplateBinding Background}"
-                            BorderThickness="{TemplateBinding BorderThickness}"
-                            Padding="{TemplateBinding Padding}">
+                    <Border
+                        Padding="{TemplateBinding Padding}"
+                        Background="{TemplateBinding Background}"
+                        BorderThickness="{TemplateBinding BorderThickness}">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
                 </ControlTemplate>
@@ -95,7 +103,7 @@
         </Setter>
     </Style>
 
-    <!-- DataGrid Cell Style -->
+    <!--  DataGrid Cell Style  -->
     <Style x:Key="DataGridCellStyle" TargetType="TextBlock">
         <Setter Property="Foreground" Value="White" />
         <Setter Property="VerticalAlignment" Value="Center" />
@@ -103,7 +111,7 @@
         <Setter Property="FontSize" Value="12" />
     </Style>
 
-    <!-- Fluent DataGrid Style -->
+    <!--  Fluent DataGrid Style  -->
     <Style x:Key="FluentDataGridStyle" TargetType="DataGrid">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Foreground" Value="White" />
@@ -119,15 +127,18 @@
         <Setter Property="IsReadOnly" Value="True" />
     </Style>
 
-    <!-- Accent Button Style -->
-    <Style x:Key="AccentButtonStyle" TargetType="Button" BasedOn="{StaticResource ModernButtonStyle}">
+    <!--  Accent Button Style  -->
+    <Style
+        x:Key="AccentButtonStyle"
+        BasedOn="{StaticResource ModernButtonStyle}"
+        TargetType="Button">
         <Setter Property="Background" Value="#404ECDC4" />
         <Setter Property="Foreground" Value="White" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Padding" Value="16,10" />
     </Style>
 
-    <!-- Icon Button Style for DataGrid Actions -->
+    <!--  Icon Button Style for DataGrid Actions  -->
     <Style x:Key="IconButtonStyle" TargetType="Button">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
@@ -140,7 +151,10 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Border Name="border" Background="{TemplateBinding Background}" CornerRadius="6">
+                    <Border
+                        Name="border"
+                        Background="{TemplateBinding Background}"
+                        CornerRadius="6">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
                     <ControlTemplate.Triggers>

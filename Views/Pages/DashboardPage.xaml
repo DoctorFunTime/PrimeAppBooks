@@ -7,7 +7,7 @@
     Background="Transparent">
 
     <ScrollViewer Style="{StaticResource ModernScrollViewer}">
-        <Grid>
+        <Grid Margin="10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="3*" />
                 <ColumnDefinition Width="*" />

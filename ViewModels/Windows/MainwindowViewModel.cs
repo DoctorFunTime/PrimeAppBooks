@@ -21,6 +21,38 @@ namespace PrimeAppBooks.ViewModels.Windows
         public Visibility SidebarContentVisibility => IsSidebarExpanded ? Visibility.Visible : Visibility.Collapsed;
         public Visibility CollapsedContentVisibility => IsSidebarExpanded ? Visibility.Collapsed : Visibility.Visible;
 
+        // ==========================================================
+        // == 1. ADD PROPERTIES TO TRACK THE SELECTED NAVIGATION ITEM ==
+        // ==========================================================
+        [ObservableProperty]
+        private bool _isDashboardSelected;
+
+        [ObservableProperty]
+        private bool _isChartOfAccountsSelected;
+
+        [ObservableProperty]
+        private bool _isTransactionsSelected;
+
+        [ObservableProperty]
+        private bool _isReportsSelected;
+
+        [ObservableProperty]
+        private bool _isAuditTrailsSelected;
+
+        [ObservableProperty]
+        private bool _isSettingsSelected;
+
+        [ObservableProperty]
+        private bool _isUserManagementSelected;
+
+        [ObservableProperty]
+        private bool _isSecurityCenterSelected;
+
+        [ObservableProperty]
+        private bool _isHelpSupportSelected;
+
+        // ==========================================================
+
         [ObservableProperty]
         private bool _isSidebarExpanded = true;
 
@@ -40,18 +72,8 @@ namespace PrimeAppBooks.ViewModels.Windows
         private void ToggleSidebar()
         {
             IsSidebarExpanded = !IsSidebarExpanded;
-
-            if (IsSidebarExpanded)
-            {
-                SidebarWidth = new GridLength(230);
-                SidebarMargin = new GridLength(20);
-            }
-            else
-            {
-                SidebarWidth = new GridLength(64);
-                SidebarMargin = new GridLength(12);
-            }
-
+            SidebarWidth = IsSidebarExpanded ? new GridLength(230) : new GridLength(64);
+            SidebarMargin = IsSidebarExpanded ? new GridLength(20) : new GridLength(12);
             OnPropertyChanged(nameof(SidebarContentVisibility));
             OnPropertyChanged(nameof(CollapsedContentVisibility));
         }
@@ -74,15 +96,30 @@ namespace PrimeAppBooks.ViewModels.Windows
         [RelayCommand]
         private void NavigateToSettings() => _navigationService.NavigateTo<Settings>();
 
+        private void OnPageNavigated(object sender, Page page)
+        {
+            // ==========================================================
+            // == 2. UPDATE THE PROPERTIES BASED ON THE CURRENT PAGE   ==
+            // ==========================================================
+            IsDashboardSelected = page is DashboardPage;
+            IsChartOfAccountsSelected = page is ChartOfAccountsPage;
+            IsTransactionsSelected = page is TransactionsPage;
+            IsReportsSelected = page is ReportsPage;
+            IsAuditTrailsSelected = page is Audit;
+            IsSettingsSelected = page is Settings;
+            // Set other properties to false if they exist, e.g.:
+            // IsUserManagementSelected = page is UserManagementPage;
+            // IsSecurityCenterSelected = page is SecurityCenterPage;
+            // IsHelpSupportSelected = page is HelpSupportPage;
+            // ==========================================================
+
+            OnPropertyChanged(nameof(CanGoBack));
+        }
+
         [RelayCommand]
         private void GoBack() => _navigationService.GoBack();
 
         public bool CanGoBack => _navigationService.CanGoBack;
-
-        private void OnPageNavigated(object sender, Page page)
-        {
-            OnPropertyChanged(nameof(CanGoBack));
-        }
 
         [RelayCommand]
         private void Maximize(Window window)

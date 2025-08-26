@@ -1,7 +1,6 @@
-﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <!-- Color Resources -->
+    <!--  Color Resources  -->
     <Color x:Key="AccentColorTeal">#4ECDC4</Color>
     <Color x:Key="AccentColorBlue">#45B7D1</Color>
     <Color x:Key="AccentColorRed">#FF6B6B</Color>
@@ -14,7 +13,7 @@
     <Color x:Key="BackgroundDark5">#1A3042</Color>
     <Color x:Key="BackgroundDark6">#1C3244</Color>
 
-    <!-- Solid Color Brushes -->
+    <!--  Solid Color Brushes  -->
     <SolidColorBrush x:Key="AccentBrushTeal" Color="{StaticResource AccentColorTeal}" />
     <SolidColorBrush x:Key="AccentBrushBlue" Color="{StaticResource AccentColorBlue}" />
     <SolidColorBrush x:Key="AccentBrushRed" Color="{StaticResource AccentColorRed}" />
@@ -23,7 +22,7 @@
     <SolidColorBrush x:Key="WhiteBrush" Color="White" />
     <SolidColorBrush x:Key="TransparentBrush" Color="Transparent" />
 
-    <!-- Gradient Brushes -->
+    <!--  Gradient Brushes  -->
     <LinearGradientBrush x:Key="BackgroundGradient1" StartPoint="0,0" EndPoint="1,1">
         <GradientStop Offset="0" Color="{StaticResource BackgroundDark1}" />
         <GradientStop Offset="0.15" Color="{StaticResource BackgroundDark1}" />
@@ -54,32 +53,32 @@
         <GradientStop Offset="1" Color="{StaticResource BackgroundDark6}" />
     </LinearGradientBrush>
 
-    <LinearGradientBrush x:Key="TitleBarGradient" StartPoint="0,0" EndPoint="1,0" Opacity="0.8">
-        <GradientStop Color="#50FF6B6B" Offset="0" />
-        <GradientStop Color="#304ECDC4" Offset="0.5" />
-        <GradientStop Color="#5045B7D1" Offset="1" />
+    <LinearGradientBrush x:Key="TitleBarGradient" Opacity="0.8" StartPoint="0,0" EndPoint="1,0">
+        <GradientStop Offset="0" Color="#50FF6B6B" />
+        <GradientStop Offset="0.5" Color="#304ECDC4" />
+        <GradientStop Offset="1" Color="#5045B7D1" />
     </LinearGradientBrush>
 
     <RadialGradientBrush x:Key="UserProfileGradient" Opacity="0.7">
-        <GradientStop Color="#50FF6B6B" Offset="0" />
-        <GradientStop Color="#304ECDC4" Offset="0.7" />
-        <GradientStop Color="#2045B7D1" Offset="1" />
+        <GradientStop Offset="0" Color="#50FF6B6B" />
+        <GradientStop Offset="0.7" Color="#304ECDC4" />
+        <GradientStop Offset="1" Color="#2045B7D1" />
     </RadialGradientBrush>
 
     <LinearGradientBrush x:Key="UserAvatarGradient" StartPoint="0,0" EndPoint="1,1">
-        <GradientStop Color="{StaticResource AccentColorTeal}" Offset="0" />
-        <GradientStop Color="{StaticResource AccentColorBlue}" Offset="1" />
+        <GradientStop Offset="0" Color="{StaticResource AccentColorTeal}" />
+        <GradientStop Offset="1" Color="{StaticResource AccentColorBlue}" />
     </LinearGradientBrush>
 
     <RadialGradientBrush x:Key="AppIconGradient">
-        <GradientStop Color="{StaticResource AccentColorRed}" Offset="0" />
-        <GradientStop Color="{StaticResource AccentColorTeal}" Offset="0.7" />
-        <GradientStop Color="{StaticResource AccentColorBlue}" Offset="1" />
+        <GradientStop Offset="0" Color="{StaticResource AccentColorRed}" />
+        <GradientStop Offset="0.7" Color="{StaticResource AccentColorTeal}" />
+        <GradientStop Offset="1" Color="{StaticResource AccentColorBlue}" />
     </RadialGradientBrush>
 
-    <LinearGradientBrush x:Key="WelcomePanelGradient" StartPoint="0,0" EndPoint="1,0" Opacity="0.7">
-        <GradientStop Color="#30FFFFFF" Offset="0" />
-        <GradientStop Color="#20FFFFFF" Offset="1" />
+    <LinearGradientBrush x:Key="WelcomePanelGradient" Opacity="0.7" StartPoint="0,0" EndPoint="1,0">
+        <GradientStop Offset="0" Color="#30FFFFFF" />
+        <GradientStop Offset="1" Color="#20FFFFFF" />
     </LinearGradientBrush>
 
     <LinearGradientBrush x:Key="BackgroundMaskGradient" StartPoint="0.2,0.2" EndPoint="0.8,0.8">

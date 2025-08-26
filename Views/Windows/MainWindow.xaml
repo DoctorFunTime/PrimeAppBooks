@@ -1,166 +1,287 @@
-﻿<Window x:Class="PrimeAppBooks.Views.Windows.MainWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:fw="clr-namespace:SourceChord.FluentWPF;assembly=FluentWPF"
-        xmlns:vm="clr-namespace:PrimeAppBooks.ViewModels.Windows"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        Title="PrimeApp Systems — Accounting"
-        Width="1300" Height="670" MinWidth="980" MinHeight="560"
-        WindowStartupLocation="CenterScreen"
-        WindowStyle="None"
-        Background="Transparent"
-        ResizeMode="CanResizeWithGrip"
-        AllowsTransparency="True"
-        FontFamily="Century Gothic">
+﻿<Window
+    x:Class="PrimeAppBooks.Views.Windows.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:fw="clr-namespace:SourceChord.FluentWPF;assembly=FluentWPF"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="PrimeApp Books"
+    Width="1300"
+    Height="700"
+    MinWidth="980"
+    MinHeight="560"
+    AllowsTransparency="True"
+    Background="Transparent"
+    FontFamily="Century Gothic"
+    ResizeMode="CanResizeWithGrip"
+    WindowStartupLocation="CenterScreen"
+    WindowStyle="None"
+    mc:Ignorable="d">
 
-    <Grid>
-        <!-- Beautiful Stepped Gradient Background -->
-        <!-- First gradient: Diagonal top-left to bottom-right -->
-        <Rectangle RadiusX="8" RadiusY="8">
-            <Rectangle.Fill>
-                <StaticResource ResourceKey="BackgroundGradient1" />
-            </Rectangle.Fill>
-        </Rectangle>
+    <Grid Margin="10">
+        <!--  Beautiful Stepped Gradient Background  -->
+        <!--  First gradient: Diagonal top-left to bottom-right  -->
 
-        <!-- Second gradient: Diagonal bottom-left to top-right -->
-        <Rectangle Opacity="0.5" RadiusX="8" RadiusY="8">
-            <Rectangle.Fill>
-                <StaticResource ResourceKey="BackgroundGradient2" />
-            </Rectangle.Fill>
-            <Rectangle.OpacityMask>
-                <StaticResource ResourceKey="BackgroundMaskGradient" />
-            </Rectangle.OpacityMask>
-        </Rectangle>
+        <!--  Shadow Border - positioned behind main content  -->
+        <Border
+            Margin="5"
+            Panel.ZIndex="0"
+            Background="#40000000"
+            CornerRadius="8">
+            <!--  This creates a simple shadow effect  -->
+        </Border>
 
-        <!-- Main Glass Overlay with Transparency -->
-        <fw:AcrylicPanel TintColor="#0a0a0a" TintOpacity="0.1" NoiseOpacity="0.005" Opacity="0.9">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
+        <!--  Main Content Grid with Drop Shadow Effect  -->
+        <Grid Panel.ZIndex="1">
+            <Grid.Effect>
+                <DropShadowEffect
+                    BlurRadius="8"
+                    Direction="315"
+                    Opacity="0.5"
+                    RenderingBias="Quality"
+                    ShadowDepth="2"
+                    Color="#60000000" />
+            </Grid.Effect>
 
-                <!-- Enhanced Title Bar with Shadow -->
-                <Grid Grid.Row="0" Height="50">
-                    <Border CornerRadius="8,8,0,0">
-                        <Border.Background>
-                            <StaticResource ResourceKey="TitleBarGradient" />
-                        </Border.Background>
-                        <DockPanel LastChildFill="False" Margin="5">
-                            <!-- App Title with Icon and Toggle Button -->
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" DockPanel.Dock="Left">
-                                <Button Content="☰" Style="{StaticResource ToggleButtonStyle}"
-                                       Command="{Binding ToggleSidebarCommand}"
-                                       Margin="0,0,16,0" />
-                                <Ellipse Width="36" Height="36" Margin="0,0,16,0">
-                                    <Ellipse.Fill>
-                                        <StaticResource ResourceKey="AppIconGradient" />
-                                    </Ellipse.Fill>
-                                </Ellipse>
-                                <StackPanel>
-                                    <TextBlock Text="PrimeApp Books"
-                                              Foreground="White"
-                                              FontSize="18"
-                                              FontWeight="SemiBold" />
-                                    <TextBlock Text="Financial Management Suite"
-                                              Foreground="#D0FFFFFF"
-                                              FontSize="11"
-                                              Margin="2" />
+            <Rectangle RadiusX="8" RadiusY="8">
+                <Rectangle.Fill>
+                    <StaticResource ResourceKey="BackgroundGradient1" />
+                </Rectangle.Fill>
+            </Rectangle>
+
+            <!--  Second gradient: Diagonal bottom-left to top-right  -->
+            <Rectangle
+                Opacity="0.5"
+                RadiusX="8"
+                RadiusY="8">
+                <Rectangle.Fill>
+                    <StaticResource ResourceKey="BackgroundGradient2" />
+                </Rectangle.Fill>
+                <Rectangle.OpacityMask>
+                    <StaticResource ResourceKey="BackgroundMaskGradient" />
+                </Rectangle.OpacityMask>
+            </Rectangle>
+
+            <!--  Main Glass Overlay with Transparency  -->
+            <fw:AcrylicPanel
+                NoiseOpacity="0.005"
+                Opacity="0.9"
+                TintColor="#0a0a0a"
+                TintOpacity="0.1">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <!--  Enhanced Title Bar with Shadow  -->
+                    <Grid Grid.Row="0" Height="50">
+                        <Border CornerRadius="8,8,0,0" MouseLeftButtonDown="Border_MouseLeftButtonDown">
+                            <Border.Background>
+                                <StaticResource ResourceKey="TitleBarGradient" />
+                            </Border.Background>
+                            <DockPanel Margin="5" LastChildFill="False">
+                                <!--  App Title with Icon and Toggle Button  -->
+                                <StackPanel
+                                    VerticalAlignment="Center"
+                                    DockPanel.Dock="Left"
+                                    Orientation="Horizontal">
+                                    <Button
+                                        Margin="0,0,12,0"
+                                        Command="{Binding ToggleSidebarCommand}"
+                                        Content="☰"
+                                        Style="{StaticResource ToggleButtonStyle}" />
+                                    <Image
+                                        x:Name="image"
+                                        Height="45"
+                                        Margin="0,0,5,0"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        RenderOptions.BitmapScalingMode="HighQuality"
+                                        Source="/Images/NewLogoIconDark.png"
+                                        Stretch="Uniform" />
+                                    <StackPanel>
+                                        <TextBlock
+                                            FontFamily="Century Gothic"
+                                            FontSize="17"
+                                            FontWeight="SemiBold"
+                                            Foreground="White"
+                                            Text="PrimeApp Books" />
+                                        <TextBlock
+                                            Margin="2"
+                                            FontFamily="Century Gothic"
+                                            FontSize="11"
+                                            Foreground="#D0FFFFFF"
+                                            Text="Financial Management Suite" />
+                                    </StackPanel>
                                 </StackPanel>
-                            </StackPanel>
 
-                            <!-- Window Controls with ViewModel Commands - Now properly right-aligned -->
-                            <StackPanel Orientation="Horizontal" DockPanel.Dock="Right"
-                                       VerticalAlignment="Center" Margin="0,0,0,0">
-                                <Button Content="─" Style="{StaticResource TitleBarButtonStyle}"
-                                       Command="{Binding MinimizeCommand}"
-                                       CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
-                                       Margin="2,0" />
-                                <Button Content="⬜" Style="{StaticResource TitleBarButtonStyle}"
-                                       Command="{Binding MaximizeCommand}"
-                                       CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
-                                       Margin="2,0" />
-                                <Button Content="✕" Style="{StaticResource CloseButtonStyle}"
-                                       Command="{Binding CloseCommand}"
-                                       CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
-                                       Margin="2,0" />
-                            </StackPanel>
-                        </DockPanel>
-                    </Border>
-                </Grid>
+                                <!--  Window Controls with ViewModel Commands - Now properly right-aligned  -->
+                                <StackPanel
+                                    Margin="0,0,0,0"
+                                    VerticalAlignment="Center"
+                                    DockPanel.Dock="Right"
+                                    Orientation="Horizontal">
+                                    <Button
+                                        Margin="2,0"
+                                        Command="{Binding MinimizeCommand}"
+                                        CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                                        Content="─"
+                                        Style="{StaticResource TitleBarButtonStyle}" />
+                                    <Button
+                                        Margin="2,0"
+                                        Command="{Binding MaximizeCommand}"
+                                        CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                                        Content="⬜"
+                                        Style="{StaticResource TitleBarButtonStyle}" />
+                                    <Button
+                                        Margin="2,0"
+                                        Command="{Binding CloseCommand}"
+                                        CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                                        Content="✕"
+                                        Style="{StaticResource CloseButtonStyle}" />
+                                </StackPanel>
+                            </DockPanel>
+                        </Border>
+                    </Grid>
 
-                <!-- Main Content with Floating Panels -->
-                <Grid Grid.Row="1" Margin="15">
-                    <!-- Increased left/right margin to push sidebar right -->
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="{Binding SidebarWidth}" />
-                        <ColumnDefinition Width="16" />
-                        <!-- Increased sidebar margin -->
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
+                    <!--  Main Content with Floating Panels  -->
+                    <Grid Grid.Row="1" Margin="10">
+                        <!--  Increased left/right margin to push sidebar right  -->
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="{Binding SidebarWidth}" />
+                            <ColumnDefinition Width="16" />
+                            <!--  Increased sidebar margin  -->
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
 
-                    <!-- Floating Sidebar with Shadow and Collapsible Functionality -->
-                    <Grid Grid.Column="0">
-                        <!-- Main Sidebar Panel with rounded edges -->
-                        <Border Style="{StaticResource FloatingPanelStyle}" CornerRadius="16">
-                            <fw:AcrylicPanel TintColor="#000000" TintOpacity="0.2" NoiseOpacity="0.01" Opacity="0.85">
+                        <!--  Floating Sidebar with Shadow and Collapsible Functionality  -->
+                        <Grid Grid.Column="0">
+                            <!--  Main Sidebar Panel with rounded edges  -->
+                            <Border CornerRadius="12" Background="#D0000000">
+                                <Border.Effect>
+                                    <DropShadowEffect
+                                        BlurRadius="10"
+                                        ShadowDepth="3"
+                                        Direction="315"
+                                        Color="#40000000"
+                                        Opacity="0.5" />
+                                </Border.Effect>
                                 <Grid>
-                                    <!-- Expanded Sidebar Content -->
-                                    <ScrollViewer VerticalScrollBarVisibility="Hidden"
-                                                 Visibility="{Binding SidebarContentVisibility}">
-                                        <StackPanel Margin="20,28,20,24">
-                                            <!-- User Profile with Floating Effect -->
-                                            <Border CornerRadius="16" Padding="20" Margin="0,0,0,28">
+                                    <!--  Expanded Sidebar Content  -->
+                                    <ScrollViewer VerticalScrollBarVisibility="Hidden" Style="{StaticResource ModernScrollViewer}" Visibility="{Binding SidebarContentVisibility}">
+                                        <StackPanel Margin="10">
+                                            <Border
+                                                        Margin="0,0,0,28"
+                                                        Padding="20"
+                                                        CornerRadius="16">
                                                 <Border.Background>
                                                     <StaticResource ResourceKey="UserProfileGradient" />
                                                 </Border.Background>
                                                 <StackPanel>
-                                                    <Ellipse Width="52" Height="52" Margin="0,0,0,12">
+                                                    <Ellipse
+                                                                Width="52"
+                                                                Height="52"
+                                                                Margin="0,0,0,12">
                                                         <Ellipse.Fill>
                                                             <StaticResource ResourceKey="UserAvatarGradient" />
                                                         </Ellipse.Fill>
                                                     </Ellipse>
-                                                    <TextBlock Text="Sarah Williams" Foreground="White"
-                                                              FontWeight="SemiBold" HorizontalAlignment="Center" FontSize="14" />
-                                                    <TextBlock Text="Chief Financial Officer" Foreground="#D0FFFFFF"
-                                                              FontSize="11" HorizontalAlignment="Center" Margin="0,2,0,0" />
+                                                    <TextBlock
+                                                                HorizontalAlignment="Center"
+                                                                FontSize="14"
+                                                                FontWeight="SemiBold"
+                                                                Foreground="White"
+                                                                Text="Sarah Williams" />
+                                                    <TextBlock
+                                                                Margin="0,2,0,0"
+                                                                HorizontalAlignment="Center"
+                                                                FontSize="11"
+                                                                Foreground="#D0FFFFFF"
+                                                                Text="Chief Financial Officer" />
                                                 </StackPanel>
                                             </Border>
 
-                                            <!-- Navigation -->
-                                            <TextBlock Text="NAVIGATION" Foreground="#90FFFFFF"
-                                                      FontWeight="Bold" FontSize="11"
-                                                      Margin="16,0,0,20" />
+                                            <TextBlock
+                                                        Margin="16,0,0,20"
+                                                        FontSize="11"
+                                                        FontWeight="Bold"
+                                                        Foreground="#90FFFFFF"
+                                                        Text="NAVIGATION" />
+                                            <RadioButton
+                                                        Command="{Binding NavigateToDashboardCommand}"
+                                                        Content="🏠  Dashboard"
+                                                        GroupName="Navigation"
+                                                        IsChecked="{Binding IsDashboardSelected}"
+                                                        Style="{StaticResource ModernRadioButtonStyle}" />
+                                            <RadioButton
+                                                        Command="{Binding NavigateToChartOfAccountsCommand}"
+                                                        Content="📊  Chart of Accounts"
+                                                        GroupName="Navigation"
+                                                        IsChecked="{Binding IsChartOfAccountsSelected}"
+                                                        Style="{StaticResource ModernRadioButtonStyle}" />
+                                            <RadioButton
+                                                        Command="{Binding NavigateToTransactionsCommand}"
+                                                        Content="💸  Transactions"
+                                                        GroupName="Navigation"
+                                                        IsChecked="{Binding IsTransactionsSelected}"
+                                                        Style="{StaticResource ModernRadioButtonStyle}" />
+                                            <RadioButton
+                                                        Command="{Binding NavigateToReportsCommand}"
+                                                        Content="📈  Financial Reports"
+                                                        GroupName="Navigation"
+                                                        IsChecked="{Binding IsReportsSelected}"
+                                                        Style="{StaticResource ModernRadioButtonStyle}" />
+                                            <RadioButton
+                                                        Command="{Binding NavigateToAuditTrailsCommand}"
+                                                        Content="🔍  Audit Trail"
+                                                        GroupName="Navigation"
+                                                        IsChecked="{Binding IsAuditTrailsSelected}"
+                                                        Style="{StaticResource ModernRadioButtonStyle}" />
 
-                                            <Button Content="🏠  Dashboard" Style="{StaticResource ModernButtonStyle}"
-                                                   Command="{Binding NavigateToDashboardCommand}"
-                                                   Background="#40FF6B6B" />
-                                            <Button Content="📊  Chart of Accounts" Style="{StaticResource ModernButtonStyle}"
-                                                   Command="{Binding NavigateToChartOfAccountsCommand}" />
-                                            <Button Content="💸  Transactions" Style="{StaticResource ModernButtonStyle}"
-                                                   Command="{Binding NavigateToTransactionsCommand}" />
-                                            <Button Content="📈  Financial Reports" Style="{StaticResource ModernButtonStyle}"
-                                                   Command="{Binding NavigateToReportsCommand}" />
-                                            <Button Content="🔍  Audit Trail" Style="{StaticResource ModernButtonStyle}"
-                                                    Command="{Binding NavigateToAuditTrailsCommand}" />
+                                            <Rectangle
+                                                        Height="1"
+                                                        Margin="16,20"
+                                                        Fill="#40FFFFFF"
+                                                        RadiusX="0.5"
+                                                        RadiusY="0.5" />
 
-                                            <Rectangle Height="1" Fill="#40FFFFFF" Margin="16,20" RadiusX="0.5" RadiusY="0.5" />
-
-                                            <TextBlock Text="TOOLS" Foreground="#90FFFFFF"
-                                                      FontWeight="Bold" FontSize="11"
-                                                      Margin="16,12,0,20" />
-
-                                            <Button Content="⚙️  Settings" Style="{StaticResource ModernButtonStyle}" Command="{Binding NavigateToSettingsCommand}" />
-                                            <Button Content="👥  User Management" Style="{StaticResource ModernButtonStyle}" />
-                                            <Button Content="🔐  Security Center" Style="{StaticResource ModernButtonStyle}" />
-                                            <Button Content="❓  Help and Support" Style="{StaticResource ModernButtonStyle}" />
+                                            <TextBlock
+                                                        Margin="16,12,0,20"
+                                                        FontSize="11"
+                                                        FontWeight="Bold"
+                                                        Foreground="#90FFFFFF"
+                                                        Text="TOOLS" />
+                                            <RadioButton
+                                                        Command="{Binding NavigateToSettingsCommand}"
+                                                        Content="⚙️  Settings"
+                                                        GroupName="Navigation"
+                                                        IsChecked="{Binding IsSettingsSelected}"
+                                                        Style="{StaticResource ModernRadioButtonStyle}" />
+                                            <RadioButton
+                                                        Content="👥  User Management"
+                                                        GroupName="Navigation"
+                                                        IsChecked="{Binding IsUserManagementSelected}"
+                                                        Style="{StaticResource ModernRadioButtonStyle}" />
+                                            <RadioButton
+                                                        Content="🔐  Security Center"
+                                                        GroupName="Navigation"
+                                                        IsChecked="{Binding IsSecurityCenterSelected}"
+                                                        Style="{StaticResource ModernRadioButtonStyle}" />
+                                            <RadioButton
+                                                        Content="❓  Help and Support"
+                                                        GroupName="Navigation"
+                                                        IsChecked="{Binding IsHelpSupportSelected}"
+                                                        Style="{StaticResource ModernRadioButtonStyle}" />
                                         </StackPanel>
                                     </ScrollViewer>
 
-                                    <!-- Collapsed Sidebar Content -->
+                                    <!--  Collapsed Sidebar Content  -->
                                     <StackPanel Margin="8,28,8,24" Visibility="{Binding CollapsedContentVisibility}">
-                                        <!-- Collapsed User Profile -->
-                                        <Border CornerRadius="12" Padding="8" Margin="0,0,0,20">
+                                        <Border
+                                                    Margin="0,0,0,20"
+                                                    Padding="8"
+                                                    CornerRadius="12">
                                             <Border.Background>
                                                 <StaticResource ResourceKey="UserProfileGradient" />
                                             </Border.Background>
@@ -171,48 +292,90 @@
                                             </Ellipse>
                                         </Border>
 
-                                        <!-- Collapsed Navigation -->
-                                        <Button Content="🏠" Style="{StaticResource CollapsedButtonStyle}"
-                                               Command="{Binding NavigateToDashboardCommand}"
-                                               Background="#40FF6B6B" ToolTip="Dashboard" />
-                                        <Button Content="📊" Style="{StaticResource CollapsedButtonStyle}"
-                                               Command="{Binding NavigateToChartOfAccountsCommand}"
-                                               ToolTip="Chart of Accounts" />
-                                        <Button Content="💸" Style="{StaticResource CollapsedButtonStyle}"
-                                               Command="{Binding NavigateToTransactionsCommand}"
-                                               ToolTip="Transactions" />
-                                        <Button Content="📈" Style="{StaticResource CollapsedButtonStyle}"
-                                               Command="{Binding NavigateToReportsCommand}"
-                                               ToolTip="Financial Reports" />
-                                        <Button Content="🔍" Style="{StaticResource CollapsedButtonStyle}"
+                                        <RadioButton
+                                                    Command="{Binding NavigateToDashboardCommand}"
+                                                    Content="🏠"
+                                                    GroupName="CollapsedNavigation"
+                                                    IsChecked="{Binding IsDashboardSelected}"
+                                                    Style="{StaticResource CollapsedRadioButtonStyle}"
+                                                    ToolTip="Dashboard" />
+                                        <RadioButton
+                                                    Command="{Binding NavigateToChartOfAccountsCommand}"
+                                                    Content="📊"
+                                                    GroupName="CollapsedNavigation"
+                                                    IsChecked="{Binding IsChartOfAccountsSelected}"
+                                                    Style="{StaticResource CollapsedRadioButtonStyle}"
+                                                    ToolTip="Chart of Accounts" />
+                                        <RadioButton
+                                                    Command="{Binding NavigateToTransactionsCommand}"
+                                                    Content="💸"
+                                                    GroupName="CollapsedNavigation"
+                                                    IsChecked="{Binding IsTransactionsSelected}"
+                                                    Style="{StaticResource CollapsedRadioButtonStyle}"
+                                                    ToolTip="Transactions" />
+                                        <RadioButton
+                                                    Command="{Binding NavigateToReportsCommand}"
+                                                    Content="📈"
+                                                    GroupName="CollapsedNavigation"
+                                                    IsChecked="{Binding IsReportsSelected}"
+                                                    Style="{StaticResource CollapsedRadioButtonStyle}"
+                                                    ToolTip="Financial Reports" />
+                                        <RadioButton
                                                     Command="{Binding NavigateToAuditTrailsCommand}"
-                                                ToolTip="Audit Trail" />
+                                                    Content="🔍"
+                                                    GroupName="CollapsedNavigation"
+                                                    IsChecked="{Binding IsAuditTrailsSelected}"
+                                                    Style="{StaticResource CollapsedRadioButtonStyle}"
+                                                    ToolTip="Audit Trail" />
 
-                                        <Rectangle Height="1" Fill="#40FFFFFF" Margin="8,12,8,12" RadiusX="0.5" RadiusY="0.5" />
+                                        <Rectangle
+                                                    Height="1"
+                                                    Margin="8,12,8,12"
+                                                    Fill="#40FFFFFF"
+                                                    RadiusX="0.5"
+                                                    RadiusY="0.5" />
 
-                                        <Button Content="⚙️" Style="{StaticResource CollapsedButtonStyle}" Command="{Binding NavigateToSettingsCommand}"
-                                                 ToolTip="Settings" />
-                                        <Button Content="👥" Style="{StaticResource CollapsedButtonStyle}"
-                                               ToolTip="User Management" />
-                                        <Button Content="🔐" Style="{StaticResource CollapsedButtonStyle}"
-                                               ToolTip="Security Center" />
-                                        <Button Content="❓" Style="{StaticResource CollapsedButtonStyle}"
-                                               ToolTip="Help and Support" />
+                                        <RadioButton
+                                                    Command="{Binding NavigateToSettingsCommand}"
+                                                    Content="⚙️"
+                                                    GroupName="CollapsedNavigation"
+                                                    IsChecked="{Binding IsSettingsSelected}"
+                                                    Style="{StaticResource CollapsedRadioButtonStyle}"
+                                                    ToolTip="Settings" />
+                                        <RadioButton
+                                                    Content="👥"
+                                                    GroupName="CollapsedNavigation"
+                                                    IsChecked="{Binding IsUserManagementSelected}"
+                                                    Style="{StaticResource CollapsedRadioButtonStyle}"
+                                                    ToolTip="User Management" />
+                                        <RadioButton
+                                                    Content="🔐"
+                                                    GroupName="CollapsedNavigation"
+                                                    IsChecked="{Binding IsSecurityCenterSelected}"
+                                                    Style="{StaticResource CollapsedRadioButtonStyle}"
+                                                    ToolTip="Security Center" />
+                                        <RadioButton
+                                                    Content="❓"
+                                                    GroupName="CollapsedNavigation"
+                                                    IsChecked="{Binding IsHelpSupportSelected}"
+                                                    Style="{StaticResource CollapsedRadioButtonStyle}"
+                                                    ToolTip="Help and Support" />
                                     </StackPanel>
                                 </Grid>
-                            </fw:AcrylicPanel>
-                        </Border>
-                    </Grid>
+                            </Border>
+                        </Grid>
 
-                    <!-- Navigation Frame - This replaces the hardcoded dashboard content -->
-                    <Grid Grid.Column="2">
-                        <Frame x:Name="MainContentFrame"
-                               NavigationUIVisibility="Hidden"
-                               Background="Transparent"
-                               BorderThickness="0" />
+                        <!--  Navigation Frame - This replaces the hardcoded dashboard content  -->
+                        <Grid Grid.Column="2">
+                            <Frame
+                                x:Name="MainContentFrame"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                NavigationUIVisibility="Hidden" />
+                        </Grid>
                     </Grid>
                 </Grid>
-            </Grid>
-        </fw:AcrylicPanel>
+            </fw:AcrylicPanel>
+        </Grid>
     </Grid>
 </Window>
