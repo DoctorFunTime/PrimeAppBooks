@@ -1,4 +1,7 @@
 ﻿using PrimeAppBooks.Interfaces;
+using PrimeAppBooks.Services;
+using PrimeAppBooks.ViewModels.Pages;
+using PrimeAppBooks.ViewModels.Pages.SubTransactionsPage;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,6 +29,11 @@ namespace PrimeAppBooks.Views.Pages.SubTransactionsPage
         public JournalPage()
         {
             InitializeComponent();
+
+            // Just set DataContext, navigation service is already injected into VM
+            DataContext = new JournalPageViewModel(
+                ServiceLocator.GetService<INavigationService>()
+            );
         }
     }
 }
