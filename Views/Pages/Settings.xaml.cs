@@ -15,13 +15,18 @@ using System.Windows.Shapes;
 
 namespace PrimeAppBooks.Views.Pages
 {
-    public partial class Settings : Page, Interfaces.IAnimatedPage
+    public partial class Settings : BaseAnimatedPage
     {
-        public string AnimationStyle => "SlideFromBottom";
-
         public Settings()
         {
             InitializeComponent();
+
+            // Set custom animation properties for settings page
+            // Slide from left to feel like opening a side panel
+            SetAnimationDirection(Interfaces.AnimationDirection.FromBottom);
+            SetAnimationDuration(300);
+            SetAnimationEasing(Interfaces.AnimationEasing.EaseIn);
+            SetAnimateOut(true);
 
             // Set initial selection after InitializeComponent()
             SettingsTabControl.SelectedIndex = 0;

@@ -3,11 +3,6 @@ using CommunityToolkit.Mvvm.Input;
 using PrimeAppBooks.Interfaces;
 using PrimeAppBooks.Services;
 using PrimeAppBooks.Views.Pages;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Navigation;
@@ -66,6 +61,33 @@ namespace PrimeAppBooks.ViewModels.Windows
         {
             _navigationService = navigationService;
             _navigationService.PageNavigated += OnPageNavigated;
+            
+            // Register custom animations for different pages to improve navigation experience
+            RegisterPageAnimations();
+            
+            // Navigate to dashboard by default
+            NavigateToDashboard();
+        }
+
+        private void RegisterPageAnimations()
+        {
+            // Dashboard - smooth slide from bottom
+            _navigationService.RegisterPageAnimation<DashboardPage>(AnimationDirection.FromBottom);
+            
+            // Chart of Accounts - slide from right (feels like opening a drawer)
+            _navigationService.RegisterPageAnimation<ChartOfAccountsPage>(AnimationDirection.FromRight);
+            
+            // Transactions - slide from right (consistent with accounts)
+            _navigationService.RegisterPageAnimation<TransactionsPage>(AnimationDirection.FromRight);
+            
+            // Reports - slide from top (feels like opening a report)
+            _navigationService.RegisterPageAnimation<ReportsPage>(AnimationDirection.FromTop);
+            
+            // Audit - fade in (more subtle for data-heavy pages)
+            _navigationService.RegisterPageAnimation<Audit>(AnimationDirection.FadeIn);
+            
+            // Settings - slide from left (feels like opening a side panel)
+            _navigationService.RegisterPageAnimation<Settings>(AnimationDirection.FromLeft);
         }
 
         [RelayCommand]
@@ -79,41 +101,92 @@ namespace PrimeAppBooks.ViewModels.Windows
         }
 
         [RelayCommand]
-        private void NavigateToDashboard() => _navigationService.NavigateTo<DashboardPage>();
+        private void NavigateToDashboard()
+        {
+            SetAllNavigationToFalse();
+            IsDashboardSelected = true;
+            _navigationService.NavigateTo<DashboardPage>();
+        }
 
         [RelayCommand]
-        private void NavigateToChartOfAccounts() => _navigationService.NavigateTo<ChartOfAccountsPage>();
+        private void NavigateToChartOfAccounts()
+        {
+            SetAllNavigationToFalse();
+            IsChartOfAccountsSelected = true;
+            _navigationService.NavigateTo<ChartOfAccountsPage>();
+        }
 
         [RelayCommand]
-        private void NavigateToTransactions() => _navigationService.NavigateTo<TransactionsPage>();
+        private void NavigateToTransactions()
+        {
+            SetAllNavigationToFalse();
+            IsTransactionsSelected = true;
+            _navigationService.NavigateTo<TransactionsPage>();
+        }
 
         [RelayCommand]
-        private void NavigateToReports() => _navigationService.NavigateTo<ReportsPage>();
+        private void NavigateToReports()
+        {
+            SetAllNavigationToFalse();
+            IsReportsSelected = true;
+            _navigationService.NavigateTo<ReportsPage>();
+        }
 
         [RelayCommand]
-        private void NavigateToAuditTrails() => _navigationService.NavigateTo<Audit>();
+        private void NavigateToAuditTrails()
+        {
+            SetAllNavigationToFalse();
+            IsAuditTrailsSelected = true;
+            _navigationService.NavigateTo<Audit>();
+        }
 
         [RelayCommand]
-        private void NavigateToSettings() => _navigationService.NavigateTo<Settings>();
+        private void NavigateToSettings()
+        {
+            SetAllNavigationToFalse();
+            IsSettingsSelected = true;
+            _navigationService.NavigateTo<Settings>();
+        }
+
+        private void SetAllNavigationToFalse()
+        {
+            IsDashboardSelected = false;
+            IsChartOfAccountsSelected = false;
+            IsTransactionsSelected = false;
+            IsReportsSelected = false;
+            IsAuditTrailsSelected = false;
+            IsSettingsSelected = false;
+            IsUserManagementSelected = false;
+            IsSecurityCenterSelected = false;
+            IsHelpSupportSelected = false;
+        }
 
         private void OnPageNavigated(object sender, Page page)
         {
-            // ==========================================================
-            // == 2. UPDATE THE PROPERTIES BASED ON THE CURRENT PAGE   ==
-            // ==========================================================
-            IsDashboardSelected = page is DashboardPage;
-            IsChartOfAccountsSelected = page is ChartOfAccountsPage;
-            IsTransactionsSelected = page is TransactionsPage;
-            IsReportsSelected = page is ReportsPage;
-            IsAuditTrailsSelected = page is Audit;
-            IsSettingsSelected = page is Settings;
-            // Set other properties to false if they exist, e.g.:
-            // IsUserManagementSelected = page is UserManagementPage;
-            // IsSecurityCenterSelected = page is SecurityCenterPage;
-            // IsHelpSupportSelected = page is HelpSupportPage;
-            // ==========================================================
-
-            OnPropertyChanged(nameof(CanGoBack));
+            // Update navigation selection based on the page type
+            SetAllNavigationToFalse();
+            
+            switch (page)
+            {
+                case DashboardPage:
+                    IsDashboardSelected = true;
+                    break;
+                case ChartOfAccountsPage:
+                    IsChartOfAccountsSelected = true;
+                    break;
+                case TransactionsPage:
+                    IsTransactionsSelected = true;
+                    break;
+                case ReportsPage:
+                    IsReportsSelected = true;
+                    break;
+                case Audit:
+                    IsAuditTrailsSelected = true;
+                    break;
+                case Settings:
+                    IsSettingsSelected = true;
+                    break;
+            }
         }
 
         [RelayCommand]

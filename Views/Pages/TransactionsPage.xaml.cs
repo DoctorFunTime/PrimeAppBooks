@@ -21,13 +21,18 @@ namespace PrimeAppBooks.Views.Pages
     /// <summary>
     /// Interaction logic for TransactionsPage.xaml
     /// </summary>
-    public partial class TransactionsPage : Page, IAnimatedPage
+    public partial class TransactionsPage : BaseAnimatedPage
     {
-        public string AnimationStyle => "SlideFromBottom"; // Or "SlideFromBottom"
-
         public TransactionsPage()
         {
             InitializeComponent();
+
+            // Set custom animation properties for transactions page
+            // Slide from right to feel like opening a drawer/panel
+            SetAnimationDirection(AnimationDirection.FromBottom);
+            SetAnimationDuration(300);
+            SetAnimationEasing(AnimationEasing.EaseOut);
+            SetAnimateOut(true);
 
             // Just set DataContext, navigation service is already injected into VM
             DataContext = new TransactionsPageViewModel(

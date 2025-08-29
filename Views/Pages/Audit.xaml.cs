@@ -1,31 +1,29 @@
 ﻿using PrimeAppBooks.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+using PrimeAppBooks.Services;
+using PrimeAppBooks.ViewModels.Pages;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace PrimeAppBooks.Views.Pages
 {
     /// <summary>
     /// Interaction logic for Audit.xaml
     /// </summary>
-    public partial class Audit : Page, IAnimatedPage
+    public partial class Audit : BaseAnimatedPage
     {
-        public string AnimationStyle => "SlideFromBottom";
-
         public Audit()
         {
             InitializeComponent();
+
+            // Set custom animation properties for audit page
+            // Fade in for data-heavy pages
+            SetAnimationDirection(Interfaces.AnimationDirection.FromBottom);
+            SetAnimationDuration(300);
+            SetAnimationEasing(Interfaces.AnimationEasing.EaseOut);
+            SetAnimateOut(true);
+
+            DataContext = new AuditPageViewModel(
+                ServiceLocator.GetService<INavigationService>()
+            );
         }
     }
 }

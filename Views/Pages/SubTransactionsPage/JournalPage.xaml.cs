@@ -22,13 +22,18 @@ namespace PrimeAppBooks.Views.Pages.SubTransactionsPage
     /// <summary>
     /// Interaction logic for JournalPage.xaml
     /// </summary>
-    public partial class JournalPage : Page, IAnimatedPage
+    public partial class JournalPage : BaseAnimatedPage
     {
-        public string AnimationStyle => "SlideFromRight";
-
         public JournalPage()
         {
             InitializeComponent();
+
+            // Set custom animation properties for journal page
+            // Slide from right to feel like opening a drawer
+            SetAnimationDirection(AnimationDirection.FromRight);
+            SetAnimationDuration(300);
+            SetAnimationEasing(AnimationEasing.EaseOut);
+            SetAnimateOut(true);
 
             // Just set DataContext, navigation service is already injected into VM
             DataContext = new JournalPageViewModel(

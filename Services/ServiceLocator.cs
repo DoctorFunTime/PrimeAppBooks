@@ -24,5 +24,27 @@ namespace PrimeAppBooks.Services
 
             throw new InvalidOperationException($"Service {typeof(TService)} not registered");
         }
+
+        public static bool TryGetService<TService>(out TService? service)
+        {
+            if (_services.TryGetValue(typeof(TService), out var serviceObj))
+            {
+                service = (TService)serviceObj;
+                return true;
+            }
+
+            service = default;
+            return false;
+        }
+
+        public static void ClearServices()
+        {
+            _services.Clear();
+        }
+
+        public static bool IsServiceRegistered<TService>()
+        {
+            return _services.ContainsKey(typeof(TService));
+        }
     }
 }

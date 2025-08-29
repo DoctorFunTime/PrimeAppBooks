@@ -11,6 +11,7 @@
     <Title>PrimeApp Books</Title>
     <PackageIcon>NewLogoIconDark.png</PackageIcon>
     <NeutralLanguage>en-US</NeutralLanguage>
+    <AssemblyName>PrimeAppBooks</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

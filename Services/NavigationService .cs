@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Navigation;
+using System.Windows.Threading;
 
 namespace PrimeAppBooks.Services
 {
@@ -13,7 +14,10 @@ namespace PrimeAppBooks.Services
     {
         private readonly Frame _frame;
         private Page? _currentPage;
+        private readonly Dictionary<Type, Page> _pageCache = new();
         private readonly Dictionary<Type, string> _pageAnimations = new();
+        private readonly Dictionary<Type, AnimationDirection> _pageAnimationDirections = new();
+        private bool _isNavigating = false;
 
         public event EventHandler<Page> PageNavigated = delegate { };
 
@@ -21,12 +25,20 @@ namespace PrimeAppBooks.Services
         {
             _frame = frame;
             _frame.Navigated += OnFrameNavigated;
+            _frame.NavigationStopped += OnNavigationStopped;
+            
+            // Pre-warm the frame to reduce initial navigation delay
+            _frame.Dispatcher.BeginInvoke(DispatcherPriority.Loaded, new Action(() => { }));
         }
 
-        // Optional: Method to register animations (keep it decoupled)
-        public void RegisterPageAnimation<T>(string animationStyle) where T : Page
+        // Enhanced animation registration with direction support
+        public void RegisterPageAnimation<T>(AnimationDirection direction, string? customStyle = null) where T : Page
         {
-            _pageAnimations[typeof(T)] = animationStyle;
+            _pageAnimationDirections[typeof(T)] = direction;
+            if (!string.IsNullOrEmpty(customStyle))
+            {
+                _pageAnimations[typeof(T)] = customStyle;
+            }
         }
 
         public void NavigateTo<T>() where T : Page
@@ -36,14 +48,42 @@ namespace PrimeAppBooks.Services
 
         public void NavigateTo<T>(object parameter) where T : Page
         {
-            var page = Activator.CreateInstance<T>();
-            _frame.Navigate(page, parameter);
+            if (_isNavigating) return;
+
+            try
+            {
+                _isNavigating = true;
+                
+                // Check if page is already cached
+                if (!_pageCache.TryGetValue(typeof(T), out var page))
+                {
+                    page = Activator.CreateInstance<T>();
+                    _pageCache[typeof(T)] = page;
+                }
+
+                // Apply exit animation to current page if it supports it
+                if (_currentPage != null && _currentPage is IAnimatedPage currentAnimatedPage && currentAnimatedPage.AnimateOut)
+                {
+                    ApplyExitAnimation(_currentPage, () => _frame.Navigate(page, parameter));
+                }
+                else
+                {
+                    _frame.Navigate(page, parameter);
+                }
+            }
+            finally
+            {
+                _isNavigating = false;
+            }
         }
 
         public void GoBack()
         {
-            if (_frame.CanGoBack)
+            if (_frame.CanGoBack && !_isNavigating)
+            {
+                _isNavigating = true;
                 _frame.GoBack();
+            }
         }
 
         public bool CanGoBack => _frame.CanGoBack;
@@ -55,95 +95,183 @@ namespace PrimeAppBooks.Services
 
             if (_currentPage != null)
             {
-                ApplyEntranceAnimation(_currentPage);
+                // Apply entrance animation with a slight delay for smoother transitions
+                _currentPage.Dispatcher.BeginInvoke(DispatcherPriority.Loaded, new Action(() =>
+                {
+                    ApplyEntranceAnimation(_currentPage);
+                }));
             }
+        }
+
+        private void OnNavigationStopped(object sender, NavigationEventArgs e)
+        {
+            _isNavigating = false;
         }
 
         private void ApplyEntranceAnimation(Page page)
         {
-            // Check if page implements IAnimatedPage (decoupled approach)
+            // Check if page implements enhanced IAnimatedPage
             if (page is IAnimatedPage animatedPage)
             {
-                ApplyCustomAnimation(page, animatedPage.AnimationStyle);
+                ApplyEnhancedAnimation(page, animatedPage);
                 return;
             }
 
             // Check registered animations
-            if (_pageAnimations.TryGetValue(page.GetType(), out var animationStyle))
+            if (_pageAnimationDirections.TryGetValue(page.GetType(), out var direction))
             {
-                ApplyCustomAnimation(page, animationStyle);
+                ApplyDirectionalAnimation(page, direction);
                 return;
             }
 
-            // Default animation
-            ApplySlideFromBottomAnimation(page);
+            // Default smooth animation
+            ApplySmoothSlideFromBottomAnimation(page);
         }
 
-        private void ApplyCustomAnimation(Page page, string animationStyle)
+        private void ApplyEnhancedAnimation(Page page, IAnimatedPage animatedPage)
+        {
+            var direction = animatedPage.AnimationDirection;
+            var duration = animatedPage.AnimationDuration > 0 ? animatedPage.AnimationDuration : 400;
+            var easing = animatedPage.AnimationEasing;
+
+            ApplyDirectionalAnimation(page, direction, duration, easing);
+        }
+
+        private void ApplyDirectionalAnimation(Page page, AnimationDirection direction, int duration = 400, AnimationEasing easing = AnimationEasing.EaseOut)
         {
             page.RenderTransform = new TranslateTransform();
             var storyboard = new Storyboard();
+            var easingFunction = CreateEasingFunction(easing);
 
-            switch (animationStyle)
+            switch (direction)
             {
-                case "SlideFromRight":
-                    ApplySlideFromRightAnimation(page, storyboard);
+                case AnimationDirection.FromLeft:
+                    ApplySlideAnimation(page, storyboard, -400, 0, 0, 0, duration, easingFunction);
                     break;
-
-                case "SlideFromBottom":
-                    ApplySlideFromBottomAnimation(page, storyboard);
+                case AnimationDirection.FromRight:
+                    ApplySlideAnimation(page, storyboard, 400, 0, 0, 0, duration, easingFunction);
                     break;
-
-                case "FadeIn":
-                    ApplyFadeInAnimation(page, storyboard);
+                case AnimationDirection.FromTop:
+                    ApplySlideAnimation(page, storyboard, 0, -300, 0, 0, duration, easingFunction);
                     break;
-
+                case AnimationDirection.FromBottom:
+                    ApplySlideAnimation(page, storyboard, 0, 300, 0, 0, duration, easingFunction);
+                    break;
+                case AnimationDirection.FadeIn:
+                    ApplyFadeAnimation(page, storyboard, duration, easingFunction);
+                    break;
+                case AnimationDirection.ZoomIn:
+                    ApplyZoomAnimation(page, storyboard, duration, easingFunction);
+                    break;
+                case AnimationDirection.SlideIn:
+                    ApplySmoothSlideFromBottomAnimation(page);
+                    return;
                 default:
-                    ApplySlideFromBottomAnimation(page, storyboard);
-                    break;
+                    ApplySmoothSlideFromBottomAnimation(page);
+                    return;
             }
 
-            storyboard.Begin();
-        }
-
-        private void ApplySlideFromRightAnimation(Page page, Storyboard storyboard)
-        {
-            var animation = new DoubleAnimation
-            {
-                From = 400,
-                To = 0,
-                Duration = TimeSpan.FromSeconds(0.35),
-                EasingFunction = new ExponentialEase { EasingMode = EasingMode.EaseOut, Exponent = 4 }
-            };
-
-            Storyboard.SetTarget(animation, page);
-            Storyboard.SetTargetProperty(animation, new PropertyPath("(UIElement.RenderTransform).(TranslateTransform.X)"));
-
+            // Add fade-in effect for smoother appearance
             var fadeAnimation = new DoubleAnimation
             {
                 From = 0,
                 To = 1,
-                Duration = TimeSpan.FromSeconds(0.3),
-                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
+                Duration = TimeSpan.FromMilliseconds(duration * 0.8),
+                EasingFunction = easingFunction
             };
 
             Storyboard.SetTarget(fadeAnimation, page);
             Storyboard.SetTargetProperty(fadeAnimation, new PropertyPath("Opacity"));
 
+            storyboard.Children.Add(fadeAnimation);
+            storyboard.Begin();
+        }
+
+        private void ApplySlideAnimation(Page page, Storyboard storyboard, double fromX, double fromY, double toX, double toY, int duration, IEasingFunction easing)
+        {
+            var animation = new DoubleAnimation
+            {
+                From = fromX,
+                To = toX,
+                Duration = TimeSpan.FromMilliseconds(duration),
+                EasingFunction = easing
+            };
+
+            Storyboard.SetTarget(animation, page);
+            Storyboard.SetTargetProperty(animation, new PropertyPath("(UIElement.RenderTransform).(TranslateTransform.X)"));
+
+            var animationY = new DoubleAnimation
+            {
+                From = fromY,
+                To = toY,
+                Duration = TimeSpan.FromMilliseconds(duration),
+                EasingFunction = easing
+            };
+
+            Storyboard.SetTarget(animationY, page);
+            Storyboard.SetTargetProperty(animationY, new PropertyPath("(UIElement.RenderTransform).(TranslateTransform.Y)"));
+
             storyboard.Children.Add(animation);
+            storyboard.Children.Add(animationY);
+        }
+
+        private void ApplyFadeAnimation(Page page, Storyboard storyboard, int duration, IEasingFunction easing)
+        {
+            var fadeAnimation = new DoubleAnimation
+            {
+                From = 0,
+                To = 1,
+                Duration = TimeSpan.FromMilliseconds(duration),
+                EasingFunction = easing
+            };
+
+            Storyboard.SetTarget(fadeAnimation, page);
+            Storyboard.SetTargetProperty(fadeAnimation, new PropertyPath("Opacity"));
+
             storyboard.Children.Add(fadeAnimation);
         }
 
-        private void ApplySlideFromBottomAnimation(Page page, Storyboard storyboard = null)
+        private void ApplyZoomAnimation(Page page, Storyboard storyboard, int duration, IEasingFunction easing)
         {
-            storyboard ??= new Storyboard();
+            page.RenderTransform = new ScaleTransform();
+            
+            var scaleXAnimation = new DoubleAnimation
+            {
+                From = 0.8,
+                To = 1.0,
+                Duration = TimeSpan.FromMilliseconds(duration),
+                EasingFunction = easing
+            };
+
+            var scaleYAnimation = new DoubleAnimation
+            {
+                From = 0.8,
+                To = 1.0,
+                Duration = TimeSpan.FromMilliseconds(duration),
+                EasingFunction = easing
+            };
+
+            Storyboard.SetTarget(scaleXAnimation, page);
+            Storyboard.SetTargetProperty(scaleXAnimation, new PropertyPath("(UIElement.RenderTransform).(ScaleTransform.ScaleX)"));
+
+            Storyboard.SetTarget(scaleYAnimation, page);
+            Storyboard.SetTargetProperty(scaleYAnimation, new PropertyPath("(UIElement.RenderTransform).(ScaleTransform.ScaleY)"));
+
+            storyboard.Children.Add(scaleXAnimation);
+            storyboard.Children.Add(scaleYAnimation);
+        }
+
+        private void ApplySmoothSlideFromBottomAnimation(Page page)
+        {
+            page.RenderTransform = new TranslateTransform();
+            var storyboard = new Storyboard();
 
             var animation = new DoubleAnimation
             {
                 From = 200,
                 To = 0,
-                Duration = TimeSpan.FromSeconds(0.4),
-                EasingFunction = new BackEase { EasingMode = EasingMode.EaseOut, Amplitude = 0.3 }
+                Duration = TimeSpan.FromMilliseconds(350),
+                EasingFunction = new BackEase { EasingMode = EasingMode.EaseOut, Amplitude = 0.2 }
             };
 
             Storyboard.SetTarget(animation, page);
@@ -153,7 +281,7 @@ namespace PrimeAppBooks.Services
             {
                 From = 0,
                 To = 1,
-                Duration = TimeSpan.FromSeconds(0.3),
+                Duration = TimeSpan.FromMilliseconds(300),
                 EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
             };
 
@@ -162,25 +290,54 @@ namespace PrimeAppBooks.Services
 
             storyboard.Children.Add(animation);
             storyboard.Children.Add(fadeAnimation);
-
-            if (storyboard != null)
-                storyboard.Begin();
+            storyboard.Begin();
         }
 
-        private void ApplyFadeInAnimation(Page page, Storyboard storyboard)
+        private void ApplyExitAnimation(Page page, Action onComplete)
         {
+            var storyboard = new Storyboard();
+            
             var fadeAnimation = new DoubleAnimation
             {
-                From = 0,
-                To = 1,
-                Duration = TimeSpan.FromSeconds(0.4),
-                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+                From = 1,
+                To = 0,
+                Duration = TimeSpan.FromMilliseconds(200),
+                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseIn }
             };
 
             Storyboard.SetTarget(fadeAnimation, page);
             Storyboard.SetTargetProperty(fadeAnimation, new PropertyPath("Opacity"));
 
             storyboard.Children.Add(fadeAnimation);
+            
+            storyboard.Completed += (s, e) => onComplete?.Invoke();
+            storyboard.Begin();
+        }
+
+        private IEasingFunction CreateEasingFunction(AnimationEasing easing)
+        {
+            return easing switch
+            {
+                AnimationEasing.Linear => null,
+                AnimationEasing.EaseIn => new QuadraticEase { EasingMode = EasingMode.EaseIn },
+                AnimationEasing.EaseOut => new QuadraticEase { EasingMode = EasingMode.EaseOut },
+                AnimationEasing.EaseInOut => new QuadraticEase { EasingMode = EasingMode.EaseInOut },
+                AnimationEasing.Bounce => new BounceEase { EasingMode = EasingMode.EaseOut },
+                AnimationEasing.Elastic => new ElasticEase { EasingMode = EasingMode.EaseOut },
+                AnimationEasing.Back => new BackEase { EasingMode = EasingMode.EaseOut, Amplitude = 0.3 },
+                _ => new QuadraticEase { EasingMode = EasingMode.EaseOut }
+            };
+        }
+
+        // Clean up cached pages when needed
+        public void ClearPageCache()
+        {
+            _pageCache.Clear();
+        }
+
+        public void RemovePageFromCache<T>() where T : Page
+        {
+            _pageCache.Remove(typeof(T));
         }
     }
 }

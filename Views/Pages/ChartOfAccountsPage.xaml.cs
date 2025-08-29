@@ -1,31 +1,29 @@
 ﻿using PrimeAppBooks.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+using PrimeAppBooks.Services;
+using PrimeAppBooks.ViewModels.Pages;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace PrimeAppBooks.Views.Pages
 {
     /// <summary>
     /// Interaction logic for ChartOfAccountsPage.xaml
     /// </summary>
-    public partial class ChartOfAccountsPage : Page, IAnimatedPage
+    public partial class ChartOfAccountsPage : BaseAnimatedPage
     {
-        public string AnimationStyle => "SlideFromBottom";
-
         public ChartOfAccountsPage()
         {
             InitializeComponent();
+
+            // Set custom animation properties for chart of accounts page
+            // Slide from right to feel like opening a drawer
+            SetAnimationDirection(Interfaces.AnimationDirection.FromRight);
+            SetAnimationDuration(300);
+            SetAnimationEasing(Interfaces.AnimationEasing.EaseOut);
+            SetAnimateOut(true);
+
+            DataContext = new ChartOfAccountsPageViewModel(
+                ServiceLocator.GetService<INavigationService>()
+            );
         }
     }
 }

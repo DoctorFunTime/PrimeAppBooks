@@ -2,33 +2,24 @@
 using PrimeAppBooks.Services;
 using PrimeAppBooks.Services.APIs;
 using PrimeAppBooks.ViewModels.Pages;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace PrimeAppBooks.Views.Pages
 {
     /// <summary>
     /// Interaction logic for DashboardPage.xaml
     /// </summary>
-    public partial class DashboardPage : Page, IAnimatedPage
+    public partial class DashboardPage : BaseAnimatedPage
     {
-        public string AnimationStyle => "SlideFromBottom";
-
         public DashboardPage()
         {
             InitializeComponent();
+
+            // Set custom animation properties for the dashboard
+            SetAnimationDirection(AnimationDirection.FromBottom);
+            SetAnimationDuration(300);
+            SetAnimationEasing(AnimationEasing.EaseIn);
+            SetAnimateOut(true);
 
             DataContext = new DashboardPageViewModel(
                 ServiceLocator.GetService<INavigationService>(),

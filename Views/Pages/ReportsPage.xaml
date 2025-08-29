@@ -1,5 +1,6 @@
-﻿<Page
+﻿<base:BaseAnimatedPage
     x:Class="PrimeAppBooks.Views.Pages.ReportsPage"
+        xmlns:base="clr-namespace:PrimeAppBooks.Views.Pages"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:converters="clr-namespace:PrimeAppBooks.Conveters"
@@ -328,4 +329,4 @@
             </Grid>
         </Grid>
     </ScrollViewer>
-</Page>
+</base:BaseAnimatedPage>
