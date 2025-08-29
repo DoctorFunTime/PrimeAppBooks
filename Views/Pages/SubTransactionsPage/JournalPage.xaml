@@ -94,7 +94,7 @@
                         <TextBlock Style="{StaticResource FilterLabelText}" Text="Entry Description *" />
                         <hc:TextBox
                             Margin="0,5,0,0"
-                            Style="{StaticResource HandyModernTextBox}"
+                            Style="{StaticResource ModernTextBoxStyle}"
                             Text="{Binding EntryDescription, UpdateSourceTrigger=PropertyChanged}" />
                         <TextBlock
                             Margin="0,2,0,0"
@@ -109,7 +109,7 @@
                         <TextBlock Style="{StaticResource FilterLabelText}" Text="Reference Number" />
                         <hc:TextBox
                             Margin="0,5,0,0"
-                            Style="{StaticResource HandyModernTextBox}"
+                            Style="{StaticResource ModernTextBoxStyle}"
                             Text="{Binding ReferenceNumber, UpdateSourceTrigger=PropertyChanged}" />
                         <TextBlock
                             Margin="0,2,0,0"
@@ -181,110 +181,99 @@
                         </Grid>
 
                         <!--  Journal Lines DataGrid  -->
-                        <Border Style="{StaticResource ModernDataGridContainer}">
-                            <DataGrid
+                        <DataGrid
                                 MaxHeight="400"
-                                AutoGenerateColumns="False"
-                                CellStyle="{StaticResource ModernCellStyle}"
-                                ColumnHeaderStyle="{StaticResource ModernColumnHeaderStyle}"
                                 ItemsSource="{Binding JournalLines}"
-                                RowHeight="40"
-                                RowStyle="{StaticResource ModernRowStyle}"
                                 SelectedItem="{Binding SelectedLine}"
                                 SelectionMode="Single"
                                 Style="{StaticResource ModernDataGridStyle}">
 
-                                <DataGrid.Resources>
-                                    <Style BasedOn="{StaticResource ModernScrollBarStyle}" TargetType="{x:Type ScrollBar}" />
-                                </DataGrid.Resources>
-
-                                <DataGrid.Columns>
-                                    <!--  Line Number  -->
-                                    <DataGridTextColumn
+                            <DataGrid.Columns>
+                                <!--  Line Number  -->
+                                <DataGridTextColumn
                                         Width="60"
                                         Binding="{Binding LineNumber}"
                                         Header="#"
                                         IsReadOnly="True">
-                                        <DataGridTextColumn.ElementStyle>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="HorizontalAlignment" Value="Center" />
-                                                <Setter Property="FontWeight" Value="Medium" />
-                                                <Setter Property="Foreground" Value="#7F8C8D" />
-                                            </Style>
-                                        </DataGridTextColumn.ElementStyle>
-                                    </DataGridTextColumn>
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="HorizontalAlignment" Value="Center" />
+                                            <Setter Property="FontWeight" Value="Medium" />
+                                            <Setter Property="Foreground" Value="#7F8C8D" />
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
 
-                                    <!--  Account Selection  -->
-                                    <DataGridTemplateColumn Width="*" Header="Account *">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <ComboBox
+                                <!--  Account Selection  -->
+                                <DataGridTemplateColumn Width="*" Header="Account *">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <ComboBox
                                                     DisplayMemberPath="FullName"
                                                     ItemsSource="{Binding DataContext.AvailableAccounts, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                     SelectedValue="{Binding AccountId, UpdateSourceTrigger=PropertyChanged}"
                                                     SelectedValuePath="Id"
                                                     Style="{StaticResource ModernComboBox}" />
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
 
-                                    <!--  Description  -->
-                                    <DataGridTemplateColumn Width="200" Header="Line Description">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <hc:TextBox Style="{StaticResource HandyModernTextBox}" Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" />
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
+                                <!--  Description  -->
+                                <DataGridTemplateColumn Width="200" Header="Line Description">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <hc:TextBox Style="{StaticResource HandyModernTextBox}" Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
 
-                                    <!--  Debit Amount  -->
-                                    <DataGridTemplateColumn Width="120" Header="Debit">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <hc:TextBox
+                                <!--  Debit Amount  -->
+                                <DataGridTemplateColumn Width="120" Header="Debit">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <hc:TextBox
                                                     HorizontalAlignment="Stretch"
                                                     Style="{StaticResource HandyModernTextBox}"
                                                     Text="{Binding DebitAmount, UpdateSourceTrigger=PropertyChanged}" />
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
 
-                                    <!--  Credit Amount  -->
-                                    <DataGridTemplateColumn Width="120" Header="Credit">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <hc:TextBox
+                                <!--  Credit Amount  -->
+                                <DataGridTemplateColumn Width="120" Header="Credit">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <hc:TextBox
                                                     HorizontalAlignment="Stretch"
                                                     Style="{StaticResource HandyModernTextBox}"
                                                     Text="{Binding CreditAmount, UpdateSourceTrigger=PropertyChanged}" />
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
 
-                                    <!--  Actions  -->
-                                    <DataGridTemplateColumn Width="80" Header="Actions">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
-                                                    <Button
+                                <!--  Actions  -->
+                                <DataGridTemplateColumn Width="80" Header="Actions">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                                                <Button
                                                         Command="{Binding DataContext.RemoveLineCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                         CommandParameter="{Binding}"
                                                         Style="{StaticResource ModernIconButton}"
                                                         ToolTip="Remove Line">
-                                                        <Path
+                                                    <Path
                                                             Width="12"
                                                             Height="12"
                                                             Data="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"
                                                             Fill="#E74C3C"
                                                             Stretch="Uniform" />
-                                                    </Button>
-                                                </StackPanel>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
-                                </DataGrid.Columns>
-                            </DataGrid>
-                        </Border>
+                                                </Button>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
 
                         <!--  Balance Summary  -->
                         <Border
@@ -366,7 +355,7 @@
                                 <TextBlock Style="{StaticResource DetailLabelText}" Text="Quick Account Search" />
                                 <hc:TextBox
                                     Margin="0,5,0,0"
-                                    Style="{StaticResource HandyModernTextBox}"
+                                    Style="{StaticResource ModernTextBoxStyle}"
                                     Text="{Binding AccountSearchText, UpdateSourceTrigger=PropertyChanged}" />
                                 <ListBox
                                     MaxHeight="120"

@@ -184,57 +184,15 @@
     </Style>
 
     <!--  ComboBox Style  -->
-    <Style x:Key="ModernComboBox" TargetType="ComboBox">
-        <Setter Property="Background" Value="{StaticResource CardGradientBrush}" />
+    <Style x:Key="ModernComboBox" BasedOn="{StaticResource MaterialDesignComboBox}" TargetType="ComboBox">
         <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
         <Setter Property="BorderBrush" Value="{StaticResource TextSecondaryBrush}" />
+        <Setter Property="Height" Value="30" />
+        <Setter Property="Padding" Value="5" />
+        <Setter Property="Margin" Value="5" />
+        <Setter Property="FontFamily" Value="Century Gothic" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="Padding" Value="8,4" />
         <Setter Property="FontSize" Value="11" />
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="ComboBox">
-                    <Grid>
-                        <Border
-                            Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="6">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="20" />
-                                </Grid.ColumnDefinitions>
-                                <ContentPresenter
-                                    Grid.Column="0"
-                                    Margin="{TemplateBinding Padding}"
-                                    VerticalAlignment="Center" />
-                                <Path
-                                    Grid.Column="1"
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"
-                                    Data="M 0 0 L 4 4 L 8 0 Z"
-                                    Fill="{TemplateBinding Foreground}" />
-                            </Grid>
-                        </Border>
-                        <Popup
-                            x:Name="PART_Popup"
-                            IsOpen="{TemplateBinding IsDropDownOpen}"
-                            Placement="Bottom">
-                            <Border
-                                Background="{StaticResource CardGradientBrush}"
-                                BorderBrush="{StaticResource TextSecondaryBrush}"
-                                BorderThickness="1"
-                                CornerRadius="6">
-                                <ScrollViewer>
-                                    <ItemsPresenter />
-                                </ScrollViewer>
-                            </Border>
-                        </Popup>
-                    </Grid>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
     </Style>
 
     <!--  Text Styles  -->
@@ -479,6 +437,21 @@
         <Setter Property="FontSize" Value="14" />
         <Setter Property="Foreground" Value="Gainsboro" />
         <Setter Property="Width" Value="300" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Height" Value="30" />
+        <Setter Property="Margin" Value="5" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+
+    <!--  Base textBox Style  -->
+    <Style
+                x:Key="ModernTextBoxStyle"
+                BasedOn="{StaticResource MaterialDesignFloatingHintTextBox}"
+                TargetType="TextBox">
+        <Setter Property="FontFamily" Value="Century Gothic" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Foreground" Value="Gainsboro" />
         <Setter Property="Padding" Value="0" />
         <Setter Property="Height" Value="30" />
         <Setter Property="Margin" Value="5" />

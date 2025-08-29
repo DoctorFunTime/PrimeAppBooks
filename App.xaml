@@ -2,15 +2,20 @@
     x:Class="PrimeAppBooks.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:MaterialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:converters="clr-namespace:PrimeAppBooks.Conveters"
     xmlns:hc="https://handyorg.github.io/handycontrol"
     StartupUri="Views/Windows/MainWindow.xaml">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <!-- Merged Resource Dictionaries -->
+                <!--  Merged Resource Dictionaries  -->
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign2.Defaults.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.Blue.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Secondary/MaterialDesignColor.Lime.xaml" />
 
-                <!-- Resources -->
+                <!--  Resources  -->
                 <ResourceDictionary Source="pack://application:,,,/Resources/Colors.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/Resources/ButtonStyles.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/Resources/BorderStyles.xaml" />
@@ -22,12 +27,12 @@
                 <ResourceDictionary Source="pack://application:,,,/Resources/ModernDataGridStyle.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/Resources/SettingsStyles.xaml" />
 
-                <!-- Handy Controls -->
+                <!--  Handy Controls  -->
                 <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/Theme.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
-            <!-- Converters -->
+            <!--  Converters  -->
             <converters:LengthToVisibilityConverter x:Key="LengthToVisibilityConverter" />
             <converters:StatusIndicatorConverter x:Key="StatusIndicatorConverter" />
             <converters:StatusColorConverter x:Key="StatusColorConverter" />
@@ -47,7 +52,7 @@
             <converters:WidthToVisibilityConverter x:Key="WidthToVisibilityConverter" />
             <converters:BalanceIndicatorConverter x:Key="BalanceIndicatorConverter" />
 
-            <!-- System Converters -->
+            <!--  System Converters  -->
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         </ResourceDictionary>
     </Application.Resources>

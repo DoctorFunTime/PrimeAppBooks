@@ -27,6 +27,13 @@
                             <TextBlock Style="{StaticResource WelcomeTitleText}" Text="Welcome back, Sarah!" />
                             <TextBlock Style="{StaticResource WelcomeSubtitleText}" Text="Here's your comprehensive financial overview" />
                         </StackPanel>
+
+                        <Button
+                            Grid.Column="1"
+                            Margin="5,0"
+                            Command="{Binding ExportTransactionsCommand}"
+                            Content="📊 Connect to Quickbooks"
+                            Style="{StaticResource ModernSecondaryButton}" />
                     </Grid>
                 </Border>
 
@@ -36,7 +43,7 @@
                     <Border Style="{StaticResource ModernCardStyle}">
                         <StackPanel Style="{StaticResource CardContentContainer}">
                             <TextBlock Style="{StaticResource CashHeaderText}" Text="💰 Cash Balance" />
-                            <TextBlock Style="{StaticResource CardValueText}" Text="$128,450.00" />
+                            <TextBlock Style="{StaticResource CardValueText}" Text="{Binding Address}" />
                             <TextBlock Style="{StaticResource CardSubText}" Text="+2.8% from last month" />
                         </StackPanel>
                     </Border>
@@ -45,7 +52,7 @@
                     <Border Style="{StaticResource ModernCardStyle}">
                         <StackPanel Style="{StaticResource CardContentContainer}">
                             <TextBlock Style="{StaticResource ReceivablesHeaderText}" Text="📥 Receivables" />
-                            <TextBlock Style="{StaticResource CardValueText}" Text="$21,980.00" />
+                            <TextBlock Style="{StaticResource CardValueText}" Text="{Binding CompanyName}" />
                             <TextBlock Style="{StaticResource CardSubText}" Text="12 outstanding" />
                         </StackPanel>
                     </Border>

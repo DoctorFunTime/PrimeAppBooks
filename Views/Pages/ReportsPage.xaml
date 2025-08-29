@@ -253,7 +253,7 @@
                                         Text="Copies:" />
                                     <TextBox
                                         Width="40"
-                                        Style="{StaticResource ModernSearchTextBox}"
+                                        Style="{StaticResource ModernTextBoxStyle}"
                                         Text="{Binding Copies}"
                                         TextAlignment="Center" />
                                 </StackPanel>

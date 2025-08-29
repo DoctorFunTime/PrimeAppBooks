@@ -1,5 +1,6 @@
 ﻿using PrimeAppBooks.Interfaces;
 using PrimeAppBooks.Services;
+using PrimeAppBooks.Services.APIs;
 using PrimeAppBooks.ViewModels.Pages;
 using System;
 using System.Collections.Generic;
@@ -29,10 +30,10 @@ namespace PrimeAppBooks.Views.Pages
         {
             InitializeComponent();
 
-            // Just set DataContext, navigation service is already injected into VM
             DataContext = new DashboardPageViewModel(
-                ServiceLocator.GetService<INavigationService>()
-            );
+                ServiceLocator.GetService<INavigationService>(),
+                ServiceLocator.GetService<QuickBooksAuthService>(),
+                ServiceLocator.GetService<QuickBooksService>());
         }
     }
 }

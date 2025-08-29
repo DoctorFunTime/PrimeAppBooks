@@ -148,26 +148,25 @@
                         </Grid>
 
                         <!--  Enhanced TreeView  -->
-                        <Border Grid.Row="1" Style="{StaticResource ModernDataGridContainer}">
-                            <TreeView Foreground="White" ItemsSource="{Binding Accounts}">
-                                <TreeView.Resources>
-                                    <Style BasedOn="{StaticResource ModernScrollBarStyle}" TargetType="{x:Type ScrollBar}" />
-                                </TreeView.Resources>
+                        <TreeView Foreground="White" ItemsSource="{Binding Accounts}">
+                            <TreeView.Resources>
+                                <Style BasedOn="{StaticResource ModernScrollBar}" TargetType="{x:Type ScrollBar}" />
+                            </TreeView.Resources>
 
-                                <TreeView.ItemTemplate>
-                                    <HierarchicalDataTemplate ItemsSource="{Binding Children}">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="30" />
-                                                <ColumnDefinition Width="80" />
-                                                <ColumnDefinition Width="*" />
-                                                <ColumnDefinition Width="100" />
-                                                <ColumnDefinition Width="100" />
-                                                <ColumnDefinition Width="120" />
-                                            </Grid.ColumnDefinitions>
+                            <TreeView.ItemTemplate>
+                                <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="30" />
+                                            <ColumnDefinition Width="80" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="100" />
+                                            <ColumnDefinition Width="100" />
+                                            <ColumnDefinition Width="120" />
+                                        </Grid.ColumnDefinitions>
 
-                                            <!--  Account Type Indicator  -->
-                                            <Border
+                                        <!--  Account Type Indicator  -->
+                                        <Border
                                                 Grid.Column="0"
                                                 Width="16"
                                                 Height="16"
@@ -175,17 +174,17 @@
                                                 VerticalAlignment="Center"
                                                 Background="{Binding Type, Converter={StaticResource AccountTypeToColorConverter}}"
                                                 CornerRadius="3">
-                                                <Border.Effect>
-                                                    <DropShadowEffect
+                                            <Border.Effect>
+                                                <DropShadowEffect
                                                         BlurRadius="3"
                                                         Opacity="0.3"
                                                         ShadowDepth="1"
                                                         Color="Black" />
-                                                </Border.Effect>
-                                            </Border>
+                                            </Border.Effect>
+                                        </Border>
 
-                                            <!--  Account Number  -->
-                                            <TextBlock
+                                        <!--  Account Number  -->
+                                        <TextBlock
                                                 Grid.Column="1"
                                                 VerticalAlignment="Center"
                                                 FontFamily="Segoe UI"
@@ -194,8 +193,8 @@
                                                 Text="{Binding AccountNumber}"
                                                 ToolTip="{Binding AccountNumber}" />
 
-                                            <!--  Account Name  -->
-                                            <TextBlock
+                                        <!--  Account Name  -->
+                                        <TextBlock
                                                 Grid.Column="2"
                                                 VerticalAlignment="Center"
                                                 FontFamily="Segoe UI"
@@ -204,8 +203,8 @@
                                                 TextTrimming="CharacterEllipsis"
                                                 ToolTip="{Binding Name}" />
 
-                                            <!--  Account Type  -->
-                                            <TextBlock
+                                        <!--  Account Type  -->
+                                        <TextBlock
                                                 Grid.Column="3"
                                                 VerticalAlignment="Center"
                                                 FontFamily="Segoe UI"
@@ -214,8 +213,8 @@
                                                 Text="{Binding Type}"
                                                 ToolTip="{Binding Type}" />
 
-                                            <!--  Balance  -->
-                                            <TextBlock
+                                        <!--  Balance  -->
+                                        <TextBlock
                                                 Grid.Column="4"
                                                 HorizontalAlignment="Right"
                                                 VerticalAlignment="Center"
@@ -226,13 +225,13 @@
                                                 Text="{Binding Balance, StringFormat=C}"
                                                 ToolTip="{Binding Balance, StringFormat=C}" />
 
-                                            <!--  Status Indicator  -->
-                                            <StackPanel
+                                        <!--  Status Indicator  -->
+                                        <StackPanel
                                                 Grid.Column="5"
                                                 HorizontalAlignment="Right"
                                                 VerticalAlignment="Center"
                                                 Orientation="Horizontal">
-                                                <Border
+                                            <Border
                                                     Width="10"
                                                     Height="10"
                                                     Margin="0,0,5,0"
@@ -240,38 +239,37 @@
                                                     VerticalAlignment="Center"
                                                     Background="{Binding IsActive, Converter={StaticResource BooleanToStatusColorConverter}}"
                                                     CornerRadius="5">
-                                                    <Border.Effect>
-                                                        <DropShadowEffect
+                                                <Border.Effect>
+                                                    <DropShadowEffect
                                                             BlurRadius="3"
                                                             Opacity="0.3"
                                                             ShadowDepth="1"
                                                             Color="Black" />
-                                                    </Border.Effect>
-                                                </Border>
-                                                <TextBlock
+                                                </Border.Effect>
+                                            </Border>
+                                            <TextBlock
                                                     FontFamily="Segoe UI"
                                                     FontSize="12"
                                                     Foreground="#7F8C8D"
                                                     Text="{Binding IsActive, Converter={StaticResource BooleanToStatusTextConverter}}" />
-                                            </StackPanel>
-                                        </Grid>
-                                    </HierarchicalDataTemplate>
-                                </TreeView.ItemTemplate>
+                                        </StackPanel>
+                                    </Grid>
+                                </HierarchicalDataTemplate>
+                            </TreeView.ItemTemplate>
 
-                                <TreeView.ItemContainerStyle>
-                                    <Style TargetType="{x:Type TreeViewItem}">
-                                        <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
-                                        <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
-                                        <Setter Property="FontWeight" Value="Normal" />
-                                        <Style.Triggers>
-                                            <Trigger Property="IsSelected" Value="True">
-                                                <Setter Property="FontWeight" Value="Bold" />
-                                            </Trigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TreeView.ItemContainerStyle>
-                            </TreeView>
-                        </Border>
+                            <TreeView.ItemContainerStyle>
+                                <Style TargetType="{x:Type TreeViewItem}">
+                                    <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                                    <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+                                    <Setter Property="FontWeight" Value="Normal" />
+                                    <Style.Triggers>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter Property="FontWeight" Value="Bold" />
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TreeView.ItemContainerStyle>
+                        </TreeView>
                     </Grid>
                 </Border>
 

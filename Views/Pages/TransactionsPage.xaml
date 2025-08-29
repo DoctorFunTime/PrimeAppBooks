@@ -6,7 +6,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:fw="clr-namespace:SourceChord.FluentWPF;assembly=FluentWPF"
     xmlns:hc="https://handyorg.github.io/handycontrol"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:pages="clr-namespace:PrimeAppBooks.ViewModels.Pages" d:DataContext="{d:DesignInstance Type=pages:TransactionsPageViewModel}"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:pages="clr-namespace:PrimeAppBooks.ViewModels.Pages"
+    d:DataContext="{d:DesignInstance Type=pages:TransactionsPageViewModel}"
     d:DesignHeight="900"
     d:DesignWidth="1280"
     Background="Transparent"
@@ -225,7 +226,7 @@
                         <!--  Search Box  -->
                         <StackPanel Grid.Column="0" Margin="0,0,15,0">
                             <TextBlock Style="{StaticResource FilterLabelText}" Text="Search Description/Reference" />
-                            <hc:TextBox Style="{StaticResource HandyModernTextBox}" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBox Style="{StaticResource ModernTextBoxStyle}" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
                         </StackPanel>
 
                         <!--  Date Range  -->
@@ -316,237 +317,225 @@
                         </Grid>
 
                         <!--  Transactions DataGrid with Modern Styling  -->
-                        <Border Style="{StaticResource ModernDataGridContainer}">
-                            <DataGrid
+                        <DataGrid
                                 MaxHeight="600"
-                                AutoGenerateColumns="False"
-                                CellStyle="{StaticResource ModernCellStyle}"
-                                ColumnHeaderStyle="{StaticResource ModernColumnHeaderStyle}"
                                 ItemsSource="{Binding FilteredTransactions}"
-                                RowHeight="48"
-                                RowStyle="{StaticResource ModernRowStyle}"
                                 SelectedItem="{Binding SelectedTransaction}"
                                 SelectionMode="Single"
                                 Style="{StaticResource ModernDataGridStyle}">
 
-                                <DataGrid.Resources>
-                                    <!--  Apply Modern ScrollBar Style  -->
-                                    <Style BasedOn="{StaticResource ModernScrollBarStyle}" TargetType="{x:Type ScrollBar}" />
-                                </DataGrid.Resources>
-
-                                <DataGrid.Columns>
-                                    <!--  Status Indicator  -->
-                                    <DataGridTemplateColumn
+                            <DataGrid.Columns>
+                                <!--  Status Indicator  -->
+                                <DataGridTemplateColumn
                                         Width="40"
                                         CanUserResize="False"
                                         Header="">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <Border
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Border
                                                     Width="12"
                                                     Height="12"
                                                     HorizontalAlignment="Center"
                                                     VerticalAlignment="Center"
                                                     Background="{Binding Status, Converter={StaticResource StatusIndicatorConverter}}"
                                                     CornerRadius="6">
-                                                    <Border.Effect>
-                                                        <DropShadowEffect
+                                                <Border.Effect>
+                                                    <DropShadowEffect
                                                             BlurRadius="3"
                                                             Opacity="0.3"
                                                             ShadowDepth="1"
                                                             Color="Black" />
-                                                    </Border.Effect>
-                                                </Border>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
+                                                </Border.Effect>
+                                            </Border>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
 
-                                    <!--  Date  -->
-                                    <DataGridTextColumn
+                                <!--  Date  -->
+                                <DataGridTextColumn
                                         Width="120"
                                         Binding="{Binding TransactionDate, StringFormat='MMM dd, yyyy'}"
                                         Header="Date">
-                                        <DataGridTextColumn.ElementStyle>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="FontFamily" Value="Segoe UI" />
-                                                <Setter Property="FontWeight" Value="Normal" />
-                                                <Setter Property="Foreground" Value="#2C3E50" />
-                                            </Style>
-                                        </DataGridTextColumn.ElementStyle>
-                                    </DataGridTextColumn>
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="FontFamily" Value="Segoe UI" />
+                                            <Setter Property="FontWeight" Value="Normal" />
+                                            <Setter Property="Foreground" Value="#2C3E50" />
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
 
-                                    <!--  Reference/Number  -->
-                                    <DataGridTextColumn
+                                <!--  Reference/Number  -->
+                                <DataGridTextColumn
                                         Width="110"
                                         Binding="{Binding ReferenceNumber}"
                                         Header="Reference">
-                                        <DataGridTextColumn.ElementStyle>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="FontFamily" Value="Segoe UI" />
-                                                <Setter Property="FontWeight" Value="Medium" />
-                                                <Setter Property="Foreground" Value="#34495E" />
-                                            </Style>
-                                        </DataGridTextColumn.ElementStyle>
-                                    </DataGridTextColumn>
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="FontFamily" Value="Segoe UI" />
+                                            <Setter Property="FontWeight" Value="Medium" />
+                                            <Setter Property="Foreground" Value="#34495E" />
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
 
-                                    <!--  Description  -->
-                                    <DataGridTextColumn
+                                <!--  Description  -->
+                                <DataGridTextColumn
                                         Width="*"
                                         MinWidth="250"
                                         Binding="{Binding Description}"
                                         Header="Description">
-                                        <DataGridTextColumn.ElementStyle>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="FontFamily" Value="Segoe UI" />
-                                                <Setter Property="FontWeight" Value="Normal" />
-                                                <Setter Property="Foreground" Value="#2C3E50" />
-                                                <Setter Property="TextTrimming" Value="CharacterEllipsis" />
-                                                <Setter Property="ToolTip" Value="{Binding Description}" />
-                                            </Style>
-                                        </DataGridTextColumn.ElementStyle>
-                                    </DataGridTextColumn>
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="FontFamily" Value="Segoe UI" />
+                                            <Setter Property="FontWeight" Value="Normal" />
+                                            <Setter Property="Foreground" Value="#2C3E50" />
+                                            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                                            <Setter Property="ToolTip" Value="{Binding Description}" />
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
 
-                                    <!--  Accounts Involved  -->
-                                    <DataGridTextColumn
+                                <!--  Accounts Involved  -->
+                                <DataGridTextColumn
                                         Width="180"
                                         Binding="{Binding AccountsSummary}"
                                         Header="Accounts">
-                                        <DataGridTextColumn.ElementStyle>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="FontFamily" Value="Segoe UI" />
-                                                <Setter Property="FontSize" Value="12" />
-                                                <Setter Property="Foreground" Value="#7F8C8D" />
-                                                <Setter Property="TextTrimming" Value="CharacterEllipsis" />
-                                                <Setter Property="ToolTip" Value="{Binding AccountsSummary}" />
-                                            </Style>
-                                        </DataGridTextColumn.ElementStyle>
-                                    </DataGridTextColumn>
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="FontFamily" Value="Segoe UI" />
+                                            <Setter Property="FontSize" Value="12" />
+                                            <Setter Property="Foreground" Value="#7F8C8D" />
+                                            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                                            <Setter Property="ToolTip" Value="{Binding AccountsSummary}" />
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
 
-                                    <!--  Amount  -->
-                                    <DataGridTextColumn
+                                <!--  Amount  -->
+                                <DataGridTextColumn
                                         Width="120"
                                         Binding="{Binding TotalAmount, StringFormat=C}"
                                         Header="Amount">
-                                        <DataGridTextColumn.ElementStyle>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="HorizontalAlignment" Value="Right" />
-                                                <Setter Property="FontWeight" Value="SemiBold" />
-                                                <Setter Property="FontFamily" Value="Segoe UI" />
-                                                <Setter Property="FontSize" Value="13" />
-                                                <Setter Property="Foreground" Value="#27AE60" />
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding TotalAmount, Converter={StaticResource NegativeAmountConverter}}" Value="True">
-                                                        <Setter Property="Foreground" Value="#E74C3C" />
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </DataGridTextColumn.ElementStyle>
-                                    </DataGridTextColumn>
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="HorizontalAlignment" Value="Right" />
+                                            <Setter Property="FontWeight" Value="SemiBold" />
+                                            <Setter Property="FontFamily" Value="Segoe UI" />
+                                            <Setter Property="FontSize" Value="13" />
+                                            <Setter Property="Foreground" Value="#27AE60" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding TotalAmount, Converter={StaticResource NegativeAmountConverter}}" Value="True">
+                                                    <Setter Property="Foreground" Value="#E74C3C" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
 
-                                    <!--  Status Badge  -->
-                                    <DataGridTemplateColumn Width="90" Header="Status">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <Border Background="{Binding Status, Converter={StaticResource StatusColorConverter}}" Style="{StaticResource TransactionStatusBadge}">
-                                                    <Border.Effect>
-                                                        <DropShadowEffect
+                                <!--  Status Badge  -->
+                                <DataGridTemplateColumn Width="90" Header="Status">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Border Background="{Binding Status, Converter={StaticResource StatusColorConverter}}" Style="{StaticResource TransactionStatusBadge}">
+                                                <Border.Effect>
+                                                    <DropShadowEffect
                                                             BlurRadius="4"
                                                             Opacity="0.2"
                                                             ShadowDepth="1"
                                                             Color="Black" />
-                                                    </Border.Effect>
-                                                    <TextBlock Style="{StaticResource StatusBadgeText}" Text="{Binding Status}" />
-                                                </Border>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
+                                                </Border.Effect>
+                                                <TextBlock Style="{StaticResource StatusBadgeText}" Text="{Binding Status}" />
+                                            </Border>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
 
-                                    <!--  Actions  -->
-                                    <DataGridTemplateColumn Width="160" Header="Actions">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <StackPanel
+                                <!--  Actions  -->
+                                <DataGridTemplateColumn Width="160" Header="Actions">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel
                                                     HorizontalAlignment="Center"
                                                     VerticalAlignment="Center"
                                                     Orientation="Horizontal">
 
-                                                    <!--  Edit Button  -->
-                                                    <Button
+                                                <!--  Edit Button  -->
+                                                <Button
                                                         Margin="0,0,4,0"
                                                         Command="{Binding DataContext.EditTransactionCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                         CommandParameter="{Binding}"
                                                         Style="{StaticResource ModernIconButton}"
                                                         ToolTip="Edit Transaction">
-                                                        <Path
+                                                    <Path
                                                             Width="14"
                                                             Height="14"
                                                             Data="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"
                                                             Fill="#3498DB"
                                                             Stretch="Uniform" />
-                                                    </Button>
+                                                </Button>
 
-                                                    <!--  Post/Unpost Button  -->
-                                                    <Button
+                                                <!--  Post/Unpost Button  -->
+                                                <Button
                                                         Margin="0,0,4,0"
                                                         Command="{Binding DataContext.TogglePostStatusCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                         CommandParameter="{Binding}"
                                                         IsEnabled="{Binding CanTogglePostStatus}"
                                                         Style="{StaticResource ModernIconButton}"
                                                         ToolTip="{Binding PostButtonTooltip}">
-                                                        <Path
+                                                    <Path
                                                             Width="14"
                                                             Height="14"
                                                             Data="{Binding PostButtonIcon, Converter={StaticResource IconPathConverter}}"
                                                             Stretch="Uniform">
-                                                            <Path.Style>
-                                                                <Style TargetType="Path">
-                                                                    <Setter Property="Fill" Value="#27AE60" />
-                                                                    <Style.Triggers>
-                                                                        <DataTrigger Binding="{Binding Status}" Value="Draft">
-                                                                            <Setter Property="Fill" Value="#F39C12" />
-                                                                        </DataTrigger>
-                                                                    </Style.Triggers>
-                                                                </Style>
-                                                            </Path.Style>
-                                                        </Path>
-                                                    </Button>
+                                                        <Path.Style>
+                                                            <Style TargetType="Path">
+                                                                <Setter Property="Fill" Value="#27AE60" />
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding Status}" Value="Draft">
+                                                                        <Setter Property="Fill" Value="#F39C12" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Path.Style>
+                                                    </Path>
+                                                </Button>
 
-                                                    <!--  View Details Button  -->
-                                                    <Button
+                                                <!--  View Details Button  -->
+                                                <Button
                                                         Margin="0,0,4,0"
                                                         Command="{Binding DataContext.ViewDetailsCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                         CommandParameter="{Binding}"
                                                         Style="{StaticResource ModernIconButton}"
                                                         ToolTip="View Transaction Details">
-                                                        <Path
+                                                    <Path
                                                             Width="14"
                                                             Height="14"
                                                             Data="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z"
                                                             Fill="#9B59B6"
                                                             Stretch="Uniform" />
-                                                    </Button>
+                                                </Button>
 
-                                                    <!--  Delete Button (only for drafts)  -->
-                                                    <Button
+                                                <!--  Delete Button (only for drafts)  -->
+                                                <Button
                                                         Command="{Binding DataContext.DeleteDraftCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                         CommandParameter="{Binding}"
                                                         Style="{StaticResource ModernIconButton}"
                                                         ToolTip="Delete Draft"
                                                         Visibility="{Binding IsDraft, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                                        <Path
+                                                    <Path
                                                             Width="14"
                                                             Height="14"
                                                             Data="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"
                                                             Fill="#E74C3C"
                                                             Stretch="Uniform" />
-                                                    </Button>
-                                                </StackPanel>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
-                                </DataGrid.Columns>
-                            </DataGrid>
-                        </Border>
+                                                </Button>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
 
                         <!--  Pagination  -->
                         <Grid Margin="0,15,0,0">

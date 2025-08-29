@@ -200,101 +200,99 @@
                                     Width="200"
                                     Margin="0,0,0,5"
                                     hc:InfoElement.Placeholder="Search audit trail..."
-                                    Style="{StaticResource HandyModernTextBox}"
+                                    Style="{StaticResource ModernTextBoxStyle}"
                                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
                             </WrapPanel>
                         </Border>
 
                         <!--  Audit DataGrid - Simplified columns  -->
-                        <Border Grid.Row="2" Style="{StaticResource ModernDataGridContainer}">
-                            <DataGrid
+                        <DataGrid
                                 AutoGenerateColumns="False"
                                 ItemsSource="{Binding AuditEntries}"
                                 SelectedItem="{Binding SelectedAuditEntry}"
                                 Style="{StaticResource ModernDataGridStyle}">
 
-                                <DataGrid.Columns>
-                                    <!--  Severity Indicator  -->
-                                    <DataGridTemplateColumn Width="40">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <Border
+                            <DataGrid.Columns>
+                                <!--  Severity Indicator  -->
+                                <DataGridTemplateColumn Width="40">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Border
                                                     Width="12"
                                                     Height="12"
                                                     Background="{Binding Severity, Converter={StaticResource AuditActionToColorConverter}}"
                                                     CornerRadius="6"
                                                     ToolTip="{Binding Severity}" />
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
 
-                                    <!--  Timestamp  -->
-                                    <DataGridTextColumn
+                                <!--  Timestamp  -->
+                                <DataGridTextColumn
                                         Width="120"
                                         Binding="{Binding Timestamp, StringFormat='MM/dd HH:mm'}"
                                         Header="Time" />
 
-                                    <!--  User  -->
-                                    <DataGridTextColumn
+                                <!--  User  -->
+                                <DataGridTextColumn
                                         Width="100"
                                         Binding="{Binding Username}"
                                         Header="User" />
 
-                                    <!--  Action Type  -->
-                                    <DataGridTextColumn
+                                <!--  Action Type  -->
+                                <DataGridTextColumn
                                         Width="100"
                                         Binding="{Binding ActionType}"
                                         Header="Action" />
 
-                                    <!--  Description  -->
-                                    <DataGridTextColumn
+                                <!--  Description  -->
+                                <DataGridTextColumn
                                         Width="*"
                                         MinWidth="200"
                                         Binding="{Binding Description}"
                                         ElementStyle="{StaticResource WrapTextBlockStyle}"
                                         Header="Description" />
 
-                                    <!--  Entity Type (collapsed on small screens)  -->
-                                    <DataGridTextColumn
+                                <!--  Entity Type (collapsed on small screens)  -->
+                                <DataGridTextColumn
                                         Width="80"
                                         Binding="{Binding EntityType}"
                                         Header="Entity"
                                         Visibility="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource WidthToVisibilityConverter}, ConverterParameter=800}" />
 
-                                    <!--  Status  -->
-                                    <DataGridTemplateColumn Width="70" Header="Status">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <Border
+                                <!--  Status  -->
+                                <DataGridTemplateColumn Width="70" Header="Status">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Border
                                                     Padding="4,2"
                                                     Background="{Binding Status, Converter={StaticResource StatusColorConverter}}"
                                                     CornerRadius="10">
-                                                    <TextBlock
+                                                <TextBlock
                                                         FontSize="11"
                                                         Foreground="White"
                                                         Text="{Binding Status}"
                                                         TextAlignment="Center" />
-                                                </Border>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
+                                            </Border>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
 
-                                    <!--  View Details Button  -->
-                                    <DataGridTemplateColumn Width="60" Header="Actions">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <Button
+                                <!--  View Details Button  -->
+                                <DataGridTemplateColumn Width="60" Header="Actions">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button
                                                     Command="{Binding DataContext.ViewDetailsCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                     CommandParameter="{Binding}"
                                                     Content="👁️"
                                                     Style="{StaticResource ModernIconButton}"
                                                     ToolTip="View Details" />
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
-                                </DataGrid.Columns>
-                            </DataGrid>
-                        </Border>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
                     </Grid>
                 </Border>
 

@@ -1,5 +1,6 @@
 ﻿using PrimeAppBooks.Interfaces;
 using PrimeAppBooks.Services;
+using PrimeAppBooks.Services.APIs;
 using PrimeAppBooks.ViewModels.Windows;
 using PrimeAppBooks.Views.Pages;
 using System.Text;
@@ -28,6 +29,8 @@ namespace PrimeAppBooks.Views.Windows
 
             // Register for dependency injection
             ServiceLocator.RegisterSingleton<INavigationService>(navigationService);
+            ServiceLocator.RegisterSingleton(new QuickBooksAuthService());
+            ServiceLocator.RegisterSingleton(new QuickBooksService());
 
             // Create view model with injected navigation service
             var viewModel = new MainWindowViewModel(navigationService);
