@@ -1,0 +1,274 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="clr-namespace:PrimeAppBooks.Conveters"
+    xmlns:services="clr-namespace:PrimeAppBooks.Services">
+
+    <converters:BoolToOptimizedVisibilityConverter x:Key="BoolToOptimizedVis" />
+    <converters:OptimizationToShadowOpacityConverter x:Key="OptimizationToShadowOpacity" />
+    <converters:OptimizationToScalingModeConverter x:Key="OptimizationToScalingMode" />
+    <converters:OptimizationToEffectConverter x:Key="OptimizationToEffect" />
+    <converters:BoolToOptimizedScrollVisibilityConverter x:Key="BoolToOptimizedScrollVisibility" />
+
+    <!--  Base optimized action card style WITHOUT animation  -->
+    <Style
+        x:Key="OptimizableActionCardStyle"
+        BasedOn="{StaticResource BankingModernActionCard}"
+        TargetType="Button">
+        <!--  Performance Optimizations  -->
+        <Setter Property="CacheMode" Value="BitmapCache" />
+        <Setter Property="RenderOptions.BitmapScalingMode" Value="{Binding LowerImageQuality, Converter={StaticResource OptimizationToScalingMode}}" />
+        <Setter Property="RenderOptions.EdgeMode" Value="Aliased" />
+        <Setter Property="RenderOptions.ClearTypeHint" Value="Enabled" />
+        <Setter Property="UseLayoutRounding" Value="True" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+
+        <!--  Conditional Effects  -->
+        <Setter Property="Effect">
+            <Setter.Value>
+                <DropShadowEffect
+                    BlurRadius="8"
+                    ShadowDepth="2" />
+            </Setter.Value>
+        </Setter>
+
+        <!--  Hardware Acceleration  -->
+        <Setter Property="RenderOptions.CachingHint" Value="Cache" />
+        <Setter Property="RenderOptions.CacheInvalidationThresholdMaximum" Value="0.98" />
+        <Setter Property="RenderOptions.CacheInvalidationThresholdMinimum" Value="0.02" />
+    </Style>
+
+    <!--  Fast animation style  -->
+    <Style
+        x:Key="FastFadeInActionCardStyle"
+        BasedOn="{StaticResource OptimizableActionCardStyle}"
+        TargetType="Button">
+        <Setter Property="Opacity" Value="0" />
+        <Style.Triggers>
+            <EventTrigger RoutedEvent="Loaded">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <DoubleAnimation
+                            Storyboard.TargetProperty="Opacity"
+                            From="0"
+                            To="1"
+                            Duration="0:0:0.1">
+                            <DoubleAnimation.EasingFunction>
+                                <QuarticEase EasingMode="EaseOut" />
+                            </DoubleAnimation.EasingFunction>
+                        </DoubleAnimation>
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <!--  Normal animation style  -->
+    <Style
+        x:Key="NormalFadeInActionCardStyle"
+        BasedOn="{StaticResource OptimizableActionCardStyle}"
+        TargetType="Button">
+        <Setter Property="Opacity" Value="0" />
+        <Style.Triggers>
+            <EventTrigger RoutedEvent="Loaded">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <DoubleAnimation
+                            Storyboard.TargetProperty="Opacity"
+                            From="0"
+                            To="1"
+                            Duration="0:0:0.3">
+                            <DoubleAnimation.EasingFunction>
+                                <QuarticEase EasingMode="EaseOut" />
+                            </DoubleAnimation.EasingFunction>
+                        </DoubleAnimation>
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <!--  Dynamic style selector using DataTrigger  -->
+    <Style
+        x:Key="DynamicFadeInActionCardStyle"
+        BasedOn="{StaticResource OptimizableActionCardStyle}"
+        TargetType="Button">
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding ReduceAnimations}" Value="True">
+                <Setter Property="Style" Value="{StaticResource FastFadeInActionCardStyle}" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding ReduceAnimations}" Value="False">
+                <Setter Property="Style" Value="{StaticResource NormalFadeInActionCardStyle}" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <!--  Optimized section card  -->
+    <Style
+        x:Key="OptimizableSectionCardStyle"
+        BasedOn="{StaticResource BankingLayeredActionGroupCard}"
+        TargetType="ContentControl">
+        <!--  Performance Optimizations  -->
+        <Setter Property="CacheMode" Value="BitmapCache" />
+        <Setter Property="RenderOptions.BitmapScalingMode" Value="{Binding LowerImageQuality, Converter={StaticResource OptimizationToScalingMode}}" />
+        <Setter Property="RenderOptions.EdgeMode" Value="Aliased" />
+        <Setter Property="RenderOptions.ClearTypeHint" Value="Enabled" />
+        <Setter Property="UseLayoutRounding" Value="True" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+
+        <!--  Hardware Acceleration  -->
+        <Setter Property="RenderOptions.CachingHint" Value="Cache" />
+        <Setter Property="RenderOptions.CacheInvalidationThresholdMaximum" Value="0.98" />
+        <Setter Property="RenderOptions.CacheInvalidationThresholdMinimum" Value="0.02" />
+    </Style>
+
+    <!--  Ultra-performance style for very low-end devices  -->
+    <Style
+        x:Key="UltraOptimizedActionCardStyle"
+        BasedOn="{StaticResource BankingModernActionCard}"
+        TargetType="Button">
+        <!--  Maximum Performance Settings  -->
+        <Setter Property="CacheMode" Value="BitmapCache" />
+        <Setter Property="RenderOptions.BitmapScalingMode" Value="LowQuality" />
+        <Setter Property="RenderOptions.EdgeMode" Value="Aliased" />
+        <Setter Property="RenderOptions.ClearTypeHint" Value="Auto" />
+        <Setter Property="UseLayoutRounding" Value="True" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+
+        <!--  Disable all effects for maximum performance  -->
+        <Setter Property="Effect" Value="{x:Null}" />
+
+        <!--  Aggressive caching  -->
+        <Setter Property="RenderOptions.CachingHint" Value="Cache" />
+        <Setter Property="RenderOptions.CacheInvalidationThresholdMaximum" Value="0.99" />
+        <Setter Property="RenderOptions.CacheInvalidationThresholdMinimum" Value="0.01" />
+
+        <!--  Disable animations completely  -->
+        <Setter Property="RenderTransform" Value="{x:Null}" />
+    </Style>
+
+    <!--  Ultra-performance section card  -->
+    <Style
+        x:Key="UltraOptimizedSectionCardStyle"
+        BasedOn="{StaticResource BankingLayeredActionGroupCard}"
+        TargetType="ContentControl">
+        <!--  Maximum Performance Settings  -->
+        <Setter Property="CacheMode" Value="BitmapCache" />
+        <Setter Property="RenderOptions.BitmapScalingMode" Value="LowQuality" />
+        <Setter Property="RenderOptions.EdgeMode" Value="Aliased" />
+        <Setter Property="RenderOptions.ClearTypeHint" Value="Auto" />
+        <Setter Property="UseLayoutRounding" Value="True" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+
+        <!--  Disable all effects  -->
+        <Setter Property="Effect" Value="{x:Null}" />
+
+        <!--  Aggressive caching  -->
+        <Setter Property="RenderOptions.CachingHint" Value="Cache" />
+        <Setter Property="RenderOptions.CacheInvalidationThresholdMaximum" Value="0.99" />
+        <Setter Property="RenderOptions.CacheInvalidationThresholdMinimum" Value="0.01" />
+    </Style>
+
+    <!--  Optimized Image Style  -->
+    <Style x:Key="OptimizedImageStyle" TargetType="Image">
+        <Setter Property="RenderOptions.BitmapScalingMode" Value="{Binding LowerImageQuality, Converter={StaticResource OptimizationToScalingMode}}" />
+        <Setter Property="RenderOptions.EdgeMode" Value="Aliased" />
+        <Setter Property="UseLayoutRounding" Value="True" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="CacheMode" Value="BitmapCache" />
+        <Setter Property="RenderOptions.CachingHint" Value="Cache" />
+    </Style>
+
+    <!--  Ultra-optimized Image Style for low-end devices  -->
+    <Style x:Key="UltraOptimizedImageStyle" TargetType="Image">
+        <Setter Property="RenderOptions.BitmapScalingMode" Value="LowQuality" />
+        <Setter Property="RenderOptions.EdgeMode" Value="Aliased" />
+        <Setter Property="RenderOptions.ClearTypeHint" Value="Auto" />
+        <Setter Property="UseLayoutRounding" Value="True" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="CacheMode" Value="BitmapCache" />
+        <Setter Property="RenderOptions.CachingHint" Value="Cache" />
+        <Setter Property="RenderOptions.CacheInvalidationThresholdMaximum" Value="0.99" />
+        <Setter Property="RenderOptions.CacheInvalidationThresholdMinimum" Value="0.01" />
+    </Style>
+
+    <!--  Optimized ListView Style  -->
+    <Style x:Key="OptimizedListViewStyle" TargetType="ListView">
+        <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True" />
+        <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling" />
+        <Setter Property="ScrollViewer.CanContentScroll" Value="False" />
+        <Setter Property="CacheMode" Value="BitmapCache" />
+        <Setter Property="RenderOptions.BitmapScalingMode" Value="LowQuality" />
+        <Setter Property="RenderOptions.EdgeMode" Value="Aliased" />
+        <Setter Property="UseLayoutRounding" Value="True" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="SelectionMode" Value="Single" />
+        <Setter Property="IsTabStop" Value="False" />
+        <Setter Property="IsHitTestVisible" Value="True" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ListView">
+                    <Border
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}">
+                        <ItemsPresenter />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <!--  Remove default hover and selection styles  -->
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="Transparent" />
+            </Trigger>
+            <Trigger Property="IsFocused" Value="True">
+                <Setter Property="Background" Value="Transparent" />
+            </Trigger>
+            <Trigger Property="IsSelected" Value="True">
+                <Setter Property="Background" Value="Transparent" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!--  ListViewItem Style to remove hover effects  -->
+    <Style x:Key="OptimizedListViewItemStyle" TargetType="ListViewItem">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Margin" Value="0" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="IsTabStop" Value="False" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ListViewItem">
+                    <Border
+                        Margin="{TemplateBinding Margin}"
+                        Padding="{TemplateBinding Padding}"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}">
+                        <ContentPresenter />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <!--  Remove all hover and selection effects  -->
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="Transparent" />
+            </Trigger>
+            <Trigger Property="IsFocused" Value="True">
+                <Setter Property="Background" Value="Transparent" />
+            </Trigger>
+            <Trigger Property="IsSelected" Value="True">
+                <Setter Property="Background" Value="Transparent" />
+            </Trigger>
+            <Trigger Property="IsKeyboardFocused" Value="True">
+                <Setter Property="Background" Value="Transparent" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+</ResourceDictionary>

@@ -1,0 +1,239 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--  Ultra Fast BounceInAnimation - synchronized shadow and content animation  -->
+    <Storyboard x:Key="BounceInAnimation">
+        <!--  Scale animation - much faster  -->
+        <DoubleAnimation
+            FillBehavior="HoldEnd"
+            Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)"
+            From="0.9"
+            To="1"
+            Duration="0:0:0.1">
+            <DoubleAnimation.EasingFunction>
+                <BackEase Amplitude="0.2" EasingMode="EaseOut" />
+            </DoubleAnimation.EasingFunction>
+        </DoubleAnimation>
+
+        <DoubleAnimation
+            FillBehavior="HoldEnd"
+            Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)"
+            From="0.9"
+            To="1"
+            Duration="0:0:0.1">
+            <DoubleAnimation.EasingFunction>
+                <BackEase Amplitude="0.2" EasingMode="EaseOut" />
+            </DoubleAnimation.EasingFunction>
+        </DoubleAnimation>
+
+        <!--  Faster opacity animation  -->
+        <DoubleAnimation
+            FillBehavior="HoldEnd"
+            Storyboard.TargetProperty="(Window.Opacity)"
+            From="0"
+            To="1"
+            Duration="0:0:0.08">
+            <DoubleAnimation.EasingFunction>
+                <QuadraticEase EasingMode="EaseOut" />
+            </DoubleAnimation.EasingFunction>
+        </DoubleAnimation>
+
+        <!--  Faster Y translation  -->
+        <DoubleAnimation
+            FillBehavior="HoldEnd"
+            Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)"
+            From="5"
+            To="0"
+            Duration="0:0:0.1">
+            <DoubleAnimation.EasingFunction>
+                <BackEase Amplitude="0.2" EasingMode="EaseOut" />
+            </DoubleAnimation.EasingFunction>
+        </DoubleAnimation>
+    </Storyboard>
+
+    <!--  Additional optimized animations for reuse across your application  -->
+
+    <!--  Fast fade in animation  -->
+    <Storyboard x:Key="FastFadeInAnimation">
+        <DoubleAnimation
+            FillBehavior="HoldEnd"
+            Storyboard.TargetProperty="(UIElement.Opacity)"
+            From="0"
+            To="1"
+            Duration="0:0:0.15">
+            <DoubleAnimation.EasingFunction>
+                <QuadraticEase EasingMode="EaseOut" />
+            </DoubleAnimation.EasingFunction>
+        </DoubleAnimation>
+    </Storyboard>
+
+    <!--  Fast fade out animation  -->
+    <Storyboard x:Key="FastFadeOutAnimation">
+        <DoubleAnimation
+            FillBehavior="HoldEnd"
+            Storyboard.TargetProperty="(UIElement.Opacity)"
+            From="1"
+            To="0"
+            Duration="0:0:0.15">
+            <DoubleAnimation.EasingFunction>
+                <QuadraticEase EasingMode="EaseIn" />
+            </DoubleAnimation.EasingFunction>
+        </DoubleAnimation>
+    </Storyboard>
+
+    <!--  Optimized slide in from right animation  -->
+    <Storyboard x:Key="SlideInFromRightAnimation">
+        <DoubleAnimation
+            FillBehavior="HoldEnd"
+            Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.X)"
+            From="50"
+            To="0"
+            Duration="0:0:0.2">
+            <DoubleAnimation.EasingFunction>
+                <QuadraticEase EasingMode="EaseOut" />
+            </DoubleAnimation.EasingFunction>
+        </DoubleAnimation>
+        <DoubleAnimation
+            FillBehavior="HoldEnd"
+            Storyboard.TargetProperty="(UIElement.Opacity)"
+            From="0"
+            To="1"
+            Duration="0:0:0.2">
+            <DoubleAnimation.EasingFunction>
+                <QuadraticEase EasingMode="EaseOut" />
+            </DoubleAnimation.EasingFunction>
+        </DoubleAnimation>
+    </Storyboard>
+
+    <!--  Optimized scale in animation  -->
+    <Storyboard x:Key="ScaleInAnimation">
+        <DoubleAnimation
+            FillBehavior="HoldEnd"
+            Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)"
+            From="0.8"
+            To="1"
+            Duration="0:0:0.2">
+            <DoubleAnimation.EasingFunction>
+                <QuadraticEase EasingMode="EaseOut" />
+            </DoubleAnimation.EasingFunction>
+        </DoubleAnimation>
+        <DoubleAnimation
+            FillBehavior="HoldEnd"
+            Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)"
+            From="0.8"
+            To="1"
+            Duration="0:0:0.2">
+            <DoubleAnimation.EasingFunction>
+                <QuadraticEase EasingMode="EaseOut" />
+            </DoubleAnimation.EasingFunction>
+        </DoubleAnimation>
+        <DoubleAnimation
+            FillBehavior="HoldEnd"
+            Storyboard.TargetProperty="(UIElement.Opacity)"
+            From="0"
+            To="1"
+            Duration="0:0:0.2">
+            <DoubleAnimation.EasingFunction>
+                <QuadraticEase EasingMode="EaseOut" />
+            </DoubleAnimation.EasingFunction>
+        </DoubleAnimation>
+    </Storyboard>
+
+    <!--  Optimized button hover animation  -->
+    <Storyboard x:Key="ButtonHoverAnimation">
+        <DoubleAnimation
+            FillBehavior="HoldEnd"
+            Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)"
+            To="1.05"
+            Duration="0:0:0.1">
+            <DoubleAnimation.EasingFunction>
+                <QuadraticEase EasingMode="EaseOut" />
+            </DoubleAnimation.EasingFunction>
+        </DoubleAnimation>
+        <DoubleAnimation
+            FillBehavior="HoldEnd"
+            Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)"
+            To="1.05"
+            Duration="0:0:0.1">
+            <DoubleAnimation.EasingFunction>
+                <QuadraticEase EasingMode="EaseOut" />
+            </DoubleAnimation.EasingFunction>
+        </DoubleAnimation>
+    </Storyboard>
+
+    <!--  Optimized button unhover animation  -->
+    <Storyboard x:Key="ButtonUnhoverAnimation">
+        <DoubleAnimation
+            FillBehavior="HoldEnd"
+            Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)"
+            To="1"
+            Duration="0:0:0.1">
+            <DoubleAnimation.EasingFunction>
+                <QuadraticEase EasingMode="EaseOut" />
+            </DoubleAnimation.EasingFunction>
+        </DoubleAnimation>
+        <DoubleAnimation
+            FillBehavior="HoldEnd"
+            Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)"
+            To="1"
+            Duration="0:0:0.1">
+            <DoubleAnimation.EasingFunction>
+                <QuadraticEase EasingMode="EaseOut" />
+            </DoubleAnimation.EasingFunction>
+        </DoubleAnimation>
+    </Storyboard>
+
+    <!--  Optimized loading animation for progress indicators  -->
+    <Storyboard x:Key="LoadingSpinAnimation" RepeatBehavior="Forever">
+        <DoubleAnimation
+            RepeatBehavior="Forever"
+            Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
+            From="0"
+            To="360"
+            Duration="0:0:1.2">
+            <DoubleAnimation.EasingFunction>
+                <QuadraticEase EasingMode="EaseInOut" />
+            </DoubleAnimation.EasingFunction>
+        </DoubleAnimation>
+    </Storyboard>
+
+    <!--  Optimized pulse animation for notifications  -->
+    <Storyboard
+        x:Key="PulseAnimation"
+        AutoReverse="True"
+        RepeatBehavior="3x">
+        <DoubleAnimation
+            AutoReverse="True"
+            Storyboard.TargetProperty="(UIElement.Opacity)"
+            From="1"
+            To="0.6"
+            Duration="0:0:0.4">
+            <DoubleAnimation.EasingFunction>
+                <SineEase EasingMode="EaseInOut" />
+            </DoubleAnimation.EasingFunction>
+        </DoubleAnimation>
+    </Storyboard>
+
+    <!--  Optimized slide out animation for closing  -->
+    <Storyboard x:Key="SlideOutAnimation">
+        <DoubleAnimation
+            FillBehavior="HoldEnd"
+            Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)"
+            From="0"
+            To="-20"
+            Duration="0:0:0.2">
+            <DoubleAnimation.EasingFunction>
+                <QuadraticEase EasingMode="EaseIn" />
+            </DoubleAnimation.EasingFunction>
+        </DoubleAnimation>
+        <DoubleAnimation
+            FillBehavior="HoldEnd"
+            Storyboard.TargetProperty="(UIElement.Opacity)"
+            From="1"
+            To="0"
+            Duration="0:0:0.2">
+            <DoubleAnimation.EasingFunction>
+                <QuadraticEase EasingMode="EaseIn" />
+            </DoubleAnimation.EasingFunction>
+        </DoubleAnimation>
+    </Storyboard>
+</ResourceDictionary>

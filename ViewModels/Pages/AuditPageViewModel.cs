@@ -11,7 +11,5 @@ namespace PrimeAppBooks.ViewModels.Pages
         {
             _navigationService = navigationService;
         }
-
-        // Add your audit-specific properties and commands here
     }
 }

@@ -1,0 +1,191 @@
+﻿<Window x:Class="PrimeAppBooks.Views.Windows.WndSplashScreen"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+            xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:local="clr-namespace:PrimeAppBooks.Views.Windows"
+            xmlns:converters="clr-namespace:PrimeAppBooks.Converters"
+    Title="Loading..."
+    Width="550"
+    Height="350"
+    AllowsTransparency="True"
+    Background="Transparent"
+    Loaded="SplashScreen_Loaded"
+    ResizeMode="NoResize"
+    ShowInTaskbar="False"
+    WindowStartupLocation="CenterScreen"
+    WindowStyle="None"
+    mc:Ignorable="d">
+
+    <Window.Resources>
+        <!--  ProgressPulse Storyboard - Smoother animation  -->
+        <Storyboard x:Key="ProgressPulse" RepeatBehavior="Forever">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="Opacity">
+
+                <EasingDoubleKeyFrame KeyTime="0:0:0" Value="0.7">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <PowerEase EasingMode="EaseOut" />
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+
+                <EasingDoubleKeyFrame KeyTime="0:0:0.4" Value="1.0">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <PowerEase EasingMode="EaseInOut" />
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+
+                <EasingDoubleKeyFrame KeyTime="0:0:0.8" Value="0.7">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <PowerEase EasingMode="EaseIn" />
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+            </DoubleAnimationUsingKeyFrames>
+        </Storyboard>
+
+        <!-- FadeIn Storyboard for smooth entrance -->
+        <Storyboard x:Key="FadeIn">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="Opacity">
+                <EasingDoubleKeyFrame KeyTime="0:0:0" Value="0.0" />
+                <EasingDoubleKeyFrame KeyTime="0:0:0.3" Value="1.0">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <PowerEase EasingMode="EaseOut" />
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+            </DoubleAnimationUsingKeyFrames>
+        </Storyboard>
+
+        <converters:ProgressToWidthConverter x:Key="ProgressToWidthConverter" />
+
+        <Style x:Key="SmoothProgressBar" TargetType="ProgressBar">
+            <Setter Property="Background" Value="#1A3042" />
+            <Setter Property="Foreground" Value="#1C3244" />
+            <Setter Property="Height" Value="10" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="RenderOptions.BitmapScalingMode" Value="HighQuality" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ProgressBar">
+                        <Grid>
+                            <!--  Background Track  -->
+                            <Border
+                                x:Name="PART_Track"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="4" />
+
+                            <!--  Progress Fill with smoother gradient  -->
+                            <Border
+                                x:Name="PART_Indicator"
+                                HorizontalAlignment="Left"
+                                CornerRadius="5">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                        <GradientStop Offset="0.0" Color="#6FD4FF" />
+                                        <GradientStop Offset="0.3" Color="#4AB8E6" />
+                                        <GradientStop Offset="0.7" Color="#2A8BC2" />
+                                        <GradientStop Offset="1.0" Color="#1E5A7A" />
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                                <Border.Effect>
+                                    <DropShadowEffect Color="#4AB8E6" BlurRadius="3" ShadowDepth="0" Opacity="0.6" />
+                                </Border.Effect>
+                                <Border.Width>
+                                    <MultiBinding Converter="{StaticResource ProgressToWidthConverter}">
+                                        <Binding Path="Value" RelativeSource="{RelativeSource TemplatedParent}" />
+                                        <Binding Path="Maximum" RelativeSource="{RelativeSource TemplatedParent}" />
+                                        <Binding Path="ActualWidth" RelativeSource="{RelativeSource TemplatedParent}" />
+                                    </MultiBinding>
+                                </Border.Width>
+                            </Border>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Border
+        Background="Transparent"
+        BorderBrush="#FF357ABD"
+        BorderThickness="1"
+        CornerRadius="9">
+        <Grid>
+            <!--  Background with smooth gradient  -->
+            <Rectangle RadiusX="8" RadiusY="8">
+                <Rectangle.Fill>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Offset="0" Color="#FF0A1F2E" />
+                        <GradientStop Offset="1" Color="#FF1C3244" />
+                    </LinearGradientBrush>
+                </Rectangle.Fill>
+            </Rectangle>
+
+            <!--  Content with fade-in animation  -->
+            <Grid Margin="20" Opacity="0">
+                <Grid.Triggers>
+                    <EventTrigger RoutedEvent="Loaded">
+                        <BeginStoryboard Storyboard="{StaticResource FadeIn}" />
+                    </EventTrigger>
+                </Grid.Triggers>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Image
+                    Grid.Row="0"
+                    Margin="0,0,0,20"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Source="/Images/LogoBlueGlow.png"
+                    Stretch="Uniform"
+                    RenderOptions.BitmapScalingMode="HighQuality">
+                    <Image.Effect>
+                        <DropShadowEffect Color="#4AB8E6" BlurRadius="8" ShadowDepth="0" Opacity="0.4" />
+                    </Image.Effect>
+                </Image>
+
+                <ProgressBar
+                    Grid.Row="1"
+                    Margin="0,10"
+                    Maximum="1.0"
+                    Style="{StaticResource SmoothProgressBar}"
+                    Value="{Binding ProgressValue, Mode=OneWay}">
+                    <ProgressBar.Triggers>
+                        <EventTrigger RoutedEvent="Loaded">
+                            <BeginStoryboard Storyboard="{StaticResource ProgressPulse}" />
+                        </EventTrigger>
+                    </ProgressBar.Triggers>
+                </ProgressBar>
+
+                <TextBlock
+                    Grid.Row="2"
+                    Height="30"
+                    Margin="0,10,0,5"
+                    HorizontalAlignment="Center"
+                    FontFamily="Century Gothic"
+                    FontSize="14"
+                    Foreground="White"
+                    Text="{Binding CurrentLoadingMessage}"
+                    TextTrimming="CharacterEllipsis"
+                    TextOptions.TextFormattingMode="Display"
+                    TextOptions.TextRenderingMode="ClearType">
+                    <TextBlock.Effect>
+                        <DropShadowEffect Color="#000000" BlurRadius="2" ShadowDepth="1" Opacity="0.3" />
+                    </TextBlock.Effect>
+                </TextBlock>
+
+                <TextBlock
+                    Grid.Row="3"
+                    Margin="0,5,0,0"
+                    HorizontalAlignment="Center"
+                    FontFamily="Century Gothic"
+                    FontSize="10"
+                    Foreground="#B0FFFFFF"
+                    Text="{Binding ApplicationVersion}" />
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

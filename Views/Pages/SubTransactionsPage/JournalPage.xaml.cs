@@ -24,7 +24,7 @@ namespace PrimeAppBooks.Views.Pages.SubTransactionsPage
     /// </summary>
     public partial class JournalPage : BaseAnimatedPage
     {
-        public JournalPage()
+        public JournalPage(JournalPageViewModel viewModel)
         {
             InitializeComponent();
 
@@ -36,9 +36,7 @@ namespace PrimeAppBooks.Views.Pages.SubTransactionsPage
             SetAnimateOut(true);
 
             // Just set DataContext, navigation service is already injected into VM
-            DataContext = new JournalPageViewModel(
-                ServiceLocator.GetService<INavigationService>()
-            );
+            DataContext = viewModel;
         }
     }
 }

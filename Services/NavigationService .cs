@@ -1,4 +1,5 @@
-﻿using PrimeAppBooks.Interfaces;
+﻿using Microsoft.Extensions.DependencyInjection;
+using PrimeAppBooks.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Windows;
@@ -14,6 +15,7 @@ namespace PrimeAppBooks.Services
     {
         private readonly Frame _frame;
         private Page? _currentPage;
+        private readonly IServiceProvider _serviceProvider;
         private readonly Dictionary<Type, Page> _pageCache = new();
         private readonly Dictionary<Type, string> _pageAnimations = new();
         private readonly Dictionary<Type, AnimationDirection> _pageAnimationDirections = new();
@@ -21,12 +23,13 @@ namespace PrimeAppBooks.Services
 
         public event EventHandler<Page> PageNavigated = delegate { };
 
-        public NavigationService(Frame frame)
+        public NavigationService(Frame frame, IServiceProvider serviceProvider)
         {
             _frame = frame;
+            _serviceProvider = serviceProvider;
             _frame.Navigated += OnFrameNavigated;
             _frame.NavigationStopped += OnNavigationStopped;
-            
+
             // Pre-warm the frame to reduce initial navigation delay
             _frame.Dispatcher.BeginInvoke(DispatcherPriority.Loaded, new Action(() => { }));
         }
@@ -50,30 +53,32 @@ namespace PrimeAppBooks.Services
         {
             if (_isNavigating) return;
 
+            _isNavigating = true;
+
             try
             {
-                _isNavigating = true;
-                
-                // Check if page is already cached
-                if (!_pageCache.TryGetValue(typeof(T), out var page))
-                {
-                    page = Activator.CreateInstance<T>();
-                    _pageCache[typeof(T)] = page;
-                }
+                // Get page from DI container - this will inject the ViewModel automatically
+                var page = _serviceProvider.GetRequiredService<T>();
 
                 // Apply exit animation to current page if it supports it
                 if (_currentPage != null && _currentPage is IAnimatedPage currentAnimatedPage && currentAnimatedPage.AnimateOut)
                 {
-                    ApplyExitAnimation(_currentPage, () => _frame.Navigate(page, parameter));
+                    ApplyExitAnimation(_currentPage, () => 
+                    {
+                        _frame.Navigate(page, parameter);
+                        // Don't reset _isNavigating here - let OnFrameNavigated handle it
+                    });
                 }
                 else
                 {
                     _frame.Navigate(page, parameter);
+                    // Reset _isNavigating after navigation completes
                 }
             }
-            finally
+            catch
             {
                 _isNavigating = false;
+                throw;
             }
         }
 
@@ -91,16 +96,18 @@ namespace PrimeAppBooks.Services
         private void OnFrameNavigated(object sender, NavigationEventArgs e)
         {
             _currentPage = e.Content as Page;
-            PageNavigated?.Invoke(this, _currentPage);
-
+            
             if (_currentPage != null)
             {
-                // Apply entrance animation with a slight delay for smoother transitions
-                _currentPage.Dispatcher.BeginInvoke(DispatcherPriority.Loaded, new Action(() =>
-                {
-                    ApplyEntranceAnimation(_currentPage);
-                }));
+                // Apply entrance animation immediately without delay to prevent double loading
+                ApplyEntranceAnimation(_currentPage);
+                
+                // Fire the PageNavigated event after animation is set up
+                PageNavigated?.Invoke(this, _currentPage);
             }
+            
+            // Reset navigation flag after everything is complete
+            _isNavigating = false;
         }
 
         private void OnNavigationStopped(object sender, NavigationEventArgs e)
@@ -148,24 +155,31 @@ namespace PrimeAppBooks.Services
                 case AnimationDirection.FromLeft:
                     ApplySlideAnimation(page, storyboard, -400, 0, 0, 0, duration, easingFunction);
                     break;
+
                 case AnimationDirection.FromRight:
                     ApplySlideAnimation(page, storyboard, 400, 0, 0, 0, duration, easingFunction);
                     break;
+
                 case AnimationDirection.FromTop:
                     ApplySlideAnimation(page, storyboard, 0, -300, 0, 0, duration, easingFunction);
                     break;
+
                 case AnimationDirection.FromBottom:
                     ApplySlideAnimation(page, storyboard, 0, 300, 0, 0, duration, easingFunction);
                     break;
+
                 case AnimationDirection.FadeIn:
                     ApplyFadeAnimation(page, storyboard, duration, easingFunction);
                     break;
+
                 case AnimationDirection.ZoomIn:
                     ApplyZoomAnimation(page, storyboard, duration, easingFunction);
                     break;
+
                 case AnimationDirection.SlideIn:
                     ApplySmoothSlideFromBottomAnimation(page);
                     return;
+
                 default:
                     ApplySmoothSlideFromBottomAnimation(page);
                     return;
@@ -234,7 +248,7 @@ namespace PrimeAppBooks.Services
         private void ApplyZoomAnimation(Page page, Storyboard storyboard, int duration, IEasingFunction easing)
         {
             page.RenderTransform = new ScaleTransform();
-            
+
             var scaleXAnimation = new DoubleAnimation
             {
                 From = 0.8,
@@ -296,7 +310,7 @@ namespace PrimeAppBooks.Services
         private void ApplyExitAnimation(Page page, Action onComplete)
         {
             var storyboard = new Storyboard();
-            
+
             var fadeAnimation = new DoubleAnimation
             {
                 From = 1,
@@ -309,7 +323,7 @@ namespace PrimeAppBooks.Services
             Storyboard.SetTargetProperty(fadeAnimation, new PropertyPath("Opacity"));
 
             storyboard.Children.Add(fadeAnimation);
-            
+
             storyboard.Completed += (s, e) => onComplete?.Invoke();
             storyboard.Begin();
         }

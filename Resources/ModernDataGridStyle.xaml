@@ -1,5 +1,7 @@
-﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
 
     <!--  Transaction Status Badge Style  -->
     <Style x:Key="TransactionStatusBadge" TargetType="{x:Type Border}">
@@ -62,7 +64,10 @@
         </Setter>
     </Style>
 
-    <Style x:Key="ModernDataGridStyle" TargetType="DataGrid" BasedOn="{StaticResource MaterialDesignDataGrid}">
+    <Style
+        x:Key="ModernDataGridStyle"
+        BasedOn="{StaticResource MaterialDesignDataGrid}"
+        TargetType="DataGrid">
         <Setter Property="Margin" Value="10" />
         <Setter Property="HorizontalAlignment" Value="Stretch" />
         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -80,14 +85,14 @@
         <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
         <Setter Property="SelectionMode" Value="Single" />
 
-        <!-- Context Menu -->
+        <!--  Context Menu  -->
         <Setter Property="ContextMenu">
             <Setter.Value>
                 <ContextMenu>
                     <MenuItem
-                    Command="{Binding EditStudentCommand}"
-                    CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Parent.PlacementTarget.SelectedItem}"
-                    Header="Edit Student">
+                        Command="{Binding EditStudentCommand}"
+                        CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Parent.PlacementTarget.SelectedItem}"
+                        Header="Edit Student">
                         <MenuItem.Icon>
                             <materialDesign:PackIcon Kind="Edit" />
                         </MenuItem.Icon>
@@ -96,18 +101,18 @@
                     <Separator />
 
                     <MenuItem
-                    Command="{Binding TransferStudentCommand}"
-                    CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Parent.PlacementTarget.SelectedItem}"
-                    Header="Transfer Student">
+                        Command="{Binding TransferStudentCommand}"
+                        CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Parent.PlacementTarget.SelectedItem}"
+                        Header="Transfer Student">
                         <MenuItem.Icon>
                             <materialDesign:PackIcon Kind="AccountArrowRightOutline" />
                         </MenuItem.Icon>
                     </MenuItem>
 
                     <MenuItem
-                    Command="{Binding DeleteStudentCommand}"
-                    CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Parent.PlacementTarget.SelectedItem}"
-                    Header="Delete Student">
+                        Command="{Binding DeleteStudentCommand}"
+                        CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Parent.PlacementTarget.SelectedItem}"
+                        Header="Delete Student">
                         <MenuItem.Icon>
                             <materialDesign:PackIcon Kind="Delete" />
                         </MenuItem.Icon>
@@ -116,7 +121,7 @@
             </Setter.Value>
         </Setter>
 
-        <!-- Row Style -->
+        <!--  Row Style  -->
         <Setter Property="RowStyle">
             <Setter.Value>
                 <Style BasedOn="{StaticResource MaterialDesignDataGridRow}" TargetType="DataGridRow">
@@ -131,7 +136,7 @@
             </Setter.Value>
         </Setter>
 
-        <!-- Cell Style -->
+        <!--  Cell Style  -->
         <Setter Property="CellStyle">
             <Setter.Value>
                 <Style BasedOn="{StaticResource MaterialDesignDataGridCell}" TargetType="DataGridCell">
@@ -146,7 +151,7 @@
             </Setter.Value>
         </Setter>
 
-        <!-- Column Header Style -->
+        <!--  Column Header Style  -->
         <Setter Property="ColumnHeaderStyle">
             <Setter.Value>
                 <Style BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}" TargetType="DataGridColumnHeader">

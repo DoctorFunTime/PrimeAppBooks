@@ -10,20 +10,10 @@ namespace PrimeAppBooks.Views.Pages
     /// </summary>
     public partial class ChartOfAccountsPage : BaseAnimatedPage
     {
-        public ChartOfAccountsPage()
+        public ChartOfAccountsPage(ChartOfAccountsPageViewModel viewModel)
         {
             InitializeComponent();
-
-            // Set custom animation properties for chart of accounts page
-            // Slide from right to feel like opening a drawer
-            SetAnimationDirection(Interfaces.AnimationDirection.FromRight);
-            SetAnimationDuration(300);
-            SetAnimationEasing(Interfaces.AnimationEasing.EaseOut);
-            SetAnimateOut(true);
-
-            DataContext = new ChartOfAccountsPageViewModel(
-                ServiceLocator.GetService<INavigationService>()
-            );
+            DataContext = viewModel;
         }
     }
 }

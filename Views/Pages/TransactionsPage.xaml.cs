@@ -1,4 +1,5 @@
-﻿using PrimeAppBooks.Interfaces;
+﻿using Microsoft.Extensions.DependencyInjection;
+using PrimeAppBooks.Interfaces;
 using PrimeAppBooks.Services;
 using PrimeAppBooks.ViewModels.Pages;
 using PrimeAppBooks.ViewModels.Windows;
@@ -23,21 +24,10 @@ namespace PrimeAppBooks.Views.Pages
     /// </summary>
     public partial class TransactionsPage : BaseAnimatedPage
     {
-        public TransactionsPage()
+        public TransactionsPage(TransactionsPageViewModel viewModel)
         {
             InitializeComponent();
-
-            // Set custom animation properties for transactions page
-            // Slide from right to feel like opening a drawer/panel
-            SetAnimationDirection(AnimationDirection.FromBottom);
-            SetAnimationDuration(300);
-            SetAnimationEasing(AnimationEasing.EaseOut);
-            SetAnimateOut(true);
-
-            // Just set DataContext, navigation service is already injected into VM
-            DataContext = new TransactionsPageViewModel(
-                ServiceLocator.GetService<INavigationService>()
-            );
+            DataContext = viewModel;
         }
     }
 }

@@ -11,20 +11,10 @@ namespace PrimeAppBooks.Views.Pages
     /// </summary>
     public partial class DashboardPage : BaseAnimatedPage
     {
-        public DashboardPage()
+        public DashboardPage(DashboardPageViewModel viewModel)
         {
             InitializeComponent();
-
-            // Set custom animation properties for the dashboard
-            SetAnimationDirection(AnimationDirection.FromBottom);
-            SetAnimationDuration(300);
-            SetAnimationEasing(AnimationEasing.EaseIn);
-            SetAnimateOut(true);
-
-            DataContext = new DashboardPageViewModel(
-                ServiceLocator.GetService<INavigationService>(),
-                ServiceLocator.GetService<QuickBooksAuthService>(),
-                ServiceLocator.GetService<QuickBooksService>());
+            DataContext = viewModel;
         }
     }
 }

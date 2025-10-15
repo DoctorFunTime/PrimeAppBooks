@@ -12,7 +12,7 @@ namespace PrimeAppBooks.ViewModels.Windows
     public partial class MainWindowViewModel : ObservableObject
     {
         private readonly INavigationService _navigationService;
-
+        private readonly SplashscreenInitialisations _splashscreenInitialisations;
         public Visibility SidebarContentVisibility => IsSidebarExpanded ? Visibility.Visible : Visibility.Collapsed;
         public Visibility CollapsedContentVisibility => IsSidebarExpanded ? Visibility.Collapsed : Visibility.Visible;
 
@@ -57,38 +57,24 @@ namespace PrimeAppBooks.ViewModels.Windows
         [ObservableProperty]
         private GridLength _sidebarMargin = new(20);
 
-        public MainWindowViewModel(INavigationService navigationService)
+        public MainWindowViewModel(INavigationService navigationService, SplashscreenInitialisations splashscreenInitialisations)
         {
             _navigationService = navigationService;
+            _splashscreenInitialisations = splashscreenInitialisations;
             _navigationService.PageNavigated += OnPageNavigated;
-            
-            // Register custom animations for different pages to improve navigation experience
-            RegisterPageAnimations();
-            
-            // Navigate to dashboard by default
-            NavigateToDashboard();
+
+            // Navigate to dashboard by default - but don't set navigation state here
+            // The OnPageNavigated event handler will handle the state setting
+            _navigationService.NavigateTo<DashboardPage>();
+
+            TestConnection();
         }
 
-        private void RegisterPageAnimations()
+        private void TestConnection()
         {
-            // Dashboard - smooth slide from bottom
-            _navigationService.RegisterPageAnimation<DashboardPage>(AnimationDirection.FromBottom);
-            
-            // Chart of Accounts - slide from right (feels like opening a drawer)
-            _navigationService.RegisterPageAnimation<ChartOfAccountsPage>(AnimationDirection.FromRight);
-            
-            // Transactions - slide from right (consistent with accounts)
-            _navigationService.RegisterPageAnimation<TransactionsPage>(AnimationDirection.FromRight);
-            
-            // Reports - slide from top (feels like opening a report)
-            _navigationService.RegisterPageAnimation<ReportsPage>(AnimationDirection.FromTop);
-            
-            // Audit - fade in (more subtle for data-heavy pages)
-            _navigationService.RegisterPageAnimation<Audit>(AnimationDirection.FadeIn);
-            
-            // Settings - slide from left (feels like opening a side panel)
-            _navigationService.RegisterPageAnimation<Settings>(AnimationDirection.FromLeft);
+            _splashscreenInitialisations.TestConnectionToDatabase();
         }
+
 
         [RelayCommand]
         private void ToggleSidebar()
@@ -103,48 +89,36 @@ namespace PrimeAppBooks.ViewModels.Windows
         [RelayCommand]
         private void NavigateToDashboard()
         {
-            SetAllNavigationToFalse();
-            IsDashboardSelected = true;
             _navigationService.NavigateTo<DashboardPage>();
         }
 
         [RelayCommand]
         private void NavigateToChartOfAccounts()
         {
-            SetAllNavigationToFalse();
-            IsChartOfAccountsSelected = true;
             _navigationService.NavigateTo<ChartOfAccountsPage>();
         }
 
         [RelayCommand]
         private void NavigateToTransactions()
         {
-            SetAllNavigationToFalse();
-            IsTransactionsSelected = true;
             _navigationService.NavigateTo<TransactionsPage>();
         }
 
         [RelayCommand]
         private void NavigateToReports()
         {
-            SetAllNavigationToFalse();
-            IsReportsSelected = true;
             _navigationService.NavigateTo<ReportsPage>();
         }
 
         [RelayCommand]
         private void NavigateToAuditTrails()
         {
-            SetAllNavigationToFalse();
-            IsAuditTrailsSelected = true;
             _navigationService.NavigateTo<Audit>();
         }
 
         [RelayCommand]
         private void NavigateToSettings()
         {
-            SetAllNavigationToFalse();
-            IsSettingsSelected = true;
             _navigationService.NavigateTo<Settings>();
         }
 
@@ -165,24 +139,29 @@ namespace PrimeAppBooks.ViewModels.Windows
         {
             // Update navigation selection based on the page type
             SetAllNavigationToFalse();
-            
+
             switch (page)
             {
                 case DashboardPage:
                     IsDashboardSelected = true;
                     break;
+
                 case ChartOfAccountsPage:
                     IsChartOfAccountsSelected = true;
                     break;
+
                 case TransactionsPage:
                     IsTransactionsSelected = true;
                     break;
+
                 case ReportsPage:
                     IsReportsSelected = true;
                     break;
+
                 case Audit:
                     IsAuditTrailsSelected = true;
                     break;
+
                 case Settings:
                     IsSettingsSelected = true;
                     break;

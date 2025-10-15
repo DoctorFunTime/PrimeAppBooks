@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PrimeAppBooks.ViewModels.Pages;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,16 +18,10 @@ namespace PrimeAppBooks.Views.Pages
 {
     public partial class Settings : BaseAnimatedPage
     {
-        public Settings()
+        public Settings(SettingsPageViewModel viewModel)
         {
             InitializeComponent();
-
-            // Set custom animation properties for settings page
-            // Slide from left to feel like opening a side panel
-            SetAnimationDirection(Interfaces.AnimationDirection.FromBottom);
-            SetAnimationDuration(300);
-            SetAnimationEasing(Interfaces.AnimationEasing.EaseIn);
-            SetAnimateOut(true);
+            DataContext = viewModel;
 
             // Set initial selection after InitializeComponent()
             SettingsTabControl.SelectedIndex = 0;

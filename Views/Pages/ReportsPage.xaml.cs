@@ -10,20 +10,10 @@ namespace PrimeAppBooks.Views.Pages
     /// </summary>
     public partial class ReportsPage : BaseAnimatedPage
     {
-        public ReportsPage()
+        public ReportsPage(ReportsPageViewModel viewModel)
         {
             InitializeComponent();
-
-            // Set custom animation properties for reports page
-            // Slide from top to feel like opening a report
-            SetAnimationDirection(Interfaces.AnimationDirection.FromBottom);
-            SetAnimationDuration(300);
-            SetAnimationEasing(Interfaces.AnimationEasing.EaseIn);
-            SetAnimateOut(true);
-
-            DataContext = new ReportsPageViewModel(
-                ServiceLocator.GetService<INavigationService>()
-            );
+            DataContext = viewModel;
         }
     }
 }
