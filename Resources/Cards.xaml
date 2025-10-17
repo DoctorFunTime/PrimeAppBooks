@@ -73,7 +73,7 @@
     <!--  Button Styles  -->
     <Style x:Key="ModernActionButton" TargetType="Button">
         <Setter Property="Background" Value="{StaticResource ButtonGradientBrush}" />
-        <Setter Property="Foreground" Value="White" />
+        <Setter Property="Foreground" Value="Black" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Padding" Value="15,8" />
         <Setter Property="FontSize" Value="12" />
@@ -579,13 +579,14 @@
     <!--  Transaction Status Badge  -->
     <Style x:Key="TransactionStatusBadge" TargetType="Border">
         <Setter Property="CornerRadius" Value="4" />
-        <Setter Property="Padding" Value="6,2" />
         <Setter Property="HorizontalAlignment" Value="Center" />
     </Style>
 
     <Style x:Key="StatusBadgeText" TargetType="TextBlock">
-        <Setter Property="Foreground" Value="White" />
+        <Setter Property="Foreground" Value="Black" />
         <Setter Property="FontSize" Value="10" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Foreground" Value="Black" />
         <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
 

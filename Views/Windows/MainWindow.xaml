@@ -5,6 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:fw="clr-namespace:SourceChord.FluentWPF;assembly=FluentWPF"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:views="clr-namespace:PrimeAppBooks.Views.Controls"
     Title="PrimeApp Books"
     Width="1300"
     Height="700"
@@ -372,6 +373,12 @@
                                 Background="Transparent"
                                 BorderThickness="0"
                                 NavigationUIVisibility="Hidden" />
+                            
+                            <!-- Loading Overlay -->
+                            <views:LoadingOverlay 
+                                x:Name="LoadingOverlay"
+                                Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                Panel.ZIndex="1000" />
                         </Grid>
                     </Grid>
                 </Grid>

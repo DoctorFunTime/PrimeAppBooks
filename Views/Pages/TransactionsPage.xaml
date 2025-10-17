@@ -15,6 +15,14 @@
     Background="Transparent"
     mc:Ignorable="d">
 
+    <base:BaseAnimatedPage.Resources>
+        <converters:StatusToVisibilityConverter x:Key="StatusToVisibilityConverter" />
+        <converters:StatusIndicatorConverter x:Key="StatusIndicatorConverter" />
+        <converters:NegativeAmountConverter x:Key="NegativeAmountConverter" />
+        <converters:StatusColorConverter x:Key="StatusColorConverter" />
+        <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+    </base:BaseAnimatedPage.Resources>
+
     <ScrollViewer Style="{StaticResource ModernScrollViewer}">
         <Grid Margin="10">
             <Grid.RowDefinitions>
@@ -264,7 +272,7 @@
                         <StackPanel Grid.Column="4" VerticalAlignment="Bottom">
                             <Button
                                 Margin="0,0,0,5"
-                                Command="{Binding ApplyFiltersCommand}"
+                                Command="{Binding ApplyFiltersCommandCommand}"
                                 Content="Apply"
                                 Style="{StaticResource ModernActionButton}" />
                             <Button
@@ -318,18 +326,53 @@
                             </StackPanel>
                         </Grid>
 
-                        <!--  Transactions DataGrid with Modern Styling  -->
+                        <!--  Journal Entries DataGrid with Modern Styling  -->
                         <DataGrid
                             MaxHeight="600"
-                            ItemsSource="{Binding FilteredTransactions}"
-                            SelectedItem="{Binding SelectedTransaction}"
+                            ItemsSource="{Binding FilteredJournalEntries}"
+                            SelectedItem="{Binding SelectedJournalEntry}"
                             SelectionMode="Single"
                             Style="{StaticResource ModernDataGridStyle}">
+
+                            <DataGrid.RowStyle>
+                                <Style BasedOn="{StaticResource MaterialDesignDataGridRow}" TargetType="DataGridRow">
+                                    <Style.Triggers>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter Property="Foreground" Value="Black" />
+                                            <Setter Property="Background" Value="Transparent" />
+                                            <Setter Property="BorderBrush" Value="Transparent" />
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </DataGrid.RowStyle>
+
+                            <DataGrid.CellStyle>
+                                <Style BasedOn="{StaticResource MaterialDesignDataGridCell}" TargetType="DataGridCell">
+                                    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                    <Style.Triggers>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter Property="Background" Value="Transparent" />
+                                            <Setter Property="BorderBrush" Value="Transparent" />
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </DataGrid.CellStyle>
+
+                            <DataGrid.ColumnHeaderStyle>
+                                <Style BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}" TargetType="DataGridColumnHeader">
+                                    <Setter Property="Foreground" Value="#FF4472C4" />
+                                    <Setter Property="FontWeight" Value="Bold" />
+                                    <Setter Property="FontFamily" Value="Segoe UI" />
+                                    <Setter Property="FontSize" Value="14" />
+                                    <Setter Property="VerticalContentAlignment" Value="Center" />
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                </Style>
+                            </DataGrid.ColumnHeaderStyle>
 
                             <DataGrid.Columns>
                                 <!--  Status Indicator  -->
                                 <DataGridTemplateColumn
-                                    Width="40"
+                                    Width="Auto"
                                     CanUserResize="False"
                                     Header="">
                                     <DataGridTemplateColumn.CellTemplate>
@@ -353,10 +396,24 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
+                                <!--  Journal Number  -->
+                                <DataGridTextColumn
+                                    Width="Auto"
+                                    Binding="{Binding JournalNumber}"
+                                    Header="Journal #">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="FontFamily" Value="Segoe UI" />
+                                            <Setter Property="FontWeight" Value="Medium" />
+                                            <Setter Property="Foreground" Value="#34495E" />
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+
                                 <!--  Date  -->
                                 <DataGridTextColumn
-                                    Width="120"
-                                    Binding="{Binding TransactionDate, StringFormat='MMM dd, yyyy'}"
+                                    Width="Auto"
+                                    Binding="{Binding JournalDate, StringFormat='MMM dd, yyyy'}"
                                     Header="Date">
                                     <DataGridTextColumn.ElementStyle>
                                         <Style TargetType="TextBlock">
@@ -367,23 +424,23 @@
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
 
-                                <!--  Reference/Number  -->
+                                <!--  Reference  -->
                                 <DataGridTextColumn
-                                    Width="110"
-                                    Binding="{Binding ReferenceNumber}"
+                                    Width="Auto"
+                                    Binding="{Binding Reference}"
                                     Header="Reference">
                                     <DataGridTextColumn.ElementStyle>
                                         <Style TargetType="TextBlock">
                                             <Setter Property="FontFamily" Value="Segoe UI" />
-                                            <Setter Property="FontWeight" Value="Medium" />
-                                            <Setter Property="Foreground" Value="#34495E" />
+                                            <Setter Property="FontWeight" Value="Normal" />
+                                            <Setter Property="Foreground" Value="#7F8C8D" />
                                         </Style>
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
 
                                 <!--  Description  -->
                                 <DataGridTextColumn
-                                    Width="*"
+                                    Width="Auto"
                                     MinWidth="250"
                                     Binding="{Binding Description}"
                                     Header="Description">
@@ -398,26 +455,25 @@
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
 
-                                <!--  Accounts Involved  -->
+                                <!--  Lines Column  -->
                                 <DataGridTextColumn
-                                    Width="180"
-                                    Binding="{Binding AccountsSummary}"
-                                    Header="Accounts">
+                                    Width="Auto"
+                                    Binding="{Binding JournalLines.Count, StringFormat='0 lines'}"
+                                    Header="Lines">
                                     <DataGridTextColumn.ElementStyle>
                                         <Style TargetType="TextBlock">
                                             <Setter Property="FontFamily" Value="Segoe UI" />
                                             <Setter Property="FontSize" Value="12" />
                                             <Setter Property="Foreground" Value="#7F8C8D" />
                                             <Setter Property="TextTrimming" Value="CharacterEllipsis" />
-                                            <Setter Property="ToolTip" Value="{Binding AccountsSummary}" />
                                         </Style>
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
 
                                 <!--  Amount  -->
                                 <DataGridTextColumn
-                                    Width="120"
-                                    Binding="{Binding TotalAmount, StringFormat=C}"
+                                    Width="Auto"
+                                    Binding="{Binding Amount, StringFormat=C}"
                                     Header="Amount">
                                     <DataGridTextColumn.ElementStyle>
                                         <Style TargetType="TextBlock">
@@ -427,7 +483,7 @@
                                             <Setter Property="FontSize" Value="13" />
                                             <Setter Property="Foreground" Value="#27AE60" />
                                             <Style.Triggers>
-                                                <DataTrigger Binding="{Binding TotalAmount, Converter={StaticResource NegativeAmountConverter}}" Value="True">
+                                                <DataTrigger Binding="{Binding Amount, Converter={StaticResource NegativeAmountConverter}}" Value="True">
                                                     <Setter Property="Foreground" Value="#E74C3C" />
                                                 </DataTrigger>
                                             </Style.Triggers>
@@ -436,7 +492,7 @@
                                 </DataGridTextColumn>
 
                                 <!--  Status Badge  -->
-                                <DataGridTemplateColumn Width="90" Header="Status">
+                                <DataGridTemplateColumn Width="Auto" Header="Status">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <Border Background="{Binding Status, Converter={StaticResource StatusColorConverter}}" Style="{StaticResource TransactionStatusBadge}">
@@ -454,7 +510,7 @@
                                 </DataGridTemplateColumn>
 
                                 <!--  Actions  -->
-                                <DataGridTemplateColumn Width="160" Header="Actions">
+                                <DataGridTemplateColumn Width="Auto" Header="Actions">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <StackPanel
@@ -465,10 +521,10 @@
                                                 <!--  Edit Button  -->
                                                 <Button
                                                     Margin="0,0,4,0"
-                                                    Command="{Binding DataContext.EditTransactionCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                    Command="{Binding DataContext.EditJournalEntryCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                     CommandParameter="{Binding}"
                                                     Style="{StaticResource ModernIconButton}"
-                                                    ToolTip="Edit Transaction">
+                                                    ToolTip="Edit Journal Entry">
                                                     <Path
                                                         Width="14"
                                                         Height="14"
@@ -477,39 +533,29 @@
                                                         Stretch="Uniform" />
                                                 </Button>
 
-                                                <!--  Post/Unpost Button  -->
+                                                <!--  Post Button (only for drafts)  -->
                                                 <Button
                                                     Margin="0,0,4,0"
-                                                    Command="{Binding DataContext.TogglePostStatusCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                    Command="{Binding DataContext.PostJournalEntryCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                     CommandParameter="{Binding}"
-                                                    IsEnabled="{Binding CanTogglePostStatus}"
                                                     Style="{StaticResource ModernIconButton}"
-                                                    ToolTip="{Binding PostButtonTooltip}">
+                                                    ToolTip="Post Journal Entry"
+                                                    Visibility="{Binding Status, Converter={StaticResource StatusToVisibilityConverter}}">
                                                     <Path
                                                         Width="14"
                                                         Height="14"
-                                                        Data="{Binding PostButtonIcon, Converter={StaticResource IconPathConverter}}"
-                                                        Stretch="Uniform">
-                                                        <Path.Style>
-                                                            <Style TargetType="Path">
-                                                                <Setter Property="Fill" Value="#27AE60" />
-                                                                <Style.Triggers>
-                                                                    <DataTrigger Binding="{Binding Status}" Value="Draft">
-                                                                        <Setter Property="Fill" Value="#F39C12" />
-                                                                    </DataTrigger>
-                                                                </Style.Triggers>
-                                                            </Style>
-                                                        </Path.Style>
-                                                    </Path>
+                                                        Data="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z"
+                                                        Fill="#27AE60"
+                                                        Stretch="Uniform" />
                                                 </Button>
 
                                                 <!--  View Details Button  -->
                                                 <Button
                                                     Margin="0,0,4,0"
-                                                    Command="{Binding DataContext.ViewDetailsCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                    Command="{Binding DataContext.ViewJournalDetailsCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                     CommandParameter="{Binding}"
                                                     Style="{StaticResource ModernIconButton}"
-                                                    ToolTip="View Transaction Details">
+                                                    ToolTip="View Journal Details">
                                                     <Path
                                                         Width="14"
                                                         Height="14"
@@ -520,11 +566,11 @@
 
                                                 <!--  Delete Button (only for drafts)  -->
                                                 <Button
-                                                    Command="{Binding DataContext.DeleteDraftCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                    Command="{Binding DataContext.DeleteJournalEntryCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                     CommandParameter="{Binding}"
                                                     Style="{StaticResource ModernIconButton}"
                                                     ToolTip="Delete Draft"
-                                                    Visibility="{Binding IsDraft, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                    Visibility="{Binding Status, Converter={StaticResource StatusToVisibilityConverter}}">
                                                     <Path
                                                         Width="14"
                                                         Height="14"
@@ -574,7 +620,7 @@
                     </StackPanel>
                 </Border>
 
-                <!--  Transaction Details & Quick Actions Panel  -->
+                <!--  Journal Entry Details & Quick Actions Panel  -->
                 <Border
                     Grid.Column="1"
                     Margin="10,0,0,0"
@@ -582,19 +628,19 @@
                     <StackPanel>
                         <TextBlock Style="{StaticResource SectionHeaderText}" Text="📋 Selected Entry Details" />
 
-                        <!--  Transaction Details (shown when item selected)  -->
-                        <StackPanel Margin="0,10,0,0" Visibility="{Binding SelectedTransaction, Converter={StaticResource NullToVisibilityConverter}}">
+                        <!--  Journal Entry Details (shown when item selected)  -->
+                        <StackPanel Margin="0,10,0,0" Visibility="{Binding SelectedJournalEntry, Converter={StaticResource NullToVisibilityConverter}}">
                             <!--  Entry Header Info  -->
                             <Border Margin="0,0,0,10" Style="{StaticResource DetailInfoBorder}">
                                 <StackPanel>
-                                    <TextBlock Style="{StaticResource DetailHeaderText}" Text="{Binding SelectedTransaction.ReferenceNumber}" />
-                                    <TextBlock Style="{StaticResource DetailSubText}" Text="{Binding SelectedTransaction.TransactionDate, StringFormat='MMM dd, yyyy'}" />
+                                    <TextBlock Style="{StaticResource DetailHeaderText}" Text="{Binding SelectedJournalEntry.JournalNumber}" />
+                                    <TextBlock Style="{StaticResource DetailSubText}" Text="{Binding SelectedJournalEntry.JournalDate, StringFormat='MMM dd, yyyy'}" />
                                     <Border
                                         Margin="0,5,0,0"
                                         HorizontalAlignment="Left"
-                                        Background="{Binding SelectedTransaction.Status, Converter={StaticResource StatusColorConverter}}"
+                                        Background="{Binding SelectedJournalEntry.Status, Converter={StaticResource StatusColorConverter}}"
                                         Style="{StaticResource TransactionStatusBadge}">
-                                        <TextBlock Style="{StaticResource StatusBadgeText}" Text="{Binding SelectedTransaction.Status}" />
+                                        <TextBlock Style="{StaticResource StatusBadgeText}" Text="{Binding SelectedJournalEntry.Status}" />
                                     </Border>
                                 </StackPanel>
                             </Border>
@@ -605,7 +651,7 @@
                                     <TextBlock Style="{StaticResource DetailLabelText}" Text="Description" />
                                     <TextBlock
                                         Style="{StaticResource DetailValueText}"
-                                        Text="{Binding SelectedTransaction.Description}"
+                                        Text="{Binding SelectedJournalEntry.Description}"
                                         TextWrapping="Wrap" />
                                 </StackPanel>
                             </Border>
@@ -614,7 +660,7 @@
                             <Border Margin="0,0,0,10" Style="{StaticResource DetailInfoBorder}">
                                 <StackPanel>
                                     <TextBlock Style="{StaticResource DetailLabelText}" Text="Account Lines" />
-                                    <ItemsControl Margin="0,5,0,0" ItemsSource="{Binding SelectedTransaction.JournalLines}">
+                                    <ItemsControl Margin="0,5,0,0" ItemsSource="{Binding SelectedJournalEntry.JournalLines}">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
                                                 <Grid Margin="0,2">
@@ -625,11 +671,11 @@
                                                     <TextBlock
                                                         Grid.Column="0"
                                                         Style="{StaticResource DetailSubText}"
-                                                        Text="{Binding AccountName}" />
+                                                        Text="{Binding Description}" />
                                                     <TextBlock
                                                         Grid.Column="1"
                                                         Style="{StaticResource DetailSubText}"
-                                                        Text="{Binding Amount, StringFormat=C}" />
+                                                        Text="{Binding DebitAmount, StringFormat=C}" />
                                                 </Grid>
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
@@ -641,22 +687,23 @@
                             <StackPanel Margin="0,10,0,0">
                                 <Button
                                     Margin="0,0,0,5"
-                                    Command="{Binding EditTransactionCommand}"
-                                    CommandParameter="{Binding SelectedTransaction}"
+                                    Command="{Binding EditJournalEntryCommand}"
+                                    CommandParameter="{Binding SelectedJournalEntry}"
                                     Content="📝 Edit Entry"
                                     Style="{StaticResource ModernSecondaryButton}" />
                                 <Button
                                     Margin="0,0,0,5"
-                                    Command="{Binding DuplicateTransactionCommand}"
-                                    CommandParameter="{Binding SelectedTransaction}"
-                                    Content="📋 Duplicate"
-                                    Style="{StaticResource ModernSecondaryButton}" />
-                                <Button
-                                    Command="{Binding TogglePostStatusCommand}"
-                                    CommandParameter="{Binding SelectedTransaction}"
-                                    Content="🔄 Post Entry"
+                                    Command="{Binding PostJournalEntryCommand}"
+                                    CommandParameter="{Binding SelectedJournalEntry}"
+                                    Content="✅ Post Entry"
                                     Style="{StaticResource ModernSecondaryButton}"
-                                    Visibility="{Binding SelectedTransaction.IsDraft, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                    Visibility="{Binding SelectedJournalEntry.Status, Converter={StaticResource StatusToVisibilityConverter}}" />
+                                <Button
+                                    Command="{Binding DeleteJournalEntryCommand}"
+                                    CommandParameter="{Binding SelectedJournalEntry}"
+                                    Content="🗑️ Delete Draft"
+                                    Style="{StaticResource ModernSecondaryButton}"
+                                    Visibility="{Binding SelectedJournalEntry.Status, Converter={StaticResource StatusToVisibilityConverter}}" />
                             </StackPanel>
                         </StackPanel>
 
@@ -664,7 +711,7 @@
                         <StackPanel
                             Margin="0,20,0,0"
                             HorizontalAlignment="Center"
-                            Visibility="{Binding SelectedTransaction, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Invert}">
+                            Visibility="{Binding SelectedJournalEntry, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Invert}">
                             <TextBlock
                                 Margin="0,0,0,10"
                                 HorizontalAlignment="Center"
@@ -674,7 +721,7 @@
                             <TextBlock
                                 HorizontalAlignment="Center"
                                 Style="{StaticResource DetailSubText}"
-                                Text="Select an entry to view details" />
+                                Text="Select a journal entry to view details" />
                         </StackPanel>
                     </StackPanel>
                 </Border>

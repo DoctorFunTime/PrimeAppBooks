@@ -165,6 +165,7 @@ namespace PrimeAppBooks.Services
 
             // Phase 3: Tables depending on financial_reports
             await CreateNotesToFinancialsTableAsync();
+            await CreateJournalTemplatesTableAsync();
             ReportProgress("Created notes to financials table (Phase 3/3)");
         }
 
@@ -177,9 +178,12 @@ namespace PrimeAppBooks.Services
                 DROP FUNCTION IF EXISTS public.post_journal_entry CASCADE;
                 DROP FUNCTION IF EXISTS public.accounting_audit_trigger CASCADE;
                 DROP FUNCTION IF EXISTS public.notify_trigger_v2 CASCADE;
-                DROP FUNCTION IF EXISTS public.log_user_activity_v2 CASCADE;";
+                DROP FUNCTION IF EXISTS public.log_user_activity_v2 CASCADE;
 
-            await ExecuteNonQuerySafeAsync(dropFunctionsSql, "Dropping existing functions");
+                -- Drop old general_ledger table if it exists (migrated to journal_lines)
+                DROP TABLE IF EXISTS general_ledger CASCADE;";
+
+            await ExecuteNonQuerySafeAsync(dropFunctionsSql, "Dropping existing functions and old tables");
         }
 
         // CORE ACCOUNTING TABLES
@@ -256,23 +260,23 @@ namespace PrimeAppBooks.Services
         private async Task CreateGeneralLedgerTableAsync()
         {
             const string sql = @"
-                CREATE TABLE IF NOT EXISTS general_ledger (
-                    ledger_id SERIAL PRIMARY KEY,
-                    journal_id INTEGER REFERENCES journal_entries(journal_id),
-                    account_id INTEGER REFERENCES chart_of_accounts(account_id),
-                    ledger_date DATE NOT NULL,
-                    period_id INTEGER REFERENCES accounting_periods(period_id),
-                    debit_amount DECIMAL(18,2) DEFAULT 0,
-                    credit_amount DECIMAL(18,2) DEFAULT 0,
-                    description TEXT,
-                    reference VARCHAR(100),
-                    cost_center_id INTEGER,
-                    project_id INTEGER,
-                    created_by INTEGER,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                )";
+        CREATE TABLE IF NOT EXISTS journal_lines (
+            line_id SERIAL PRIMARY KEY,
+            journal_id INTEGER REFERENCES journal_entries(journal_id) ON DELETE CASCADE,
+            account_id INTEGER REFERENCES chart_of_accounts(account_id) ON DELETE RESTRICT,
+            line_date DATE NOT NULL,
+            period_id INTEGER REFERENCES accounting_periods(period_id),
+            debit_amount DECIMAL(18,2) DEFAULT 0,
+            credit_amount DECIMAL(18,2) DEFAULT 0,
+            description TEXT,
+            reference VARCHAR(100),
+            cost_center_id INTEGER,
+            project_id INTEGER,
+            created_by INTEGER,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )";
 
-            await ExecuteNonQuerySafeAsync(sql, "Creating general_ledger table");
+            await ExecuteNonQuerySafeAsync(sql, "Creating journal_lines table");
         }
 
         private async Task CreateAccountsPayableTableAsync()
@@ -1371,6 +1375,24 @@ namespace PrimeAppBooks.Services
             await ExecuteNonQuerySafeAsync(sql, "Creating notes_to_financials table");
         }
 
+        private async Task CreateJournalTemplatesTableAsync()
+        {
+            const string sql = @"
+                CREATE TABLE IF NOT EXISTS journal_templates (
+                    template_id SERIAL PRIMARY KEY,
+                    template_name VARCHAR(255) NOT NULL,
+                    description TEXT,
+                    journal_type VARCHAR(50) NOT NULL,
+                    template_data TEXT,
+                    is_active BOOLEAN DEFAULT TRUE,
+                    created_by INTEGER,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )";
+
+            await ExecuteNonQuerySafeAsync(sql, "Creating journal_templates table");
+        }
+
         private async Task AdjustAccountingSchemaAsync()
         {
             ReportProgress("Adjusting accounting schema...");
@@ -1395,7 +1417,7 @@ namespace PrimeAppBooks.Services
 
                 @"DO $$ BEGIN
                     IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_debit_credit_not_both_zero') THEN
-                        ALTER TABLE general_ledger ADD CONSTRAINT chk_debit_credit_not_both_zero
+                        ALTER TABLE journal_lines ADD CONSTRAINT chk_debit_credit_not_both_zero
                         CHECK (debit_amount != 0 OR credit_amount != 0);
                     END IF;
                 END $$;",
@@ -1427,11 +1449,11 @@ namespace PrimeAppBooks.Services
 
             const string sql = @"
                 -- Create indexes for better performance (only if they don't exist)
-                CREATE INDEX IF NOT EXISTS idx_general_ledger_account_date
-                ON general_ledger(account_id, ledger_date);
+                CREATE INDEX IF NOT EXISTS idx_journal_lines_account_date
+                ON journal_lines(account_id, line_date);
 
-                CREATE INDEX IF NOT EXISTS idx_general_ledger_period
-                ON general_ledger(period_id);
+                CREATE INDEX IF NOT EXISTS idx_journal_lines_period
+                ON journal_lines(period_id);
 
                 CREATE INDEX IF NOT EXISTS idx_journal_entries_date
                 ON journal_entries(journal_date);
@@ -1704,7 +1726,7 @@ namespace PrimeAppBooks.Services
             const string sql = @"
                 -- Drop triggers from audit tables if they exist
                 DROP TRIGGER IF EXISTS accounting_audit_journal_entries ON journal_entries;
-                DROP TRIGGER IF EXISTS accounting_audit_general_ledger ON general_ledger;
+                DROP TRIGGER IF EXISTS accounting_audit_journal_lines ON journal_lines;
                 DROP TRIGGER IF EXISTS accounting_audit_invoices ON invoices;
                 DROP TRIGGER IF EXISTS accounting_audit_bills ON bills;";
 
@@ -1771,7 +1793,7 @@ namespace PrimeAppBooks.Services
             ReportProgress("Adding triggers to tables...");
 
             string[] tables = {
-                "chart_of_accounts", "accounting_periods", "journal_entries", "general_ledger",
+                "chart_of_accounts", "accounting_periods", "journal_entries", "journal_lines",
                 "accounts_payable", "accounts_receivable", "vendors", "customers",
                 "invoices", "invoice_lines", "bills", "bill_lines", "payments", "receipts",
                 "bank_accounts", "bank_reconciliations", "tax_rates", "tax_transactions",
@@ -1793,8 +1815,8 @@ namespace PrimeAppBooks.Services
                     string sql = $@"
                     DO $$
                     BEGIN
-                        -- Create balance update trigger for general_ledger
-                        IF '{table}' = 'general_ledger' AND NOT EXISTS (
+                        -- Create balance update trigger for journal_lines
+                        IF '{table}' = 'journal_lines' AND NOT EXISTS (
                             SELECT 1 FROM pg_trigger WHERE tgname = 'update_account_balance_trigger'
                         ) THEN
                             CREATE TRIGGER update_account_balance_trigger

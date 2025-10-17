@@ -1,5 +1,7 @@
 ﻿using Npgsql;
 using PrimeAppBooks.Configurations;
+using PrimeAppBooks.Data;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +21,7 @@ namespace PrimeAppBooks.Services
                 using (var testConn = new NpgsqlConnection(AppConfig.DefaultConnection))
                 {
                     testConn.Open();
+                    //_messageBoxService.ShowMessage("Succcessfully connected", "Information!", "InfoOutline");
                     return true;
                 }
             }

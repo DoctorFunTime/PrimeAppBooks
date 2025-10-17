@@ -224,16 +224,20 @@
                             Kind="{Binding IconType, Mode=TwoWay}" />
 
                         <!--  Message Text Column (Expands)  -->
-                        <TextBlock
+                        <TextBox
                             Grid.Column="1"
-                            Padding="0,5,0,5"
-                            HorizontalAlignment="Left"
+                            Padding="5"
+                            HorizontalAlignment="Stretch"
                             VerticalAlignment="Center"
+                            Background="Transparent"
+                            BorderThickness="0"
                             FontFamily="Century Gothic"
                             FontSize="12"
                             Foreground="{Binding IconColor}"
+                            IsReadOnly="True"
                             Text="{Binding Message, Mode=TwoWay}"
-                            TextWrapping="Wrap" />
+                            TextWrapping="Wrap"
+                            VerticalScrollBarVisibility="Auto" />
 
                         <StackPanel
                             Grid.Row="1"
@@ -242,6 +246,23 @@
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
                             Orientation="Horizontal">
+                            <Button
+                                Width="Auto"
+                                Height="Auto"
+                                MinWidth="50"
+                                MinHeight="20"
+                                MaxWidth="100"
+                                MaxHeight="35"
+                                Margin="10"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Center"
+                                HorizontalContentAlignment="Center"
+                                VerticalContentAlignment="Center"
+                                Command="{Binding CopyMessageCommand}"
+                                Content="Copy"
+                                FontFamily="Century gothic"
+                                FontSize="12"
+                                Style="{StaticResource ModernActionButton}" />
                             <Button
                                 Width="Auto"
                                 Height="Auto"

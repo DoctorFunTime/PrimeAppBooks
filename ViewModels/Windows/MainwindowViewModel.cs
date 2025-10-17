@@ -57,11 +57,15 @@ namespace PrimeAppBooks.ViewModels.Windows
         [ObservableProperty]
         private GridLength _sidebarMargin = new(20);
 
+        [ObservableProperty]
+        private bool _isLoading = false;
+
         public MainWindowViewModel(INavigationService navigationService, SplashscreenInitialisations splashscreenInitialisations)
         {
             _navigationService = navigationService;
             _splashscreenInitialisations = splashscreenInitialisations;
             _navigationService.PageNavigated += OnPageNavigated;
+            _navigationService.LoadingStateChanged += OnLoadingStateChanged;
 
             // Navigate to dashboard by default - but don't set navigation state here
             // The OnPageNavigated event handler will handle the state setting
@@ -166,6 +170,11 @@ namespace PrimeAppBooks.ViewModels.Windows
                     IsSettingsSelected = true;
                     break;
             }
+        }
+
+        private void OnLoadingStateChanged(object sender, bool isLoading)
+        {
+            IsLoading = isLoading;
         }
 
         [RelayCommand]

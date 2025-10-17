@@ -22,6 +22,7 @@ namespace PrimeAppBooks.Services
         private bool _isNavigating = false;
 
         public event EventHandler<Page> PageNavigated = delegate { };
+        public event EventHandler<bool> LoadingStateChanged = delegate { };
 
         public NavigationService(Frame frame, IServiceProvider serviceProvider)
         {
@@ -54,20 +55,25 @@ namespace PrimeAppBooks.Services
             if (_isNavigating) return;
 
             _isNavigating = true;
+            
+            // Show loading overlay IMMEDIATELY before any page creation
+            LoadingStateChanged?.Invoke(this, true);
 
             try
             {
+                // Force UI update before heavy operations with highest priority
+                _frame.Dispatcher.Invoke(DispatcherPriority.Render, new Action(() => { }));
+                
+                // Give UI a moment to process the loading overlay
+                System.Threading.Thread.Sleep(10);
+
                 // Get page from DI container - this will inject the ViewModel automatically
                 var page = _serviceProvider.GetRequiredService<T>();
 
-                // Apply exit animation to current page if it supports it
-                if (_currentPage != null && _currentPage is IAnimatedPage currentAnimatedPage && currentAnimatedPage.AnimateOut)
+                // Apply smooth crossfade transition
+                if (_currentPage != null)
                 {
-                    ApplyExitAnimation(_currentPage, () => 
-                    {
-                        _frame.Navigate(page, parameter);
-                        // Don't reset _isNavigating here - let OnFrameNavigated handle it
-                    });
+                    ApplySmoothCrossfadeTransition(_currentPage, page, parameter);
                 }
                 else
                 {
@@ -78,6 +84,8 @@ namespace PrimeAppBooks.Services
             catch
             {
                 _isNavigating = false;
+                // Hide loading overlay on error
+                LoadingStateChanged?.Invoke(this, false);
                 throw;
             }
         }
@@ -87,6 +95,8 @@ namespace PrimeAppBooks.Services
             if (_frame.CanGoBack && !_isNavigating)
             {
                 _isNavigating = true;
+                // Show loading overlay
+                LoadingStateChanged?.Invoke(this, true);
                 _frame.GoBack();
             }
         }
@@ -108,11 +118,20 @@ namespace PrimeAppBooks.Services
             
             // Reset navigation flag after everything is complete
             _isNavigating = false;
+            
+            // Hide loading overlay immediately after navigation completes
+            // Use a small delay to ensure smooth transition
+            _frame.Dispatcher.BeginInvoke(DispatcherPriority.Loaded, new Action(() =>
+            {
+                LoadingStateChanged?.Invoke(this, false);
+            }));
         }
 
         private void OnNavigationStopped(object sender, NavigationEventArgs e)
         {
             _isNavigating = false;
+            // Hide loading overlay if navigation was stopped
+            LoadingStateChanged?.Invoke(this, false);
         }
 
         private void ApplyEntranceAnimation(Page page)
@@ -138,14 +157,18 @@ namespace PrimeAppBooks.Services
         private void ApplyEnhancedAnimation(Page page, IAnimatedPage animatedPage)
         {
             var direction = animatedPage.AnimationDirection;
-            var duration = animatedPage.AnimationDuration > 0 ? animatedPage.AnimationDuration : 400;
+            var duration = animatedPage.AnimationDuration > 0 ? animatedPage.AnimationDuration : 600; // Increased default duration
             var easing = animatedPage.AnimationEasing;
 
             ApplyDirectionalAnimation(page, direction, duration, easing);
         }
 
-        private void ApplyDirectionalAnimation(Page page, AnimationDirection direction, int duration = 400, AnimationEasing easing = AnimationEasing.EaseOut)
+        private void ApplyDirectionalAnimation(Page page, AnimationDirection direction, int duration = 600, AnimationEasing easing = AnimationEasing.EaseOut)
         {
+            // Enable hardware acceleration for smooth animations
+            RenderOptions.SetBitmapScalingMode(page, BitmapScalingMode.HighQuality);
+            RenderOptions.SetEdgeMode(page, EdgeMode.Aliased);
+            
             page.RenderTransform = new TranslateTransform();
             var storyboard = new Storyboard();
             var easingFunction = CreateEasingFunction(easing);
@@ -277,15 +300,19 @@ namespace PrimeAppBooks.Services
 
         private void ApplySmoothSlideFromBottomAnimation(Page page)
         {
+            // Enable hardware acceleration for smooth animations
+            RenderOptions.SetBitmapScalingMode(page, BitmapScalingMode.HighQuality);
+            RenderOptions.SetEdgeMode(page, EdgeMode.Aliased);
+            
             page.RenderTransform = new TranslateTransform();
             var storyboard = new Storyboard();
 
             var animation = new DoubleAnimation
             {
-                From = 200,
+                From = 150,
                 To = 0,
-                Duration = TimeSpan.FromMilliseconds(350),
-                EasingFunction = new BackEase { EasingMode = EasingMode.EaseOut, Amplitude = 0.2 }
+                Duration = TimeSpan.FromMilliseconds(500),
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
             };
 
             Storyboard.SetTarget(animation, page);
@@ -295,8 +322,8 @@ namespace PrimeAppBooks.Services
             {
                 From = 0,
                 To = 1,
-                Duration = TimeSpan.FromMilliseconds(300),
-                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
+                Duration = TimeSpan.FromMilliseconds(400),
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
             };
 
             Storyboard.SetTarget(fadeAnimation, page);
@@ -315,8 +342,8 @@ namespace PrimeAppBooks.Services
             {
                 From = 1,
                 To = 0,
-                Duration = TimeSpan.FromMilliseconds(200),
-                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseIn }
+                Duration = TimeSpan.FromMilliseconds(300),
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn }
             };
 
             Storyboard.SetTarget(fadeAnimation, page);
@@ -328,18 +355,95 @@ namespace PrimeAppBooks.Services
             storyboard.Begin();
         }
 
+        private void ApplySmoothCrossfadeTransition(Page currentPage, Page newPage, object parameter)
+        {
+            // Enable hardware acceleration for smooth animations
+            RenderOptions.SetBitmapScalingMode(currentPage, BitmapScalingMode.HighQuality);
+            RenderOptions.SetBitmapScalingMode(newPage, BitmapScalingMode.HighQuality);
+            RenderOptions.SetEdgeMode(currentPage, EdgeMode.Aliased);
+            RenderOptions.SetEdgeMode(newPage, EdgeMode.Aliased);
+            
+            // Set initial state for new page
+            newPage.Opacity = 0;
+            newPage.RenderTransform = new TranslateTransform(0, 50); // Slight upward offset
+            
+            // Navigate to new page first (but it's invisible)
+            _frame.Navigate(newPage, parameter);
+            
+            // Create exit animation for current page
+            var exitStoryboard = new Storyboard();
+            var exitFadeAnimation = new DoubleAnimation
+            {
+                From = 1,
+                To = 0,
+                Duration = TimeSpan.FromMilliseconds(250),
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn }
+            };
+            
+            var exitSlideAnimation = new DoubleAnimation
+            {
+                From = 0,
+                To = -30,
+                Duration = TimeSpan.FromMilliseconds(250),
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn }
+            };
+            
+            Storyboard.SetTarget(exitFadeAnimation, currentPage);
+            Storyboard.SetTargetProperty(exitFadeAnimation, new PropertyPath("Opacity"));
+            Storyboard.SetTarget(exitSlideAnimation, currentPage);
+            Storyboard.SetTargetProperty(exitSlideAnimation, new PropertyPath("(UIElement.RenderTransform).(TranslateTransform.Y)"));
+            
+            exitStoryboard.Children.Add(exitFadeAnimation);
+            exitStoryboard.Children.Add(exitSlideAnimation);
+            
+            // Create entrance animation for new page
+            var entranceStoryboard = new Storyboard();
+            var entranceFadeAnimation = new DoubleAnimation
+            {
+                From = 0,
+                To = 1,
+                Duration = TimeSpan.FromMilliseconds(300),
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+            };
+            
+            var entranceSlideAnimation = new DoubleAnimation
+            {
+                From = 50,
+                To = 0,
+                Duration = TimeSpan.FromMilliseconds(300),
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+            };
+            
+            Storyboard.SetTarget(entranceFadeAnimation, newPage);
+            Storyboard.SetTargetProperty(entranceFadeAnimation, new PropertyPath("Opacity"));
+            Storyboard.SetTarget(entranceSlideAnimation, newPage);
+            Storyboard.SetTargetProperty(entranceSlideAnimation, new PropertyPath("(UIElement.RenderTransform).(TranslateTransform.Y)"));
+            
+            entranceStoryboard.Children.Add(entranceFadeAnimation);
+            entranceStoryboard.Children.Add(entranceSlideAnimation);
+            
+            // Start exit animation first, then entrance animation with slight delay
+            exitStoryboard.Begin();
+            
+            // Start entrance animation after a short delay for smooth crossfade
+            _frame.Dispatcher.BeginInvoke(DispatcherPriority.Loaded, new Action(() =>
+            {
+                entranceStoryboard.Begin();
+            }));
+        }
+
         private IEasingFunction CreateEasingFunction(AnimationEasing easing)
         {
             return easing switch
             {
                 AnimationEasing.Linear => null,
-                AnimationEasing.EaseIn => new QuadraticEase { EasingMode = EasingMode.EaseIn },
-                AnimationEasing.EaseOut => new QuadraticEase { EasingMode = EasingMode.EaseOut },
-                AnimationEasing.EaseInOut => new QuadraticEase { EasingMode = EasingMode.EaseInOut },
-                AnimationEasing.Bounce => new BounceEase { EasingMode = EasingMode.EaseOut },
-                AnimationEasing.Elastic => new ElasticEase { EasingMode = EasingMode.EaseOut },
-                AnimationEasing.Back => new BackEase { EasingMode = EasingMode.EaseOut, Amplitude = 0.3 },
-                _ => new QuadraticEase { EasingMode = EasingMode.EaseOut }
+                AnimationEasing.EaseIn => new CubicEase { EasingMode = EasingMode.EaseIn },
+                AnimationEasing.EaseOut => new CubicEase { EasingMode = EasingMode.EaseOut },
+                AnimationEasing.EaseInOut => new CubicEase { EasingMode = EasingMode.EaseInOut },
+                AnimationEasing.Bounce => new BounceEase { EasingMode = EasingMode.EaseOut, Bounces = 2, Bounciness = 0.8 },
+                AnimationEasing.Elastic => new ElasticEase { EasingMode = EasingMode.EaseOut, Oscillations = 2, Springiness = 0.8 },
+                AnimationEasing.Back => new BackEase { EasingMode = EasingMode.EaseOut, Amplitude = 0.4 },
+                _ => new CubicEase { EasingMode = EasingMode.EaseOut } // Smoother default
             };
         }
 

@@ -98,5 +98,155 @@ namespace PrimeAppBooks.Models.Pages
 
             public Bill Bill { get; set; }
         }
+
+        public class JournalEntry
+        {
+            [Key]
+            public int JournalId { get; set; }
+
+            [Required]
+            [MaxLength(50)]
+            public string JournalNumber { get; set; }
+
+            [Required]
+            public DateTime JournalDate { get; set; }
+
+            public int? PeriodId { get; set; }
+
+            [MaxLength(100)]
+            public string Reference { get; set; } = string.Empty;
+
+            [Required]
+            public string Description { get; set; } = string.Empty;
+
+            [Required]
+            [MaxLength(50)]
+            public string JournalType { get; set; } = "GENERAL";
+
+            [Required]
+            public decimal Amount { get; set; }
+
+            [MaxLength(20)]
+            public string Status { get; set; } = "DRAFT";
+
+            public int? PostedBy { get; set; }
+            public DateTime? PostedAt { get; set; }
+
+            [Required]
+            public int CreatedBy { get; set; } = 1;
+
+            public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+            public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+            public ICollection<JournalLine> JournalLines { get; set; } = new List<JournalLine>();
+        }
+
+        public class JournalLine
+        {
+            [Key]
+            public int LineId { get; set; }
+
+            [Required]
+            public int JournalId { get; set; }
+
+            [Required]
+            public int AccountId { get; set; }
+
+            [Required]
+            public DateTime LineDate { get; set; }
+
+            public int? PeriodId { get; set; }
+            public decimal DebitAmount { get; set; } = 0;
+            public decimal CreditAmount { get; set; } = 0;
+            public string Description { get; set; } = string.Empty;
+
+            [MaxLength(100)]
+            public string Reference { get; set; } = string.Empty;
+
+            public int? CostCenterId { get; set; }
+            public int? ProjectId { get; set; }
+            public int CreatedBy { get; set; } = 1;
+            public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+            // Navigation properties
+            public JournalEntry JournalEntry { get; set; }
+
+            public ChartOfAccount ChartOfAccount { get; set; }  // ADD THIS
+        }
+
+        public class ChartOfAccount
+        {
+            [Key]
+            public int AccountId { get; set; }
+
+            [Required]
+            [MaxLength(20)]
+            public string AccountNumber { get; set; }
+
+            [Required]
+            [MaxLength(255)]
+            public string AccountName { get; set; }
+
+            [Required]
+            [MaxLength(50)]
+            public string AccountType { get; set; }
+
+            [MaxLength(50)]
+            public string AccountSubtype { get; set; } = string.Empty;
+
+            public string? Description { get; set; }
+
+            public int? ParentAccountId { get; set; }
+
+            public bool IsActive { get; set; } = true;
+
+            public bool IsSystemAccount { get; set; } = false;
+
+            [MaxLength(10)]
+            public string NormalBalance { get; set; }
+
+            public decimal OpeningBalance { get; set; } = 0;
+
+            public DateTime? OpeningBalanceDate { get; set; }
+
+            public decimal CurrentBalance { get; set; } = 0;
+
+            public int? CreatedBy { get; set; }
+            public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+            public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+            // Navigation properties
+            public ChartOfAccount ParentAccount { get; set; }
+
+            public ICollection<ChartOfAccount> ChildAccounts { get; set; } = new List<ChartOfAccount>();
+            public ICollection<JournalLine> JournalLines { get; set; } = new List<JournalLine>();
+
+            // Computed property for display
+            public string FullName => $"{AccountNumber} - {AccountName}";
+        }
+
+        public class JournalTemplate
+        {
+            [Key]
+            public int TemplateId { get; set; }
+
+            [Required]
+            [MaxLength(255)]
+            public string Name { get; set; }
+
+            public string Description { get; set; } = string.Empty;
+
+            [Required]
+            [MaxLength(50)]
+            public string JournalType { get; set; }
+
+            public string TemplateData { get; set; } = string.Empty; // JSON string containing template lines
+
+            public bool IsActive { get; set; } = true;
+
+            public int CreatedBy { get; set; } = 1;
+            public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+            public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        }
     }
 }

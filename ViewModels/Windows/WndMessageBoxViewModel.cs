@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Media;
 
 namespace PrimeAppBooks.ViewModels.Windows
@@ -93,6 +94,20 @@ namespace PrimeAppBooks.ViewModels.Windows
         private void Maximize(WndMessageBox mnWnd)
         {
             mnWnd.WindowState = System.Windows.WindowState.Maximized;
+        }
+
+        [RelayCommand]
+        private void CopyMessage()
+        {
+            try
+            {
+                Clipboard.SetText(Message);
+            }
+            catch (Exception ex)
+            {
+                // Handle clipboard access issues gracefully
+                System.Diagnostics.Debug.WriteLine($"Failed to copy to clipboard: {ex.Message}");
+            }
         }
     }
 }

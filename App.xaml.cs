@@ -5,7 +5,9 @@ using PrimeAppBooks.Data;
 using PrimeAppBooks.Interfaces;
 using PrimeAppBooks.Services;
 using PrimeAppBooks.Services.APIs;
+using PrimeAppBooks.Services.DbServices;
 using PrimeAppBooks.ViewModels.Pages;
+using PrimeAppBooks.ViewModels.Pages.SubTransactionsPage;
 using PrimeAppBooks.ViewModels.Windows;
 using PrimeAppBooks.Views.Pages;
 using PrimeAppBooks.Views.Pages.SubTransactionsPage;
@@ -33,7 +35,9 @@ namespace PrimeAppBooks
             // Register core services
             services.AddSingleton<QuickBooksAuthService>();
             services.AddSingleton<QuickBooksService>();
-            services.AddTransient<TransactionsServices>();
+            services.AddScoped<TransactionsServices>();
+            services.AddScoped<JournalServices>();  // Changed from Singleton to Scoped
+            services.AddSingleton<IJournalNavigationService, JournalNavigationService>();
             services.AddSingleton<SplashscreenInitialisations>();
             services.AddTransient<DatabaseSetup>();
 
@@ -47,7 +51,10 @@ namespace PrimeAppBooks
             services.AddTransient<SettingsPageViewModel>();
             services.AddTransient<WndSplashScreenViewModel>();
 
-            // Register ALL Pages (IMPORTANT!)
+            //Subpages
+            services.AddTransient<JournalPageViewModel>();
+
+            // Register ALL Pages
             services.AddTransient<TransactionsPage>();
             services.AddTransient<DashboardPage>();
             services.AddTransient<ChartOfAccountsPage>();
@@ -55,6 +62,9 @@ namespace PrimeAppBooks
             services.AddTransient<Audit>();
             services.AddTransient<Settings>();
             services.AddTransient<WndSplashScreen>();
+
+            //Sub pages
+            services.AddTransient<JournalPage>();
 
             // Register MainWindow
             services.AddSingleton<MainWindow>();
@@ -73,6 +83,24 @@ namespace PrimeAppBooks
 
             // Build the service provider
             ServiceProvider = services.BuildServiceProvider();
+
+            // === ADD DATABASE MIGRATION HERE ===
+            try
+            {
+                using (var scope = ServiceProvider.CreateScope())
+                {
+                    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                    dbContext.Database.Migrate();
+                    System.Diagnostics.Debug.WriteLine("Database migration completed successfully");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Database migration failed: {ex.Message}");
+                // Optionally show error to user or log it
+                MessageBox.Show($"Database initialization error: {ex.Message}", "Error", MessageBoxButton.OK);
+            }
+            // === END MIGRATION CODE ===
 
             // Get MainWindow from DI container
             var mainWindow = ServiceProvider.GetRequiredService<MainWindow>();
@@ -98,27 +126,26 @@ namespace PrimeAppBooks
         /// </summary>
         private static void RegisterPageAnimations(INavigationService navigationService)
         {
-            // Dashboard - smooth slide from bottom
+            // Dashboard - smooth fade in with slight slide
             navigationService.RegisterPageAnimation<DashboardPage>(AnimationDirection.FadeIn);
 
-            // Chart of Accounts - slide from right (feels like opening a drawer)
+            // Chart of Accounts - smooth slide from bottom
             navigationService.RegisterPageAnimation<ChartOfAccountsPage>(AnimationDirection.FromBottom);
 
-            // Transactions - slide from right (consistent with accounts)
+            // Transactions - smooth slide from bottom
             navigationService.RegisterPageAnimation<TransactionsPage>(AnimationDirection.FromBottom);
 
-            // Reports - slide from top (feels like opening a report)
+            // Reports - smooth slide from bottom
             navigationService.RegisterPageAnimation<ReportsPage>(AnimationDirection.FromBottom);
 
-            // Audit - fade in (more subtle for data-heavy pages)
+            // Audit - smooth slide from bottom
             navigationService.RegisterPageAnimation<Audit>(AnimationDirection.FromBottom);
 
-            // Settings - slide from left (feels like opening a side panel)
+            // Settings - smooth slide from bottom
             navigationService.RegisterPageAnimation<Settings>(AnimationDirection.FromBottom);
 
-            //SubPages
-            // Settings - slide from left (feels like opening a side panel)
-            navigationService.RegisterPageAnimation<JournalPage>(AnimationDirection.FromLeft);
+            // SubPages - smooth slide from left
+            navigationService.RegisterPageAnimation<JournalPage>(AnimationDirection.FromRight);
         }
     }
 }

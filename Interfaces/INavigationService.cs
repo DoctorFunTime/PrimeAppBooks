@@ -18,6 +18,8 @@ namespace PrimeAppBooks.Interfaces
         bool CanGoBack { get; }
 
         event EventHandler<Page> PageNavigated;
+        
+        event EventHandler<bool> LoadingStateChanged;
 
         // Enhanced animation registration
         void RegisterPageAnimation<T>(AnimationDirection direction, string? customStyle = null) where T : Page;

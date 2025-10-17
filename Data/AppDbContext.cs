@@ -13,6 +13,10 @@ namespace PrimeAppBooks.Data
     {
         public DbSet<Bill> Bills { get; set; }
         public DbSet<Payment> Payments { get; set; }
+        public DbSet<JournalEntry> JournalEntries { get; set; }
+        public DbSet<JournalLine> JournalLines { get; set; }
+        public DbSet<ChartOfAccount> ChartOfAccounts { get; set; }
+        public DbSet<JournalTemplate> JournalTemplates { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
