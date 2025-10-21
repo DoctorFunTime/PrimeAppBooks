@@ -17,6 +17,11 @@
     Background="Transparent"
     mc:Ignorable="d">
 
+    <base:BaseAnimatedPage.Resources>
+        <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+    </base:BaseAnimatedPage.Resources>
+
     <ScrollViewer Style="{StaticResource ModernScrollViewer}">
         <Grid Margin="10">
             <Grid.RowDefinitions>
@@ -54,8 +59,34 @@
                         ToolTip="Go back" />
 
                     <StackPanel Grid.Column="1">
-                        <TextBlock Style="{StaticResource WelcomeTitleText}" Text="Create Journal Entry" />
-                        <TextBlock Style="{StaticResource WelcomeSubtitleText}" Text="Record debits and credits with proper double-entry bookkeeping" />
+                        <TextBlock>
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock" BasedOn="{StaticResource WelcomeTitleText}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsEditing}" Value="True">
+                                            <Setter Property="Text" Value="Edit Journal Entry" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding IsEditing}" Value="False">
+                                            <Setter Property="Text" Value="Create Journal Entry" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        <TextBlock>
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock" BasedOn="{StaticResource WelcomeSubtitleText}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsEditing}" Value="True">
+                                            <Setter Property="Text" Value="Modify existing journal entry - save as draft to update" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding IsEditing}" Value="False">
+                                            <Setter Property="Text" Value="Record debits and credits with proper double-entry bookkeeping" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
                     </StackPanel>
 
                     <StackPanel Grid.Column="2" Orientation="Horizontal">
@@ -135,21 +166,6 @@
                             Text="{Binding DateValidationError}"
                             Visibility="{Binding HasDateError, Converter={StaticResource BooleanToVisibilityConverter}}" />
                     </StackPanel>
-
-                    <!--  Entry Status  -->
-                    <StackPanel Grid.Column="3">
-                        <TextBlock Style="{StaticResource FilterLabelText}" Text="Status" />
-                        <Border
-                            Margin="0,8,0,0"
-                            HorizontalAlignment="Left"
-                            Background="{Binding CurrentStatus, Converter={StaticResource StatusColorConverter}}"
-                            Style="{StaticResource TransactionStatusBadge}">
-                            <TextBlock
-                                Foreground="Black"
-                                Style="{StaticResource StatusBadgeText}"
-                                Text="{Binding CurrentStatus}" />
-                        </Border>
-                    </StackPanel>
                 </Grid>
             </Border>
 
@@ -190,11 +206,11 @@
                         <DataGrid
                             MaxHeight="400"
                             HorizontalAlignment="Stretch"
-                            HorizontalContentAlignment="Stretch"
                             AutoGenerateColumns="False"
-                            BorderThickness="1"
+                            BorderThickness="0"
                             CanUserAddRows="False"
                             CanUserDeleteRows="False"
+                            GridLinesVisibility="None"
                             ItemsSource="{Binding JournalLines}"
                             ScrollViewer.HorizontalScrollBarVisibility="Auto"
                             ScrollViewer.VerticalScrollBarVisibility="Auto"
@@ -202,38 +218,64 @@
                             SelectionMode="Single"
                             Style="{StaticResource ModernDataGridStyle}">
 
+                            <!--  Set row height and vertical alignment with enhanced selection state  -->
                             <DataGrid.RowStyle>
                                 <Style BasedOn="{StaticResource MaterialDesignDataGridRow}" TargetType="DataGridRow">
+                                    <Setter Property="Height" Value="60" />
+                                    <Setter Property="BorderThickness" Value="0" />
+                                    <Setter Property="VerticalAlignment" Value="Center" />
+                                    <Setter Property="VerticalContentAlignment" Value="Center" />
+                                    <Setter Property="Foreground" Value="White" />
+                                    <Setter Property="Background" Value="Transparent" />
                                     <Style.Triggers>
                                         <Trigger Property="IsSelected" Value="True">
-                                            <Setter Property="Foreground" Value="Black" />
-                                            <Setter Property="Background" Value="Transparent" />
-                                            <Setter Property="BorderBrush" Value="Transparent" />
+                                            <Setter Property="Background" Value="#2A4A7B" />
+                                            <!--  Selected background color  -->
+                                            <Setter Property="BorderBrush" Value="#4472C4" />
+                                            <Setter Property="BorderThickness" Value="1" />
+                                            <Setter Property="Foreground" Value="White" />
+                                        </Trigger>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#1E3A5F" />
+                                            <!--  Hover color  -->
+                                            <Setter Property="Foreground" Value="White" />
                                         </Trigger>
                                     </Style.Triggers>
                                 </Style>
                             </DataGrid.RowStyle>
 
+                            <!--  Enhanced cell styling with selection state  -->
                             <DataGrid.CellStyle>
                                 <Style BasedOn="{StaticResource MaterialDesignDataGridCell}" TargetType="DataGridCell">
+                                    <Setter Property="VerticalAlignment" Value="Center" />
+                                    <Setter Property="VerticalContentAlignment" Value="Center" />
+                                    <Setter Property="BorderThickness" Value="0" />
+                                    <Setter Property="Background" Value="Transparent" />
                                     <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                                     <Style.Triggers>
                                         <Trigger Property="IsSelected" Value="True">
                                             <Setter Property="Background" Value="Transparent" />
+                                            <!--  Let row handle background  -->
                                             <Setter Property="BorderBrush" Value="Transparent" />
+                                            <Setter Property="Foreground" Value="White" />
                                         </Trigger>
                                     </Style.Triggers>
                                 </Style>
                             </DataGrid.CellStyle>
 
+                            <!--  Update column header style  -->
                             <DataGrid.ColumnHeaderStyle>
                                 <Style BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}" TargetType="DataGridColumnHeader">
                                     <Setter Property="Foreground" Value="#FF4472C4" />
                                     <Setter Property="FontWeight" Value="Bold" />
                                     <Setter Property="FontFamily" Value="Segoe UI" />
-                                    <Setter Property="FontSize" Value="14" />
+                                    <Setter Property="FontSize" Value="12" />
                                     <Setter Property="VerticalContentAlignment" Value="Center" />
                                     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                    <Setter Property="Height" Value="35" />
+                                    <Setter Property="Background" Value="#1E1E1E" />
+                                    <Setter Property="BorderBrush" Value="#3A3A3A" />
+                                    <Setter Property="BorderThickness" Value="0,0,0,1" />
                                 </Style>
                             </DataGrid.ColumnHeaderStyle>
 
@@ -246,32 +288,31 @@
                                     IsReadOnly="True">
                                     <DataGridTextColumn.ElementStyle>
                                         <Style TargetType="TextBlock">
+                                            <Setter Property="VerticalAlignment" Value="Center" />
                                             <Setter Property="HorizontalAlignment" Value="Center" />
                                             <Setter Property="FontWeight" Value="Medium" />
+                                            <Setter Property="FontFamily" Value="Segoe UI" />
                                             <Setter Property="Foreground" Value="#7F8C8D" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=DataGridRow}, Path=IsSelected}" Value="True">
+                                                    <Setter Property="Foreground" Value="White" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
                                         </Style>
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
 
                                 <!--  Account Selection  -->
-                                <DataGridTemplateColumn Width="150" Header="Account *">
+                                <DataGridTemplateColumn Width="200" Header="Account *">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <ComboBox
+                                                VerticalAlignment="Center"
                                                 DisplayMemberPath="FullName"
                                                 ItemsSource="{Binding DataContext.AvailableAccounts, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                 SelectedValue="{Binding AccountId, UpdateSourceTrigger=PropertyChanged}"
                                                 SelectedValuePath="AccountId"
                                                 Style="{StaticResource ModernComboBox}" />
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-
-                                <!--  Description  -->
-                                <DataGridTemplateColumn Width="150" Header="Line Description">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <TextBox Style="{StaticResource ModernTextBoxStyle}" Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" />
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
@@ -282,6 +323,7 @@
                                         <DataTemplate>
                                             <hc:TextBox
                                                 HorizontalAlignment="Stretch"
+                                                VerticalAlignment="Center"
                                                 Style="{StaticResource ModernTextBoxStyle}"
                                                 Text="{Binding DebitAmount, UpdateSourceTrigger=PropertyChanged, StringFormat=N2}" />
                                         </DataTemplate>
@@ -294,6 +336,7 @@
                                         <DataTemplate>
                                             <hc:TextBox
                                                 HorizontalAlignment="Stretch"
+                                                VerticalAlignment="Center"
                                                 Style="{StaticResource ModernTextBoxStyle}"
                                                 Text="{Binding CreditAmount, UpdateSourceTrigger=PropertyChanged, StringFormat=N2}" />
                                         </DataTemplate>
@@ -304,7 +347,7 @@
                                 <DataGridTemplateColumn Width="Auto" Header="Actions">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                                            <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
                                                 <Button
                                                     Command="{Binding DataContext.RemoveLineCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                     CommandParameter="{Binding}"
@@ -387,6 +430,30 @@
                                 </StackPanel>
                             </Grid>
                         </Border>
+                        <!--  Validation Summary  -->
+                        <Border
+                            Margin="0,10"
+                            Style="{StaticResource DetailInfoBorder}"
+                            Visibility="{Binding HasValidationErrors, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <StackPanel>
+                                <TextBlock
+                                    Foreground="PaleVioletRed"
+                                    Style="{StaticResource DetailLabelText}"
+                                    Text="⚠️ Validation Issues" />
+                                <ItemsControl Margin="0,5,0,0" ItemsSource="{Binding ValidationErrors}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock
+                                                Margin="0,2"
+                                                FontSize="11"
+                                                Foreground="PaleVioletRed"
+                                                Text="{Binding}"
+                                                TextWrapping="Wrap" />
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
                     </StackPanel>
                 </Border>
 
@@ -408,8 +475,8 @@
                                     Style="{StaticResource ModernTextBoxStyle}"
                                     Text="{Binding AccountSearchText, UpdateSourceTrigger=PropertyChanged}" />
                                 <ListBox
-                                    MaxHeight="120"
                                     MaxWidth="280"
+                                    MaxHeight="120"
                                     Margin="0,5,0,0"
                                     Background="#15FFFFFF"
                                     BorderBrush="#40FFFFFF"
@@ -418,10 +485,22 @@
                                     Visibility="{Binding HasAccountResults, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
-                                            <TextBlock FontSize="11" Text="{Binding FullName}" />
+                                            <Border Padding="5" Background="Transparent">
+                                                <Border.InputBindings>
+                                                    <MouseBinding Command="{Binding DataContext.SelectQuickAccountCommand, RelativeSource={RelativeSource AncestorType=Page}}" MouseAction="LeftClick" />
+                                                </Border.InputBindings>
+                                                <TextBlock FontSize="11" Text="{Binding FullName}" />
+                                            </Border>
                                         </DataTemplate>
                                     </ListBox.ItemTemplate>
                                 </ListBox>
+                                <Button
+                                    Margin="0,5,0,0"
+                                    Command="{Binding SelectQuickAccountCommand}"
+                                    Content="Select Account"
+                                    IsEnabled="{Binding SelectedQuickAccount, Converter={StaticResource NullToVisibilityConverter}}"
+                                    Style="{StaticResource ModernSecondaryButton}"
+                                    Visibility="{Binding HasAccountResults, Converter={StaticResource BooleanToVisibilityConverter}}" />
                             </StackPanel>
                         </Border>
 
@@ -435,45 +514,26 @@
                                     ItemsSource="{Binding EntryTemplates}"
                                     SelectedItem="{Binding SelectedTemplate}"
                                     Style="{StaticResource ModernComboBox}" />
-                                <Button
-                                    Margin="0,5,0,0"
-                                    Command="{Binding ApplyTemplateCommand}"
-                                    Content="Apply Template"
-                                    IsEnabled="{Binding HasSelectedTemplate}"
-                                    Style="{StaticResource ModernSecondaryButton}" />
+                                <StackPanel Margin="0,5,0,0" Orientation="Horizontal">
+                                    <Button
+                                        Margin="0,0,5,0"
+                                        Command="{Binding ApplyTemplateCommand}"
+                                        Content="Apply Template"
+                                        IsEnabled="{Binding HasSelectedTemplate}"
+                                        Style="{StaticResource ModernSecondaryButton}" />
+                                    <Button
+                                        Command="{Binding DeleteTemplateCommand}"
+                                        Content="🗑️ Delete"
+                                        IsEnabled="{Binding HasSelectedTemplate}"
+                                        Style="{StaticResource ModernSecondaryButton}"
+                                        ToolTip="Delete selected template" />
+                                </StackPanel>
                             </StackPanel>
                         </Border>
 
                         <!--  Recent Accounts  -->
-                        <Border Margin="0,0,0,15" Style="{StaticResource DetailInfoBorder}">
-                            <StackPanel>
-                                <TextBlock Style="{StaticResource DetailLabelText}" Text="Recent Accounts" />
-                                <ListBox
-                                    MaxHeight="150"
-                                    Margin="0,5,0,0"
-                                    Background="#15FFFFFF"
-                                    BorderBrush="#40FFFFFF"
-                                    ItemsSource="{Binding RecentAccounts}"
-                                    SelectedItem="{Binding SelectedRecentAccount}">
-                                    <ListBox.ItemTemplate>
-                                        <DataTemplate>
-                                            <StackPanel Margin="5">
-                                                <TextBlock
-                                                    FontSize="12"
-                                                    FontWeight="Medium"
-                                                    Text="{Binding Name}" />
-                                                <TextBlock
-                                                    FontSize="10"
-                                                    Foreground="#7F8C8D"
-                                                    Text="{Binding Code}" />
-                                            </StackPanel>
-                                        </DataTemplate>
-                                    </ListBox.ItemTemplate>
-                                </ListBox>
-                            </StackPanel>
-                        </Border>
 
-                        <!--  Validation Summary  -->
+                        <!--
                         <Border Style="{StaticResource DetailInfoBorder}" Visibility="{Binding HasValidationErrors, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <StackPanel>
                                 <TextBlock
@@ -494,6 +554,7 @@
                                 </ItemsControl>
                             </StackPanel>
                         </Border>
+                        -->
 
                         <!--  Entry Preview  -->
                         <Border

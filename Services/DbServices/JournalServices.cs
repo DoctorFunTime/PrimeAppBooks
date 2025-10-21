@@ -28,11 +28,11 @@ namespace PrimeAppBooks.Services.DbServices
                 journalEntry.UpdatedAt = DateTime.UtcNow;
                 
                 // Ensure all DateTime properties are UTC
-                if (journalEntry.JournalDate.Kind == DateTimeKind.Local)
-                    journalEntry.JournalDate = journalEntry.JournalDate.ToUniversalTime();
+                if (journalEntry.JournalDate.Kind != DateTimeKind.Utc)
+                    journalEntry.JournalDate = DateTime.SpecifyKind(journalEntry.JournalDate, DateTimeKind.Utc);
                 
-                if (journalEntry.PostedAt.HasValue && journalEntry.PostedAt.Value.Kind == DateTimeKind.Local)
-                    journalEntry.PostedAt = journalEntry.PostedAt.Value.ToUniversalTime();
+                if (journalEntry.PostedAt.HasValue && journalEntry.PostedAt.Value.Kind != DateTimeKind.Utc)
+                    journalEntry.PostedAt = DateTime.SpecifyKind(journalEntry.PostedAt.Value, DateTimeKind.Utc);
 
                 // Generate journal number if not provided
                 if (string.IsNullOrEmpty(journalEntry.JournalNumber))
@@ -40,10 +40,18 @@ namespace PrimeAppBooks.Services.DbServices
                     journalEntry.JournalNumber = await GenerateJournalNumberAsync();
                 }
 
+                // Generate reference number if not provided
+                if (string.IsNullOrEmpty(journalEntry.Reference))
+                {
+                    journalEntry.Reference = await GenerateReferenceNumberAsync();
+                }
+
                 // Calculate total amount from lines
                 if (journalEntry.JournalLines?.Any() == true)
                 {
-                    journalEntry.Amount = journalEntry.JournalLines.Sum(l => l.DebitAmount + l.CreditAmount);
+                    // For a balanced entry, we can use either total debits or total credits
+                    // Using total debits as the amount
+                    journalEntry.Amount = journalEntry.JournalLines.Sum(l => l.DebitAmount);
                     
                     // Set timestamps for journal lines and ensure UTC
                     foreach (var line in journalEntry.JournalLines)
@@ -51,8 +59,8 @@ namespace PrimeAppBooks.Services.DbServices
                         line.CreatedAt = DateTime.UtcNow;
                         
                         // Ensure LineDate is UTC
-                        if (line.LineDate.Kind == DateTimeKind.Local)
-                            line.LineDate = line.LineDate.ToUniversalTime();
+                        if (line.LineDate.Kind != DateTimeKind.Utc)
+                            line.LineDate = DateTime.SpecifyKind(line.LineDate, DateTimeKind.Utc);
                     }
                 }
 
@@ -73,6 +81,7 @@ namespace PrimeAppBooks.Services.DbServices
         {
             return await _context.JournalEntries
                 .Include(j => j.JournalLines)
+                    .ThenInclude(l => l.ChartOfAccount)
                 .OrderByDescending(j => j.CreatedAt)
                 .ToListAsync();
         }
@@ -81,6 +90,7 @@ namespace PrimeAppBooks.Services.DbServices
         {
             return await _context.JournalEntries
                 .Include(j => j.JournalLines)
+                    .ThenInclude(l => l.ChartOfAccount)
                 .FirstOrDefaultAsync(j => j.JournalId == journalId);
         }
 
@@ -96,7 +106,17 @@ namespace PrimeAppBooks.Services.DbServices
             journalEntry.JournalNumber = updatedJournalEntry.JournalNumber;
             journalEntry.JournalDate = updatedJournalEntry.JournalDate;
             journalEntry.PeriodId = updatedJournalEntry.PeriodId;
-            journalEntry.Reference = updatedJournalEntry.Reference;
+            
+            // Generate reference number if not provided
+            if (string.IsNullOrEmpty(updatedJournalEntry.Reference))
+            {
+                journalEntry.Reference = await GenerateReferenceNumberAsync();
+            }
+            else
+            {
+                journalEntry.Reference = updatedJournalEntry.Reference;
+            }
+            
             journalEntry.Description = updatedJournalEntry.Description;
             journalEntry.JournalType = updatedJournalEntry.JournalType;
             journalEntry.Status = updatedJournalEntry.Status;
@@ -105,11 +125,11 @@ namespace PrimeAppBooks.Services.DbServices
             journalEntry.UpdatedAt = DateTime.UtcNow;
             
             // Ensure all DateTime properties are UTC
-            if (journalEntry.JournalDate.Kind == DateTimeKind.Local)
-                journalEntry.JournalDate = journalEntry.JournalDate.ToUniversalTime();
+            if (journalEntry.JournalDate.Kind != DateTimeKind.Utc)
+                journalEntry.JournalDate = DateTime.SpecifyKind(journalEntry.JournalDate, DateTimeKind.Utc);
             
-            if (journalEntry.PostedAt.HasValue && journalEntry.PostedAt.Value.Kind == DateTimeKind.Local)
-                journalEntry.PostedAt = journalEntry.PostedAt.Value.ToUniversalTime();
+            if (journalEntry.PostedAt.HasValue && journalEntry.PostedAt.Value.Kind != DateTimeKind.Utc)
+                journalEntry.PostedAt = DateTime.SpecifyKind(journalEntry.PostedAt.Value, DateTimeKind.Utc);
 
             // Update journal lines
             if (updatedJournalEntry.JournalLines?.Any() == true)
@@ -124,14 +144,14 @@ namespace PrimeAppBooks.Services.DbServices
                     line.CreatedAt = DateTime.UtcNow;
                     
                     // Ensure LineDate is UTC
-                    if (line.LineDate.Kind == DateTimeKind.Local)
-                        line.LineDate = line.LineDate.ToUniversalTime();
+                    if (line.LineDate.Kind != DateTimeKind.Utc)
+                        line.LineDate = DateTime.SpecifyKind(line.LineDate, DateTimeKind.Utc);
                     
                     _context.JournalLines.Add(line);
                 }
 
                 // Recalculate total amount
-                journalEntry.Amount = updatedJournalEntry.JournalLines.Sum(l => l.DebitAmount + l.CreditAmount);
+                journalEntry.Amount = updatedJournalEntry.JournalLines.Sum(l => l.DebitAmount);
             }
 
             await _context.SaveChangesAsync();
@@ -213,6 +233,32 @@ namespace PrimeAppBooks.Services.DbServices
             }
 
             var numberPart = lastNumber.Substring(prefix.Length);
+            if (int.TryParse(numberPart, out int number))
+            {
+                return $"{prefix}{(number + 1):D4}";
+            }
+
+            return $"{prefix}0001";
+        }
+
+        private async Task<string> GenerateReferenceNumberAsync()
+        {
+            var year = DateTime.Now.Year;
+            var month = DateTime.Now.Month;
+            var prefix = $"REF{year}{month:D2}";
+            
+            var lastReference = await _context.JournalEntries
+                .Where(j => j.Reference != null && j.Reference.StartsWith(prefix))
+                .OrderByDescending(j => j.Reference)
+                .Select(j => j.Reference)
+                .FirstOrDefaultAsync();
+
+            if (string.IsNullOrEmpty(lastReference))
+            {
+                return $"{prefix}0001";
+            }
+
+            var numberPart = lastReference.Substring(prefix.Length);
             if (int.TryParse(numberPart, out int number))
             {
                 return $"{prefix}{(number + 1):D4}";

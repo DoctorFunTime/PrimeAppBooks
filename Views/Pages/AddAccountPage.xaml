@@ -1,0 +1,283 @@
+<base:BaseAnimatedPage
+    x:Class="PrimeAppBooks.Views.Pages.AddAccountPage"
+    xmlns:base="clr-namespace:PrimeAppBooks.Views.Pages"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:hc="https://handyorg.github.io/handycontrol"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="900"
+    d:DesignWidth="1280"
+    Background="Transparent"
+    mc:Ignorable="d">
+
+    <ScrollViewer Style="{StaticResource ModernScrollViewer}">
+        <Grid Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!-- Header Section -->
+            <Border
+                Grid.Row="0"
+                Margin="0,0,0,20"
+                Style="{StaticResource ModernCardStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Style="{StaticResource WelcomeTitleText}" Text="➕ Add New Account" />
+                        <TextBlock Style="{StaticResource WelcomeSubtitleText}" Text="Create a new account in your chart of accounts" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                        <Button
+                            Margin="5,0"
+                            Command="{Binding NavigateBackCommand}"
+                            Content="← Back"
+                            Style="{StaticResource ModernSecondaryButton}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Main Form -->
+            <Border
+                Grid.Row="1"
+                Style="{StaticResource ModernCardStyle}">
+                <Grid Margin="20">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Form Header -->
+                    <TextBlock
+                        Grid.Row="0"
+                        Margin="0,0,0,20"
+                        Style="{StaticResource SectionHeaderText}"
+                        Text="📋 Account Information" />
+
+                    <!-- Form Content -->
+                    <ScrollViewer Grid.Row="1" Style="{StaticResource ModernScrollViewer}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Left Column -->
+                            <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                                <!-- Account Number -->
+                                <Border Margin="0,0,0,15" Style="{StaticResource DetailInfoBorder}">
+                                    <StackPanel>
+                                        <TextBlock Style="{StaticResource DetailLabelText}" Text="Account Number *" />
+                                        <TextBox
+                                            Text="{Binding AccountNumber, UpdateSourceTrigger=PropertyChanged}"
+                                            Style="{StaticResource FluentTextBoxStyle}" />
+                                        <TextBlock
+                                            Foreground="#FF6B6B"
+                                            Style="{StaticResource DetailSubText}"
+                                            Text="{Binding AccountNumberError}"
+                                            Visibility="{Binding AccountNumberError, Converter={StaticResource LengthToVisibilityConverter}}" />
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Account Name -->
+                                <Border Margin="0,0,0,15" Style="{StaticResource DetailInfoBorder}">
+                                    <StackPanel>
+                                        <TextBlock Style="{StaticResource DetailLabelText}" Text="Account Name *" />
+                                        <TextBox
+                                            Text="{Binding AccountName, UpdateSourceTrigger=PropertyChanged}"
+                                            Style="{StaticResource FluentTextBoxStyle}" />
+                                        <TextBlock
+                                            Foreground="#FF6B6B"
+                                            Style="{StaticResource DetailSubText}"
+                                            Text="{Binding AccountNameError}"
+                                            Visibility="{Binding AccountNameError, Converter={StaticResource LengthToVisibilityConverter}}" />
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Account Type -->
+                                <Border Margin="0,0,0,15" Style="{StaticResource DetailInfoBorder}">
+                                    <StackPanel>
+                                        <TextBlock Style="{StaticResource DetailLabelText}" Text="Account Type *" />
+                                        <ComboBox
+                                            ItemsSource="{Binding AccountTypes}"
+                                            SelectedItem="{Binding SelectedAccountType}"
+                                            Style="{StaticResource FluentComboBoxStyle}" />
+                                        <TextBlock
+                                            Foreground="#FF6B6B"
+                                            Style="{StaticResource DetailSubText}"
+                                            Text="{Binding AccountTypeError}"
+                                            Visibility="{Binding AccountTypeError, Converter={StaticResource LengthToVisibilityConverter}}" />
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Account Subtype -->
+                                <Border Margin="0,0,0,15" Style="{StaticResource DetailInfoBorder}">
+                                    <StackPanel>
+                                        <TextBlock Style="{StaticResource DetailLabelText}" Text="Account Subtype" />
+                                        <ComboBox
+                                            ItemsSource="{Binding AccountSubtypes}"
+                                            SelectedItem="{Binding SelectedAccountSubtype}"
+                                            Style="{StaticResource FluentComboBoxStyle}" />
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Parent Account -->
+                                <Border Margin="0,0,0,15" Style="{StaticResource DetailInfoBorder}">
+                                    <StackPanel>
+                                        <TextBlock Style="{StaticResource DetailLabelText}" Text="Parent Account" />
+                                        <ComboBox
+                                            DisplayMemberPath="FullName"
+                                            ItemsSource="{Binding ParentAccounts}"
+                                            SelectedItem="{Binding SelectedParentAccount}"
+                                            Style="{StaticResource FluentComboBoxStyle}" />
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Normal Balance -->
+                                <Border Margin="0,0,0,15" Style="{StaticResource DetailInfoBorder}">
+                                    <StackPanel>
+                                        <TextBlock Style="{StaticResource DetailLabelText}" Text="Normal Balance" />
+                                        <ComboBox
+                                            ItemsSource="{Binding NormalBalanceOptions}"
+                                            SelectedItem="{Binding SelectedNormalBalance}"
+                                            Style="{StaticResource FluentComboBoxStyle}" />
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+
+                            <!-- Right Column -->
+                            <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                                <!-- Description -->
+                                <Border Margin="0,0,0,15" Style="{StaticResource DetailInfoBorder}">
+                                    <StackPanel>
+                                        <TextBlock Style="{StaticResource DetailLabelText}" Text="Description" />
+                                        <TextBox
+                                            AcceptsReturn="True"
+                                            Height="80"
+                                            Text="{Binding Description}"
+                                            TextWrapping="Wrap"
+                                            Style="{StaticResource FluentTextBoxStyle}" />
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Opening Balance -->
+                                <Border Margin="0,0,0,15" Style="{StaticResource DetailInfoBorder}">
+                                    <StackPanel>
+                                        <TextBlock Style="{StaticResource DetailLabelText}" Text="Opening Balance" />
+                                        <TextBox
+                                            Text="{Binding OpeningBalance, StringFormat=F2}"
+                                            Style="{StaticResource FluentTextBoxStyle}" />
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Opening Balance Date -->
+                                <Border Margin="0,0,0,15" Style="{StaticResource DetailInfoBorder}">
+                                    <StackPanel>
+                                        <TextBlock Style="{StaticResource DetailLabelText}" Text="Opening Balance Date" />
+                                        <DatePicker
+                                            SelectedDate="{Binding OpeningBalanceDate}"
+                                            Style="{StaticResource FluentDatePickerStyle}" />
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Account Status -->
+                                <Border Margin="0,0,0,15" Style="{StaticResource DetailInfoBorder}">
+                                    <StackPanel>
+                                        <TextBlock Style="{StaticResource DetailLabelText}" Text="Account Status" />
+                                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                                            <CheckBox
+                                                Content="Active"
+                                                IsChecked="{Binding IsActive}"
+                                                Foreground="White"
+                                                Margin="0,0,20,0" />
+                                            <CheckBox
+                                                Content="System Account"
+                                                IsChecked="{Binding IsSystemAccount}"
+                                                Foreground="White" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Account Preview -->
+                                <Border Margin="0,0,0,15" Style="{StaticResource DetailInfoBorder}">
+                                    <StackPanel>
+                                        <TextBlock Style="{StaticResource DetailLabelText}" Text="Account Preview" />
+                                        <Border
+                                            Margin="0,5,0,0"
+                                            Padding="10"
+                                            Background="#20FFFFFF"
+                                            CornerRadius="6">
+                                            <StackPanel>
+                                                <TextBlock Style="{StaticResource DetailValueText}">
+                                                    <TextBlock.Text>
+                                                        <MultiBinding StringFormat="{}{0} - {1}">
+                                                            <Binding Path="AccountNumber" />
+                                                            <Binding Path="AccountName" />
+                                                        </MultiBinding>
+                                                    </TextBlock.Text>
+                                                </TextBlock>
+                                                <TextBlock
+                                                    Margin="0,2,0,0"
+                                                    Style="{StaticResource DetailSubText}"
+                                                    Text="{Binding SelectedAccountType}" />
+                                                <TextBlock
+                                                    Margin="0,2,0,0"
+                                                    Style="{StaticResource DetailSubText}"
+                                                    Text="{Binding SelectedNormalBalance}" />
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </Grid>
+                    </ScrollViewer>
+
+                    <!-- Action Buttons -->
+                    <StackPanel
+                        Grid.Row="2"
+                        Margin="0,20,0,0"
+                        HorizontalAlignment="Right"
+                        Orientation="Horizontal">
+                        <Button
+                            Margin="0,0,10,0"
+                            Command="{Binding ClearFormCommand}"
+                            Content="🗑️ Clear"
+                            Style="{StaticResource ModernSecondaryButton}" />
+                        <Button
+                            Command="{Binding SaveAccountCommand}"
+                            Content="💾 Save Account"
+                            IsEnabled="{Binding IsValid}"
+                            Style="{StaticResource ModernActionButton}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Loading Overlay -->
+            <Border
+                Grid.RowSpan="2"
+                Background="#80000000"
+                Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <ProgressBar
+                        Width="100"
+                        Height="100"
+                        IsIndeterminate="True"
+                        Style="{StaticResource MaterialDesignCircularProgressBar}" />
+                    <TextBlock
+                        Margin="0,10,0,0"
+                        HorizontalAlignment="Center"
+                        Style="{StaticResource DetailValueText}"
+                        Text="Creating Account..." />
+                </StackPanel>
+            </Border>
+        </Grid>
+    </ScrollViewer>
+</base:BaseAnimatedPage>

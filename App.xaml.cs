@@ -37,6 +37,7 @@ namespace PrimeAppBooks
             services.AddSingleton<QuickBooksService>();
             services.AddScoped<TransactionsServices>();
             services.AddScoped<JournalServices>();  // Changed from Singleton to Scoped
+            services.AddScoped<ChartOfAccountsServices>();  // Add Chart of Accounts service
             services.AddSingleton<IJournalNavigationService, JournalNavigationService>();
             services.AddSingleton<SplashscreenInitialisations>();
             services.AddTransient<DatabaseSetup>();
@@ -46,6 +47,7 @@ namespace PrimeAppBooks
             services.AddTransient<TransactionsPageViewModel>();
             services.AddTransient<DashboardPageViewModel>();
             services.AddTransient<ChartOfAccountsPageViewModel>();
+            services.AddTransient<AddAccountPageViewModel>();
             services.AddTransient<ReportsPageViewModel>();
             services.AddTransient<AuditPageViewModel>();
             services.AddTransient<SettingsPageViewModel>();
@@ -58,6 +60,7 @@ namespace PrimeAppBooks
             services.AddTransient<TransactionsPage>();
             services.AddTransient<DashboardPage>();
             services.AddTransient<ChartOfAccountsPage>();
+            services.AddTransient<AddAccountPage>();
             services.AddTransient<ReportsPage>();
             services.AddTransient<Audit>();
             services.AddTransient<Settings>();

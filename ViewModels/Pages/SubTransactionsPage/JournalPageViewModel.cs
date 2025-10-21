@@ -170,7 +170,13 @@ namespace PrimeAppBooks.ViewModels.Pages.SubTransactionsPage
         public ChartOfAccount SelectedQuickAccount
         {
             get => _selectedQuickAccount;
-            set => SetProperty(ref _selectedQuickAccount, value);
+            set
+            {
+                if (SetProperty(ref _selectedQuickAccount, value))
+                {
+                    OnSelectedQuickAccountChanged(value);
+                }
+            }
         }
 
         private ObservableCollection<JournalTemplate> _entryTemplates = new();
@@ -295,9 +301,11 @@ namespace PrimeAppBooks.ViewModels.Pages.SubTransactionsPage
 
         public bool CanPost
         {
-            get => _canPost;
+            get => _canPost && !IsEditing;
             set => SetProperty(ref _canPost, value);
         }
+
+        public bool IsEditing => _editingJournalEntry != null;
 
         private bool _isBalanced = false;
 
@@ -434,8 +442,8 @@ namespace PrimeAppBooks.ViewModels.Pages.SubTransactionsPage
                 var journalEntry = new JournalEntry
                 {
                     JournalId = _editingJournalEntry?.JournalId ?? 0,
-                    JournalNumber = string.IsNullOrEmpty(ReferenceNumber) ? null : ReferenceNumber,
-                    JournalDate = EntryDate.Kind == DateTimeKind.Local ? EntryDate.ToUniversalTime() : EntryDate,
+                    JournalNumber = string.IsNullOrEmpty(ReferenceNumber) ? await GenerateJournalNumberAsync() : ReferenceNumber,
+                    JournalDate = DateTime.SpecifyKind(EntryDate, DateTimeKind.Utc),
                     Description = EntryDescription,
                     JournalType = "GENERAL",
                     Status = "DRAFT",
@@ -444,7 +452,7 @@ namespace PrimeAppBooks.ViewModels.Pages.SubTransactionsPage
                         .Select(l => new JournalLine
                         {
                             AccountId = l.AccountId,
-                            LineDate = l.LineDate.Kind == DateTimeKind.Local ? l.LineDate.ToUniversalTime() : l.LineDate,
+                            LineDate = DateTime.SpecifyKind(l.LineDate, DateTimeKind.Utc),
                             DebitAmount = l.DebitAmount,
                             CreditAmount = l.CreditAmount,
                             Description = l.Description,
@@ -487,6 +495,16 @@ namespace PrimeAppBooks.ViewModels.Pages.SubTransactionsPage
         [RelayCommand]
         private async Task PostEntry()
         {
+            // Prevent posting when editing existing entries
+            if (_editingJournalEntry != null)
+            {
+                await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    _messageBoxService.ShowMessage("Cannot post edited entries directly. Please save as draft first, then post from the transactions list.", "Edit Mode", "InfoOutline");
+                });
+                return;
+            }
+
             if (!ValidateEntry())
             {
                 await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
@@ -509,8 +527,8 @@ namespace PrimeAppBooks.ViewModels.Pages.SubTransactionsPage
             {
                 var journalEntry = new JournalEntry
                 {
-                    JournalNumber = string.IsNullOrEmpty(ReferenceNumber) ? null : ReferenceNumber,
-                    JournalDate = EntryDate.Kind == DateTimeKind.Local ? EntryDate.ToUniversalTime() : EntryDate,
+                    JournalNumber = string.IsNullOrEmpty(ReferenceNumber) ? await GenerateJournalNumberAsync() : ReferenceNumber,
+                    JournalDate = DateTime.SpecifyKind(EntryDate, DateTimeKind.Utc),
                     Description = EntryDescription,
                     JournalType = "GENERAL",
                     Status = "POSTED",
@@ -521,7 +539,7 @@ namespace PrimeAppBooks.ViewModels.Pages.SubTransactionsPage
                         .Select(l => new JournalLine
                         {
                             AccountId = l.AccountId,
-                            LineDate = l.LineDate.Kind == DateTimeKind.Local ? l.LineDate.ToUniversalTime() : l.LineDate,
+                            LineDate = DateTime.SpecifyKind(l.LineDate, DateTimeKind.Utc),
                             DebitAmount = l.DebitAmount,
                             CreditAmount = l.CreditAmount,
                             Description = l.Description,
@@ -567,6 +585,9 @@ namespace PrimeAppBooks.ViewModels.Pages.SubTransactionsPage
             EntryDate = DateTime.Today;
             CurrentStatus = "DRAFT";
             
+            // Clear editing state
+            _editingJournalEntry = null;
+            
             // Unsubscribe from all line events before clearing
             foreach (var line in JournalLines)
             {
@@ -576,6 +597,10 @@ namespace PrimeAppBooks.ViewModels.Pages.SubTransactionsPage
             JournalLines.Clear();
             SelectedLine = null;
             UpdateCalculations();
+            
+            // Notify that editing state has changed
+            OnPropertyChanged(nameof(IsEditing));
+            OnPropertyChanged(nameof(CanPost));
             
             // Add one empty line to start fresh
             AddLine();
@@ -607,11 +632,20 @@ namespace PrimeAppBooks.ViewModels.Pages.SubTransactionsPage
 
                 await _journalServices.CreateTemplateAsync(template);
                 await LoadTemplatesAsync();
-                // TODO: Show success message
+                
+                // Show success message
+                await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    _messageBoxService.ShowMessage($"Template '{template.Name}' saved successfully!", "Success", "CheckCircleOutline");
+                });
             }
             catch (Exception ex)
             {
-                // TODO: Show error message
+                // Show error message
+                await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    _messageBoxService.ShowMessage($"Error saving template: {ex.Message}", "Error", "ErrorOutline");
+                });
                 System.Diagnostics.Debug.WriteLine($"Error saving template: {ex.Message}");
             }
         }
@@ -652,6 +686,74 @@ namespace PrimeAppBooks.ViewModels.Pages.SubTransactionsPage
             {
                 // TODO: Show error message
                 System.Diagnostics.Debug.WriteLine($"Error applying template: {ex.Message}");
+            }
+        }
+
+        [RelayCommand]
+        private void SelectQuickAccount()
+        {
+            if (SelectedQuickAccount != null && SelectedLine != null)
+            {
+                SelectedLine.AccountId = SelectedQuickAccount.AccountId;
+                UpdateCalculations();
+                
+                // Clear the selection and search text
+                SelectedQuickAccount = null;
+                AccountSearchText = string.Empty;
+            }
+        }
+
+        [RelayCommand]
+        private async Task DeleteTemplate()
+        {
+            if (SelectedTemplate == null)
+                return;
+
+            try
+            {
+                // Show confirmation dialog
+                var result = await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    return _messageBoxService.ShowConfirmation(
+                        $"Are you sure you want to delete the template '{SelectedTemplate.Name}'?\n\nThis action cannot be undone.",
+                        "Delete Template",
+                        "DeleteForever"
+                    );
+                });
+
+                if (result)
+                {
+                    var success = await _journalServices.DeleteTemplateAsync(SelectedTemplate.TemplateId);
+                    
+                    if (success)
+                    {
+                        // Reload templates to refresh the list
+                        await LoadTemplatesAsync();
+                        
+                        // Clear selection
+                        SelectedTemplate = null;
+                        
+                        await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
+                        {
+                            _messageBoxService.ShowMessage("Template deleted successfully!", "Success", "CheckCircleOutline");
+                        });
+                    }
+                    else
+                    {
+                        await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
+                        {
+                            _messageBoxService.ShowMessage("Failed to delete template. Template may not exist.", "Error", "ErrorOutline");
+                        });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    _messageBoxService.ShowMessage($"Error deleting template: {ex.Message}", "Error", "ErrorOutline");
+                });
+                System.Diagnostics.Debug.WriteLine($"Error deleting template: {ex.Message}");
             }
         }
 
@@ -697,14 +799,23 @@ namespace PrimeAppBooks.ViewModels.Pages.SubTransactionsPage
             try
             {
                 var templates = await _journalServices.GetAllTemplatesAsync();
-                EntryTemplates.Clear();
-                foreach (var template in templates)
+                
+                // Use Dispatcher to update UI thread
+                await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
                 {
-                    EntryTemplates.Add(template);
-                }
+                    EntryTemplates.Clear();
+                    foreach (var template in templates)
+                    {
+                        EntryTemplates.Add(template);
+                    }
+                });
             }
             catch (Exception ex)
             {
+                await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    _messageBoxService.ShowMessage($"Error loading templates: {ex.Message}", "Error", "ErrorOutline");
+                });
                 System.Diagnostics.Debug.WriteLine($"Error loading templates: {ex.Message}");
             }
         }
@@ -935,6 +1046,26 @@ namespace PrimeAppBooks.ViewModels.Pages.SubTransactionsPage
             }
 
             UpdateCalculations();
+            
+            // Notify that editing state has changed
+            OnPropertyChanged(nameof(IsEditing));
+            OnPropertyChanged(nameof(CanPost));
+        }
+
+        private async Task<string> GenerateJournalNumberAsync()
+        {
+            try
+            {
+                // Generate a simple journal number based on current date and time
+                var now = DateTime.Now;
+                var journalNumber = $"JE{now:yyyyMMdd}{now:HHmmss}";
+                return journalNumber;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error generating journal number: {ex.Message}");
+                return $"JE{DateTime.Now:yyyyMMddHHmmss}";
+            }
         }
 
         #endregion Methods
@@ -978,6 +1109,11 @@ namespace PrimeAppBooks.ViewModels.Pages.SubTransactionsPage
         private void OnSelectedTemplateChanged(JournalTemplate value)
         {
             HasSelectedTemplate = value != null;
+        }
+
+        private void OnSelectedQuickAccountChanged(ChartOfAccount value)
+        {
+            // This will be handled by the SelectQuickAccountCommand when user clicks
         }
 
         #endregion Property Change Handlers

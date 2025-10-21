@@ -2,6 +2,8 @@
 using PrimeAppBooks.Services;
 using PrimeAppBooks.ViewModels.Pages;
 using System.Windows.Controls;
+using System.Windows;
+using static PrimeAppBooks.Models.Pages.TransactionsModels;
 
 namespace PrimeAppBooks.Views.Pages
 {
@@ -14,6 +16,14 @@ namespace PrimeAppBooks.Views.Pages
         {
             InitializeComponent();
             DataContext = viewModel;
+        }
+
+        private void TreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            if (DataContext is ChartOfAccountsPageViewModel viewModel && e.NewValue is ChartOfAccount selectedAccount)
+            {
+                viewModel.SelectedAccount = selectedAccount;
+            }
         }
     }
 }

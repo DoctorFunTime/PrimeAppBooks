@@ -38,18 +38,18 @@
                     <StackPanel Grid.Column="1" Orientation="Horizontal">
                         <Button
                             Margin="5,0"
-                            Command="{Binding AddAccountCommand}"
+                            Command="{Binding AddNewAccountCommand}"
                             Content="+ New Account"
                             Style="{StaticResource ModernActionButton}" />
                         <Button
                             Margin="5,0"
-                            Command="{Binding ImportAccountsCommand}"
-                            Content="📥 Import"
+                            Command="{Binding UpdateAccountBalancesCommand}"
+                            Content="🔄 Update Balances"
                             Style="{StaticResource ModernSecondaryButton}" />
                         <Button
                             Margin="5,0"
-                            Command="{Binding ExportAccountsCommand}"
-                            Content="📊 Export"
+                            Command="{Binding RefreshCommand}"
+                            Content="🔄 Refresh"
                             Style="{StaticResource ModernSecondaryButton}" />
                     </StackPanel>
                 </Grid>
@@ -73,8 +73,8 @@
                 <Border Style="{StaticResource ModernCardStyle}">
                     <StackPanel Style="{StaticResource CardContentContainer}">
                         <TextBlock Style="{StaticResource PostedHeaderText}" Text="💼 Assets" />
-                        <TextBlock Style="{StaticResource CardValueText}" Text="{Binding AssetAccountsCount}" />
-                        <TextBlock Style="{StaticResource CardSubText}" Text="{Binding TotalAssets, StringFormat=C}" />
+                        <TextBlock Style="{StaticResource CardValueText}" Text="{Binding ActiveAccountsCount}" />
+                        <TextBlock Style="{StaticResource CardSubText}" Text="{Binding TotalAssetsBalance, StringFormat=C}" />
                     </StackPanel>
                 </Border>
 
@@ -82,8 +82,8 @@
                 <Border Style="{StaticResource ModernCardStyle}">
                     <StackPanel Style="{StaticResource CardContentContainer}">
                         <TextBlock Style="{StaticResource MonthlyHeaderText}" Text="📋 Liabilities" />
-                        <TextBlock Style="{StaticResource CardValueText}" Text="{Binding LiabilityAccountsCount}" />
-                        <TextBlock Style="{StaticResource CardSubText}" Text="{Binding TotalLiabilities, StringFormat=C}" />
+                        <TextBlock Style="{StaticResource CardValueText}" Text="{Binding InactiveAccountsCount}" />
+                        <TextBlock Style="{StaticResource CardSubText}" Text="{Binding TotalLiabilitiesBalance, StringFormat=C}" />
                     </StackPanel>
                 </Border>
 
@@ -91,8 +91,8 @@
                 <Border Style="{StaticResource ModernCardStyle}">
                     <StackPanel Style="{StaticResource CardContentContainer}">
                         <TextBlock Style="{StaticResource BalanceHeaderText}" Text="⚖️ Equity" />
-                        <TextBlock Style="{StaticResource CardValueText}" Text="{Binding EquityAccountsCount}" />
-                        <TextBlock Style="{StaticResource CardSubText}" Text="{Binding TotalEquity, StringFormat=C}" />
+                        <TextBlock Style="{StaticResource CardValueText}" Text="{Binding AccountsWithTransactionsCount}" />
+                        <TextBlock Style="{StaticResource CardSubText}" Text="{Binding TotalEquityBalance, StringFormat=C}" />
                     </StackPanel>
                 </Border>
             </UniformGrid>
@@ -112,11 +112,11 @@
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
-                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
                         <!--  TreeView Header with Filters  -->
-                        <Grid Grid.Row="0" Margin="0,0,0,15">
+                        <Grid Grid.Row="0" Margin="0,0,0,10">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
@@ -131,16 +131,9 @@
                                 <ComboBox
                                     Width="120"
                                     Margin="0,0,10,0"
-                                    ItemsSource="{Binding AccountTypeFilters}"
-                                    SelectedValue="{Binding SelectedAccountTypeFilter}"
-                                    Style="{StaticResource ModernComboBox}">
-                                    <ComboBoxItem Content="All Types" />
-                                    <ComboBoxItem Content="Assets" />
-                                    <ComboBoxItem Content="Liabilities" />
-                                    <ComboBoxItem Content="Equity" />
-                                    <ComboBoxItem Content="Revenue" />
-                                    <ComboBoxItem Content="Expenses" />
-                                </ComboBox>
+                                    ItemsSource="{Binding AccountTypes}"
+                                    SelectedItem="{Binding SelectedAccountType}"
+                                    Style="{StaticResource ModernComboBox}" />
                                 <Button
                                     Command="{Binding RefreshCommand}"
                                     Content="🔄"
@@ -148,128 +141,45 @@
                             </StackPanel>
                         </Grid>
 
-                        <!--  Enhanced TreeView  -->
-                        <TreeView Foreground="White" ItemsSource="{Binding Accounts}">
-                            <TreeView.Resources>
-                                <Style BasedOn="{StaticResource ModernScrollBar}" TargetType="{x:Type ScrollBar}" />
-                            </TreeView.Resources>
-
+                        <!--  TreeView for Account Hierarchy  -->
+                        <TreeView
+                            Grid.Row="1"
+                            ItemsSource="{Binding AccountHierarchy}"
+                            SelectedItemChanged="TreeView_SelectedItemChanged"
+                            Style="{StaticResource ModernTreeViewStyle}"
+                            ItemContainerStyle="{StaticResource ModernTreeViewItemStyle}">
                             <TreeView.ItemTemplate>
-                                <HierarchicalDataTemplate ItemsSource="{Binding Children}">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="30" />
-                                            <ColumnDefinition Width="80" />
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="100" />
-                                            <ColumnDefinition Width="100" />
-                                            <ColumnDefinition Width="120" />
-                                        </Grid.ColumnDefinitions>
-
-                                        <!--  Account Type Indicator  -->
-                                        <Border
-                                                Grid.Column="0"
-                                                Width="16"
-                                                Height="16"
-                                                HorizontalAlignment="Left"
-                                                VerticalAlignment="Center"
-                                                Background="{Binding Type, Converter={StaticResource AccountTypeToColorConverter}}"
-                                                CornerRadius="3">
-                                            <Border.Effect>
-                                                <DropShadowEffect
-                                                        BlurRadius="3"
-                                                        Opacity="0.3"
-                                                        ShadowDepth="1"
-                                                        Color="Black" />
-                                            </Border.Effect>
-                                        </Border>
-
-                                        <!--  Account Number  -->
+                                <HierarchicalDataTemplate ItemsSource="{Binding ChildAccounts}">
+                                    <StackPanel Orientation="Horizontal" Margin="5">
                                         <TextBlock
-                                                Grid.Column="1"
-                                                VerticalAlignment="Center"
-                                                FontFamily="Segoe UI"
-                                                FontSize="13"
-                                                FontWeight="Medium"
-                                                Text="{Binding AccountNumber}"
-                                                ToolTip="{Binding AccountNumber}" />
-
-                                        <!--  Account Name  -->
+                                            Margin="0,0,10,0"
+                                            Style="{StaticResource DetailValueText}"
+                                            Text="{Binding AccountNumber}" />
                                         <TextBlock
-                                                Grid.Column="2"
-                                                VerticalAlignment="Center"
-                                                FontFamily="Segoe UI"
-                                                FontSize="13"
-                                                Text="{Binding Name}"
-                                                TextTrimming="CharacterEllipsis"
-                                                ToolTip="{Binding Name}" />
-
-                                        <!--  Account Type  -->
+                                            Margin="0,0,10,0"
+                                            Style="{StaticResource DetailValueText}"
+                                            Text="{Binding AccountName}" />
                                         <TextBlock
-                                                Grid.Column="3"
-                                                VerticalAlignment="Center"
-                                                FontFamily="Segoe UI"
-                                                FontSize="12"
-                                                Foreground="#7F8C8D"
-                                                Text="{Binding Type}"
-                                                ToolTip="{Binding Type}" />
-
-                                        <!--  Balance  -->
+                                            Margin="0,0,10,0"
+                                            Style="{StaticResource DetailValueText}"
+                                            Text="{Binding AccountType}" />
                                         <TextBlock
-                                                Grid.Column="4"
-                                                HorizontalAlignment="Right"
-                                                VerticalAlignment="Center"
-                                                FontFamily="Segoe UI"
-                                                FontSize="13"
-                                                FontWeight="SemiBold"
-                                                Foreground="{Binding Balance, Converter={StaticResource BalanceToColorConverter}}"
-                                                Text="{Binding Balance, StringFormat=C}"
-                                                ToolTip="{Binding Balance, StringFormat=C}" />
-
-                                        <!--  Status Indicator  -->
-                                        <StackPanel
-                                                Grid.Column="5"
-                                                HorizontalAlignment="Right"
-                                                VerticalAlignment="Center"
-                                                Orientation="Horizontal">
+                                            Margin="0,0,10,0"
+                                            Foreground="{Binding CurrentBalance, Converter={StaticResource BalanceToColorConverter}}"
+                                            Style="{StaticResource DetailValueText}"
+                                            Text="{Binding CurrentBalance, StringFormat=C}" />
+                                        <StackPanel Orientation="Horizontal" Margin="10,0,0,0">
                                             <Border
-                                                    Width="10"
-                                                    Height="10"
-                                                    Margin="0,0,5,0"
-                                                    HorizontalAlignment="Center"
-                                                    VerticalAlignment="Center"
-                                                    Background="{Binding IsActive, Converter={StaticResource BooleanToStatusColorConverter}}"
-                                                    CornerRadius="5">
-                                                <Border.Effect>
-                                                    <DropShadowEffect
-                                                            BlurRadius="3"
-                                                            Opacity="0.3"
-                                                            ShadowDepth="1"
-                                                            Color="Black" />
-                                                </Border.Effect>
-                                            </Border>
-                                            <TextBlock
-                                                    FontFamily="Segoe UI"
-                                                    FontSize="12"
-                                                    Foreground="#7F8C8D"
-                                                    Text="{Binding IsActive, Converter={StaticResource BooleanToStatusTextConverter}}" />
+                                                Width="10"
+                                                Height="10"
+                                                Margin="0,0,5,0"
+                                                Background="{Binding IsActive, Converter={StaticResource BooleanToStatusColorConverter}}"
+                                                CornerRadius="5" />
+                                            <TextBlock Text="{Binding IsActive, Converter={StaticResource BooleanToStatusTextConverter}}" />
                                         </StackPanel>
-                                    </Grid>
+                                    </StackPanel>
                                 </HierarchicalDataTemplate>
                             </TreeView.ItemTemplate>
-
-                            <TreeView.ItemContainerStyle>
-                                <Style TargetType="{x:Type TreeViewItem}">
-                                    <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
-                                    <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
-                                    <Setter Property="FontWeight" Value="Normal" />
-                                    <Style.Triggers>
-                                        <Trigger Property="IsSelected" Value="True">
-                                            <Setter Property="FontWeight" Value="Bold" />
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TreeView.ItemContainerStyle>
                         </TreeView>
                     </Grid>
                 </Border>
@@ -287,14 +197,14 @@
                             <!--  Account Header Info  -->
                             <Border Margin="0,0,0,10" Style="{StaticResource DetailInfoBorder}">
                                 <StackPanel>
-                                    <TextBlock Style="{StaticResource DetailHeaderText}" Text="{Binding SelectedAccount.Name}" />
+                                    <TextBlock Style="{StaticResource DetailHeaderText}" Text="{Binding SelectedAccount.AccountName}" />
                                     <TextBlock Style="{StaticResource DetailSubText}" Text="{Binding SelectedAccount.AccountNumber}" />
                                     <Border
                                         Margin="0,5,0,0"
                                         HorizontalAlignment="Left"
-                                        Background="{Binding SelectedAccount.Type, Converter={StaticResource AccountTypeToColorConverter}}"
+                                        Background="{Binding SelectedAccount.AccountType, Converter={StaticResource AccountTypeToColorConverter}}"
                                         Style="{StaticResource TransactionStatusBadge}">
-                                        <TextBlock Style="{StaticResource StatusBadgeText}" Text="{Binding SelectedAccount.Type}" />
+                                        <TextBlock Style="{StaticResource StatusBadgeText}" Text="{Binding SelectedAccount.AccountType}" />
                                     </Border>
                                 </StackPanel>
                             </Border>
@@ -313,11 +223,11 @@
                             <!--  Balance Information  -->
                             <Border Margin="0,0,0,10" Style="{StaticResource DetailInfoBorder}">
                                 <StackPanel>
-                                    <TextBlock Style="{StaticResource DetailLabelText}" Text="Balance" />
+                                    <TextBlock Style="{StaticResource DetailLabelText}" Text="Current Balance" />
                                     <TextBlock
-                                        Foreground="{Binding SelectedAccount.Balance, Converter={StaticResource BalanceToColorConverter}}"
+                                        Foreground="{Binding SelectedAccount.CurrentBalance, Converter={StaticResource BalanceToColorConverter}}"
                                         Style="{StaticResource DetailValueText}"
-                                        Text="{Binding SelectedAccount.Balance, StringFormat=C}" />
+                                        Text="{Binding SelectedAccount.CurrentBalance, StringFormat=C}" />
                                 </StackPanel>
                             </Border>
 
@@ -349,7 +259,7 @@
                                     Style="{StaticResource ModernSecondaryButton}" />
                                 <Button
                                     Margin="0,0,0,5"
-                                    Command="{Binding ViewTransactionsCommand}"
+                                    Command="{Binding ViewAccountTransactionsCommand}"
                                     CommandParameter="{Binding SelectedAccount}"
                                     Content="📋 View Transactions"
                                     Style="{StaticResource ModernSecondaryButton}" />

@@ -38,5 +38,19 @@ namespace PrimeAppBooks.Services
 
             return userInput;
         }
+
+        public bool ShowConfirmation(string message, string title, string iconType)
+        {
+            bool result = false;
+
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                var confirmationBox = new WndConfirmationBox(message, title, iconType);
+                confirmationBox.ShowDialog();
+                result = confirmationBox.Result;
+            });
+
+            return result;
+        }
     }
 }

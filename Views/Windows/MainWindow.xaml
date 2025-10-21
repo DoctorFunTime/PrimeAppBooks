@@ -7,7 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:views="clr-namespace:PrimeAppBooks.Views.Controls"
     Title="PrimeApp Books"
-    Width="1300"
+    Width="1310"
     Height="700"
     MinWidth="980"
     MinHeight="560"
@@ -373,9 +373,9 @@
                                 Background="Transparent"
                                 BorderThickness="0"
                                 NavigationUIVisibility="Hidden" />
-                            
+
                             <!-- Loading Overlay -->
-                            <views:LoadingOverlay 
+                            <views:LoadingOverlay
                                 x:Name="LoadingOverlay"
                                 Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}"
                                 Panel.ZIndex="1000" />
