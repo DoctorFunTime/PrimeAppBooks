@@ -48,6 +48,7 @@ namespace PrimeAppBooks
             services.AddTransient<DashboardPageViewModel>();
             services.AddTransient<ChartOfAccountsPageViewModel>();
             services.AddTransient<AddAccountPageViewModel>();
+            services.AddTransient<AccountTransactionsPageViewModel>();
             services.AddTransient<ReportsPageViewModel>();
             services.AddTransient<AuditPageViewModel>();
             services.AddTransient<SettingsPageViewModel>();
@@ -62,6 +63,7 @@ namespace PrimeAppBooks
             services.AddTransient<ChartOfAccountsPage>();
             services.AddTransient<AddAccountPage>();
             services.AddTransient<ReportsPage>();
+            services.AddTransient<AccountTransactionsPage>();
             services.AddTransient<Audit>();
             services.AddTransient<Settings>();
             services.AddTransient<WndSplashScreen>();
@@ -149,6 +151,9 @@ namespace PrimeAppBooks
 
             // SubPages - smooth slide from left
             navigationService.RegisterPageAnimation<JournalPage>(AnimationDirection.FromRight);
+
+            //Subpages
+            navigationService.RegisterPageAnimation<AccountTransactionsPage>(AnimationDirection.FromBottom);
         }
     }
 }

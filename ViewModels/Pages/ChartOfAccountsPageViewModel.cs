@@ -209,25 +209,19 @@ namespace PrimeAppBooks.ViewModels.Pages
         }
 
         [RelayCommand]
-        private async Task EditAccount(ChartOfAccount account)
+        private void EditAccount(ChartOfAccount account)
         {
             if (account == null) return;
 
-            try
-            {
-                // TODO: Navigate to edit account dialog or page
-                await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
-                {
-                    _messageBoxService.ShowMessage($"Edit account functionality will be implemented here.", "Info", "InfoOutline");
-                });
-            }
-            catch (Exception ex)
-            {
-                await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
-                {
-                    _messageBoxService.ShowMessage($"Error editing account: {ex.Message}", "Error", "ErrorOutline");
-                });
-            }
+            _navigationService.NavigateTo<AddAccountPage>(account);
+        }
+
+        [RelayCommand]
+        private void ViewAccountTransactions(ChartOfAccount account)
+        {
+            if (account == null) return;
+
+            _navigationService.NavigateTo<AccountTransactionsPage>(account);
         }
 
         [RelayCommand]
@@ -362,28 +356,6 @@ namespace PrimeAppBooks.ViewModels.Pages
             }
         }
 
-        [RelayCommand]
-        private async Task ViewAccountTransactions(ChartOfAccount account)
-        {
-            if (account == null) return;
-
-            try
-            {
-                // TODO: Navigate to account transactions view
-                await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
-                {
-                    _messageBoxService.ShowMessage($"View transactions for account '{account.AccountName}' functionality will be implemented here.", "Info", "InfoOutline");
-                });
-            }
-            catch (Exception ex)
-            {
-                await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
-                {
-                    _messageBoxService.ShowMessage($"Error viewing account transactions: {ex.Message}", "Error", "ErrorOutline");
-                });
-            }
-        }
-
         #endregion Commands
 
         #region Methods
@@ -479,9 +451,14 @@ namespace PrimeAppBooks.ViewModels.Pages
             // Calculate balances by account type
             TotalAssetsBalance = Accounts.Where(a => a.AccountType == "ASSET" && a.IsActive).Sum(a => a.CurrentBalance);
             TotalLiabilitiesBalance = Accounts.Where(a => a.AccountType == "LIABILITY" && a.IsActive).Sum(a => a.CurrentBalance);
-            TotalEquityBalance = Accounts.Where(a => a.AccountType == "EQUITY" && a.IsActive).Sum(a => a.CurrentBalance);
+            
+            var equity = Accounts.Where(a => a.AccountType == "EQUITY" && a.IsActive).Sum(a => a.CurrentBalance);
             TotalRevenueBalance = Accounts.Where(a => a.AccountType == "REVENUE" && a.IsActive).Sum(a => a.CurrentBalance);
             TotalExpensesBalance = Accounts.Where(a => a.AccountType == "EXPENSE" && a.IsActive).Sum(a => a.CurrentBalance);
+            
+            // Equity should include Net Income (Revenue - Expenses)
+            // Based on the accounting equation: Assets = Liabilities + Equity + (Revenue - Expenses)
+            TotalEquityBalance = equity + TotalRevenueBalance - TotalExpensesBalance;
         }
 
         private void ApplyFilters()
@@ -543,9 +520,11 @@ namespace PrimeAppBooks.ViewModels.Pages
         private void BuildAccountHierarchy()
         {
             AccountHierarchy.Clear();
-            
+
+            var accountIds = new HashSet<int>(FilteredAccounts.Select(a => a.AccountId));
+
             var rootAccounts = FilteredAccounts
-                .Where(a => a.ParentAccountId == null)
+                .Where(a => a.ParentAccountId == null || !accountIds.Contains(a.ParentAccountId.Value))
                 .OrderBy(a => a.AccountNumber)
                 .ToList();
 

@@ -39,6 +39,12 @@ namespace PrimeAppBooks.Services.DbServices
                     throw new InvalidOperationException($"Account number '{account.AccountNumber}' already exists.");
                 }
 
+                // Check if account name is unique
+                if (await IsAccountNameUniqueAsync(account.AccountName, null))
+                {
+                    throw new InvalidOperationException($"Account name '{account.AccountName}' already exists.");
+                }
+
                 // Set timestamps
                 account.CreatedAt = DateTime.UtcNow;
                 account.UpdatedAt = DateTime.UtcNow;
@@ -101,6 +107,7 @@ namespace PrimeAppBooks.Services.DbServices
         {
             var account = await _context.ChartOfAccounts
                 .Include(a => a.ChildAccounts)
+                .Include(a => a.JournalLines)
                 .FirstOrDefaultAsync(a => a.AccountId == updatedAccount.AccountId);
 
             if (account == null) return null;
@@ -112,6 +119,18 @@ namespace PrimeAppBooks.Services.DbServices
             if (await IsAccountNumberUniqueAsync(updatedAccount.AccountNumber, updatedAccount.AccountId))
             {
                 throw new InvalidOperationException($"Account number '{updatedAccount.AccountNumber}' already exists.");
+            }
+
+            // Check if account name is unique (excluding current account)
+            if (await IsAccountNameUniqueAsync(updatedAccount.AccountName, updatedAccount.AccountId))
+            {
+                throw new InvalidOperationException($"Account name '{updatedAccount.AccountName}' already exists.");
+            }
+
+            // Prevent changing Account Type if transactions exist
+            if (account.JournalLines.Any() && account.AccountType != updatedAccount.AccountType)
+            {
+                throw new InvalidOperationException("Cannot change Account Type because this account has existing transactions. Changing the type would affect historical financial reports.");
             }
 
             // Update properties
@@ -216,22 +235,46 @@ namespace PrimeAppBooks.Services.DbServices
 
         public async Task<List<string>> GetAccountTypesAsync()
         {
-            return await _context.ChartOfAccounts
-                .Where(a => a.IsActive)
-                .Select(a => a.AccountType)
-                .Distinct()
-                .OrderBy(t => t)
-                .ToListAsync();
+            // Return standard account types regardless of what's in the DB
+            return new List<string> { "ASSET", "LIABILITY", "EQUITY", "REVENUE", "EXPENSE" };
         }
 
         public async Task<List<string>> GetAccountSubtypesAsync()
         {
-            return await _context.ChartOfAccounts
+            // Get existing subtypes from DB
+            var existingSubtypes = await _context.ChartOfAccounts
                 .Where(a => a.IsActive && !string.IsNullOrEmpty(a.AccountSubtype))
                 .Select(a => a.AccountSubtype)
                 .Distinct()
-                .OrderBy(s => s)
                 .ToListAsync();
+
+            // Add standard subtypes
+            var standardSubtypes = new List<string>
+            {
+                "Cash",
+                "Accounts Receivable",
+                "Inventory",
+                "Prepaid Expenses",
+                "Fixed Assets",
+                "Accumulated Depreciation",
+                "Accounts Payable",
+                "Accrued Liabilities",
+                "Long Term Debt",
+                "Owner's Equity",
+                "Retained Earnings",
+                "Sales Revenue",
+                "Service Revenue",
+                "Cost of Goods Sold",
+                "Operating Expenses",
+                "Other Income",
+                "Other Expenses"
+            };
+
+            // Combine and sort
+            return existingSubtypes
+                .Union(standardSubtypes)
+                .OrderBy(s => s)
+                .ToList();
         }
 
         #endregion Account Type Operations
@@ -269,7 +312,7 @@ namespace PrimeAppBooks.Services.DbServices
 
             // Check if setting this parent would create a circular reference
             var currentAccount = await _context.ChartOfAccounts.FindAsync(accountId);
-            if (currentAccount == null) return false;
+            if (currentAccount == null) return true; // New account cannot have descendants yet
 
             // Check if the proposed parent is a descendant of the current account
             return !await IsDescendantAsync(parentAccountId.Value, accountId);
@@ -522,6 +565,18 @@ namespace PrimeAppBooks.Services.DbServices
         private async Task<bool> IsAccountNumberUniqueAsync(string accountNumber, int? excludeAccountId)
         {
             var query = _context.ChartOfAccounts.Where(a => a.AccountNumber == accountNumber);
+
+            if (excludeAccountId.HasValue)
+            {
+                query = query.Where(a => a.AccountId != excludeAccountId.Value);
+            }
+
+            return await query.AnyAsync();
+        }
+
+        private async Task<bool> IsAccountNameUniqueAsync(string accountName, int? excludeAccountId)
+        {
+            var query = _context.ChartOfAccounts.Where(a => a.AccountName == accountName);
 
             if (excludeAccountId.HasValue)
             {

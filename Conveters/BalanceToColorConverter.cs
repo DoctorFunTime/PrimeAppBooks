@@ -14,7 +14,8 @@ namespace PrimeAppBooks.Conveters
         {
             if (value is decimal balance)
             {
-                return balance >= 0 ? "#27AE60" : "#E74C3C"; // Green for positive, Red for negative
+                if (balance == 0) return "#7F8C8D"; // Gray for zero
+                return balance > 0 ? "#27AE60" : "#E74C3C"; // Green for positive, Red for negative
             }
             return "#2C3E50"; // Default dark color
         }

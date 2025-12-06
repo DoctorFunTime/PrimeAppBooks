@@ -20,6 +20,7 @@ namespace PrimeAppBooks.Services
         private readonly Dictionary<Type, string> _pageAnimations = new();
         private readonly Dictionary<Type, AnimationDirection> _pageAnimationDirections = new();
         private bool _isNavigating = false;
+        private object _pendingNavigationParameter; // Store the navigation parameter
 
         public event EventHandler<Page> PageNavigated = delegate { };
         public event EventHandler<bool> LoadingStateChanged = delegate { };
@@ -55,6 +56,9 @@ namespace PrimeAppBooks.Services
             if (_isNavigating) return;
 
             _isNavigating = true;
+            _pendingNavigationParameter = parameter; // Store the parameter
+            
+            System.Diagnostics.Debug.WriteLine($"NavigateTo called with parameter: {parameter?.GetType().Name ?? "NULL"}");
             
             // Show loading overlay IMMEDIATELY before any page creation
             LoadingStateChanged?.Invoke(this, true);
@@ -84,6 +88,7 @@ namespace PrimeAppBooks.Services
             catch
             {
                 _isNavigating = false;
+                _pendingNavigationParameter = null;
                 // Hide loading overlay on error
                 LoadingStateChanged?.Invoke(this, false);
                 throw;
@@ -109,6 +114,41 @@ namespace PrimeAppBooks.Services
             
             if (_currentPage != null)
             {
+                System.Diagnostics.Debug.WriteLine($"OnFrameNavigated: Page type = {_currentPage.GetType().Name}");
+                System.Diagnostics.Debug.WriteLine($"Pending parameter: {_pendingNavigationParameter?.GetType().Name ?? "NULL"}");
+                
+                // Pass the navigation parameter to the page if it has an Initialize method
+                if (_pendingNavigationParameter != null)
+                {
+                    // Try to find and call an Initialize method on the page's DataContext (ViewModel)
+                    var dataContext = _currentPage.DataContext;
+                    if (dataContext != null)
+                    {
+                        var initializeMethod = dataContext.GetType().GetMethod("Initialize", 
+                            new[] { _pendingNavigationParameter.GetType() });
+                        
+                        if (initializeMethod != null)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Calling Initialize on {dataContext.GetType().Name}");
+                            
+                            // Call Initialize asynchronously if it returns a Task
+                            var result = initializeMethod.Invoke(dataContext, new[] { _pendingNavigationParameter });
+                            if (result is System.Threading.Tasks.Task task)
+                            {
+                                // Fire and forget - the task will complete on its own
+                                _ = task;
+                            }
+                        }
+                        else
+                        {
+                            System.Diagnostics.Debug.WriteLine($"No Initialize method found on {dataContext.GetType().Name} for parameter type {_pendingNavigationParameter.GetType().Name}");
+                        }
+                    }
+                    
+                    // Clear the parameter after using it
+                    _pendingNavigationParameter = null;
+                }
+                
                 // Apply entrance animation immediately without delay to prevent double loading
                 ApplyEntranceAnimation(_currentPage);
                 

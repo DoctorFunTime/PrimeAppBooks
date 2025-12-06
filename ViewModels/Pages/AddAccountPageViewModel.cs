@@ -4,10 +4,10 @@ using Microsoft.Extensions.DependencyInjection;
 using PrimeAppBooks.Interfaces;
 using PrimeAppBooks.Services;
 using PrimeAppBooks.Services.DbServices;
-using PrimeAppBooks.Views.Pages;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
-using System.Windows.Controls;
+using System.Linq;
+using System.Threading.Tasks;
 using static PrimeAppBooks.Models.Pages.TransactionsModels;
 
 namespace PrimeAppBooks.ViewModels.Pages
@@ -18,34 +18,39 @@ namespace PrimeAppBooks.ViewModels.Pages
         private readonly IServiceProvider _serviceProvider;
         private readonly BoxServices _messageBoxService = new();
 
-        #region Observable Properties
+        private ChartOfAccount _editingAccount;
 
         [ObservableProperty]
-        private bool _isLoading = false;
+        [NotifyPropertyChangedFor(nameof(PageTitle))]
+        [NotifyPropertyChangedFor(nameof(PageSubtitle))]
+        [NotifyPropertyChangedFor(nameof(SaveButtonText))]
+        private bool _isEditing = false;
+
+        #region Form Properties
 
         [ObservableProperty]
-        private string _accountNumber = string.Empty;
+        private string _accountNumber;
 
         [ObservableProperty]
-        private string _accountName = string.Empty;
+        private string _accountName;
 
         [ObservableProperty]
-        private string _selectedAccountType = string.Empty;
+        private string _selectedAccountType;
 
         [ObservableProperty]
-        private string _selectedAccountSubtype = string.Empty;
+        private string _selectedAccountSubtype;
 
         [ObservableProperty]
-        private string _description = string.Empty;
+        private string _description;
 
         [ObservableProperty]
         private ChartOfAccount _selectedParentAccount;
 
         [ObservableProperty]
-        private string _selectedNormalBalance = "DEBIT";
+        private string _selectedNormalBalance;
 
         [ObservableProperty]
-        private decimal _openingBalance = 0;
+        private decimal _openingBalance;
 
         [ObservableProperty]
         private DateTime _openingBalanceDate = DateTime.Today;
@@ -56,89 +61,125 @@ namespace PrimeAppBooks.ViewModels.Pages
         [ObservableProperty]
         private bool _isSystemAccount = false;
 
-        #endregion
+        [ObservableProperty]
+        private bool _isLoading = false;
+
+        #endregion Form Properties
+
+        #region Observable Properties
+
+        public string PageTitle => IsEditing ? "Edit Account" : "Add New Account";
+        public string PageSubtitle => IsEditing ? "Modify existing account details" : "Create a new account in your chart of accounts";
+        public string SaveButtonText => IsEditing ? "💾 Update Account" : "💾 Save Account";
+
+        #endregion Observable Properties
 
         #region Collections
 
         public ObservableCollection<string> AccountTypes { get; } = new();
         public ObservableCollection<string> AccountSubtypes { get; } = new();
         public ObservableCollection<ChartOfAccount> ParentAccounts { get; } = new();
+
         public ObservableCollection<string> NormalBalanceOptions { get; } = new()
         {
             "DEBIT",
             "CREDIT"
         };
 
-        #endregion
+        #endregion Collections
 
         #region Validation Properties
 
         [ObservableProperty]
-        private string _accountNumberError = string.Empty;
+        private string _accountNumberError;
 
         [ObservableProperty]
-        private string _accountNameError = string.Empty;
+        private string _accountNameError;
 
         [ObservableProperty]
-        private string _accountTypeError = string.Empty;
+        private string _accountTypeError;
 
         [ObservableProperty]
         private bool _isValid = false;
 
-        #endregion
+        #endregion Validation Properties
 
         public AddAccountPageViewModel(INavigationService navigationService, IServiceProvider serviceProvider)
         {
             _navigationService = navigationService;
             _serviceProvider = serviceProvider;
-            _navigationService.PageNavigated += OnPageNavigated;
+
+            // Initialize with default values
+            LoadDataAsync();
         }
 
-        #region Commands
+        public async Task Initialize(ChartOfAccount accountToEdit)
+        {
+            if (accountToEdit != null)
+            {
+                IsEditing = true;
+                _editingAccount = accountToEdit;
 
-        [RelayCommand]
+                // Populate form with account data
+                AccountNumber = accountToEdit.AccountNumber;
+                AccountName = accountToEdit.AccountName;
+                SelectedAccountType = accountToEdit.AccountType;
+                SelectedAccountSubtype = accountToEdit.AccountSubtype;
+                Description = accountToEdit.Description;
+                SelectedNormalBalance = accountToEdit.NormalBalance;
+                OpeningBalance = accountToEdit.OpeningBalance;
+                OpeningBalanceDate = accountToEdit.OpeningBalanceDate ?? DateTime.Today;
+                IsActive = accountToEdit.IsActive;
+                IsSystemAccount = accountToEdit.IsSystemAccount;
+
+                // Parent account selection needs to happen after data load
+                await LoadDataAsync();
+                SelectedParentAccount = ParentAccounts.FirstOrDefault(p => p.AccountId == accountToEdit.ParentAccountId);
+            }
+            else
+            {
+                ClearForm();
+                await LoadDataAsync();
+            }
+        }
+
         private async Task LoadDataAsync()
         {
-            IsLoading = true;
+            using var scope = _serviceProvider.CreateScope();
+            var chartOfAccountsService = scope.ServiceProvider.GetRequiredService<ChartOfAccountsServices>();
+
             try
             {
-                using var scope = _serviceProvider.CreateScope();
-                var chartOfAccountsService = scope.ServiceProvider.GetRequiredService<ChartOfAccountsServices>();
-
-                var accountTypes = await chartOfAccountsService.GetAccountTypesAsync();
-                var accountSubtypes = await chartOfAccountsService.GetAccountSubtypesAsync();
-                var parentAccounts = await chartOfAccountsService.GetParentAccountsAsync();
+                var types = await chartOfAccountsService.GetAccountTypesAsync();
+                var subtypes = await chartOfAccountsService.GetAccountSubtypesAsync();
+                var parents = await chartOfAccountsService.GetParentAccountsAsync();
 
                 await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
                 {
-                    // Load account types
                     AccountTypes.Clear();
-                    foreach (var type in accountTypes)
-                    {
-                        AccountTypes.Add(type);
-                    }
+                    foreach (var type in types) AccountTypes.Add(type);
 
-                    // Load account subtypes
                     AccountSubtypes.Clear();
-                    AccountSubtypes.Add(string.Empty); // Empty option
-                    foreach (var subtype in accountSubtypes)
-                    {
-                        AccountSubtypes.Add(subtype);
-                    }
+                    foreach (var subtype in subtypes) AccountSubtypes.Add(subtype);
 
-                    // Load parent accounts
                     ParentAccounts.Clear();
-                    ParentAccounts.Add(null); // No parent option
-                    foreach (var parent in parentAccounts)
+                    ParentAccounts.Add(new ChartOfAccount { AccountId = 0, AccountName = "None", AccountNumber = "" });
+                    foreach (var parent in parents)
                     {
+                        // Don't allow selecting self as parent when editing
+                        if (IsEditing && _editingAccount != null && parent.AccountId == _editingAccount.AccountId)
+                            continue;
+
                         ParentAccounts.Add(parent);
                     }
 
-                    // Set default account type if available
-                    if (AccountTypes.Count > 0 && string.IsNullOrEmpty(SelectedAccountType))
+                    // Set default parent if not set
+                    if (SelectedParentAccount == null)
                     {
-                        SelectedAccountType = AccountTypes.First();
+                        SelectedParentAccount = ParentAccounts.FirstOrDefault(p => p == null);
                     }
+
+                    ValidateForm();
                 });
             }
             catch (Exception ex)
@@ -148,58 +189,86 @@ namespace PrimeAppBooks.ViewModels.Pages
                     _messageBoxService.ShowMessage($"Error loading data: {ex.Message}", "Error", "ErrorOutline");
                 });
             }
-            finally
-            {
-                IsLoading = false;
-            }
+        }
+
+        #region Commands
+
+        [RelayCommand]
+        private void NavigateBack()
+        {
+            _navigationService.GoBack();
         }
 
         [RelayCommand]
         private async Task SaveAccountAsync()
         {
-            if (!ValidateForm())
-            {
-                _messageBoxService.ShowMessage("Please fix the validation errors before saving.", "Validation Error", "WarningOutline");
-                return;
-            }
+            ValidateForm();
+            if (!IsValid) return;
 
             IsLoading = true;
             try
             {
-                var newAccount = new ChartOfAccount
-                {
-                    AccountNumber = AccountNumber.Trim(),
-                    AccountName = AccountName.Trim(),
-                    AccountType = SelectedAccountType,
-                    AccountSubtype = string.IsNullOrEmpty(SelectedAccountSubtype) ? null : SelectedAccountSubtype,
-                    Description = string.IsNullOrEmpty(Description) ? null : Description.Trim(),
-                    ParentAccountId = SelectedParentAccount?.AccountId,
-                    NormalBalance = SelectedNormalBalance,
-                    OpeningBalance = OpeningBalance,
-                    OpeningBalanceDate = OpeningBalanceDate,
-                    IsActive = IsActive,
-                    IsSystemAccount = IsSystemAccount,
-                    CreatedBy = 1 // TODO: Get from current user
-                };
-
                 using var scope = _serviceProvider.CreateScope();
                 var chartOfAccountsService = scope.ServiceProvider.GetRequiredService<ChartOfAccountsServices>();
 
-                var createdAccount = await chartOfAccountsService.CreateAccountAsync(newAccount);
-
-                await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
+                if (IsEditing && _editingAccount != null)
                 {
-                    _messageBoxService.ShowMessage($"Account '{createdAccount.AccountName}' created successfully!", "Success", "CheckCircleOutline");
-                });
+                    // Update existing account
+                    _editingAccount.AccountNumber = AccountNumber.Trim();
+                    _editingAccount.AccountName = AccountName.Trim();
+                    _editingAccount.AccountType = SelectedAccountType;
+                    _editingAccount.AccountSubtype = string.IsNullOrEmpty(SelectedAccountSubtype) ? null : SelectedAccountSubtype;
+                    _editingAccount.Description = string.IsNullOrEmpty(Description) ? null : Description.Trim();
+                    _editingAccount.ParentAccountId = SelectedParentAccount?.AccountId > 0 ? SelectedParentAccount.AccountId : null;
+                    _editingAccount.NormalBalance = SelectedNormalBalance;
+                    _editingAccount.OpeningBalance = OpeningBalance;
+                    _editingAccount.OpeningBalanceDate = OpeningBalanceDate;
+                    _editingAccount.IsActive = IsActive;
+                    _editingAccount.IsSystemAccount = IsSystemAccount;
+                    _editingAccount.UpdatedAt = DateTime.UtcNow;
+                    // TODO: Update ModifiedBy
 
-                // Navigate back to Chart of Accounts page
-                NavigateBack();
+                    await chartOfAccountsService.UpdateAccountAsync(_editingAccount);
+
+                    await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
+                    {
+                        _messageBoxService.ShowMessage("Account updated successfully!", "Success", "CheckCircleOutline");
+                        _navigationService.GoBack();
+                    });
+                }
+                else
+                {
+                    // Create new account
+                    var newAccount = new ChartOfAccount
+                    {
+                        AccountNumber = AccountNumber.Trim(),
+                        AccountName = AccountName.Trim(),
+                        AccountType = SelectedAccountType,
+                        AccountSubtype = string.IsNullOrEmpty(SelectedAccountSubtype) ? null : SelectedAccountSubtype,
+                        Description = string.IsNullOrEmpty(Description) ? null : Description.Trim(),
+                        ParentAccountId = SelectedParentAccount?.AccountId > 0 ? SelectedParentAccount.AccountId : null,
+                        NormalBalance = SelectedNormalBalance,
+                        OpeningBalance = OpeningBalance,
+                        OpeningBalanceDate = OpeningBalanceDate,
+                        IsActive = IsActive,
+                        IsSystemAccount = IsSystemAccount,
+                        CreatedBy = 1 // TODO: Get from current user
+                    };
+
+                    var createdAccount = await chartOfAccountsService.CreateAccountAsync(newAccount);
+
+                    await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
+                    {
+                        _messageBoxService.ShowMessage($"Account '{createdAccount.AccountName}' created successfully!", "Success", "CheckCircleOutline");
+                        _navigationService.GoBack();
+                    });
+                }
             }
             catch (Exception ex)
             {
                 await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
                 {
-                    _messageBoxService.ShowMessage($"Error creating account: {ex.Message}", "Error", "ErrorOutline");
+                    _messageBoxService.ShowMessage($"Error saving account: {ex.Message}", "Error", "ErrorOutline");
                 });
             }
             finally
@@ -209,71 +278,52 @@ namespace PrimeAppBooks.ViewModels.Pages
         }
 
         [RelayCommand]
-        private void NavigateBack()
-        {
-            _navigationService.NavigateTo<ChartOfAccountsPage>();
-        }
-
-        [RelayCommand]
         private void ClearForm()
         {
+            IsEditing = false;
+            _editingAccount = null;
             AccountNumber = string.Empty;
             AccountName = string.Empty;
-            SelectedAccountType = AccountTypes.FirstOrDefault() ?? string.Empty;
-            SelectedAccountSubtype = string.Empty;
+            SelectedAccountType = null;
+            SelectedAccountSubtype = null;
             Description = string.Empty;
-            SelectedParentAccount = null;
-            SelectedNormalBalance = "DEBIT";
+            SelectedParentAccount = ParentAccounts.FirstOrDefault();
+            SelectedNormalBalance = null;
             OpeningBalance = 0;
             OpeningBalanceDate = DateTime.Today;
             IsActive = true;
             IsSystemAccount = false;
-
             ClearValidationErrors();
         }
 
-        #endregion
+        #endregion Commands
 
         #region Validation Methods
 
-        private bool ValidateForm()
+        private void ValidateForm()
         {
             ClearValidationErrors();
             bool isValid = true;
 
-            // Validate Account Number
             if (string.IsNullOrWhiteSpace(AccountNumber))
             {
-                AccountNumberError = "Account number is required.";
-                isValid = false;
-            }
-            else if (AccountNumber.Length > 20)
-            {
-                AccountNumberError = "Account number cannot exceed 20 characters.";
+                AccountNumberError = "Account Number is required";
                 isValid = false;
             }
 
-            // Validate Account Name
             if (string.IsNullOrWhiteSpace(AccountName))
             {
-                AccountNameError = "Account name is required.";
-                isValid = false;
-            }
-            else if (AccountName.Length > 255)
-            {
-                AccountNameError = "Account name cannot exceed 255 characters.";
+                AccountNameError = "Account Name is required";
                 isValid = false;
             }
 
-            // Validate Account Type
-            if (string.IsNullOrWhiteSpace(SelectedAccountType))
+            if (string.IsNullOrEmpty(SelectedAccountType))
             {
-                AccountTypeError = "Account type is required.";
+                AccountTypeError = "Account Type is required";
                 isValid = false;
             }
 
             IsValid = isValid;
-            return isValid;
         }
 
         private void ClearValidationErrors()
@@ -284,37 +334,18 @@ namespace PrimeAppBooks.ViewModels.Pages
             IsValid = false;
         }
 
-        #endregion
+        #endregion Validation Methods
 
-        #region Property Change Handlers
-
-        partial void OnAccountNumberChanged(string value)
+        protected override void OnPropertyChanged(System.ComponentModel.PropertyChangedEventArgs e)
         {
-            ValidateForm();
-        }
+            base.OnPropertyChanged(e);
 
-        partial void OnAccountNameChanged(string value)
-        {
-            ValidateForm();
-        }
-
-        partial void OnSelectedAccountTypeChanged(string value)
-        {
-            ValidateForm();
-        }
-
-        #endregion
-
-        #region Page Navigation Events
-
-        private async void OnPageNavigated(object sender, Page page)
-        {
-            if (page is AddAccountPage)
+            if (e.PropertyName == nameof(AccountNumber) ||
+                e.PropertyName == nameof(AccountName) ||
+                e.PropertyName == nameof(SelectedAccountType))
             {
-                await LoadDataAsync();
+                ValidateForm();
             }
         }
-
-        #endregion
     }
 }
