@@ -41,6 +41,10 @@ namespace PrimeAppBooks
             services.AddSingleton<IJournalNavigationService, JournalNavigationService>();
             services.AddSingleton<SplashscreenInitialisations>();
             services.AddTransient<DatabaseSetup>();
+            
+            // Register Report Services
+            services.AddScoped<ReportGenerationService>();
+            services.AddScoped<ReportPrintingService>();
 
             // Register ALL ViewModels
             services.AddTransient<MainWindowViewModel>();
