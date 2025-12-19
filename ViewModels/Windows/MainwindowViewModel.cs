@@ -35,6 +35,12 @@ namespace PrimeAppBooks.ViewModels.Windows
         private bool _isAuditTrailsSelected;
 
         [ObservableProperty]
+        private bool _isSalesSelected;
+
+        [ObservableProperty]
+        private bool _isPurchasesSelected;
+
+        [ObservableProperty]
         private bool _isSettingsSelected;
 
         [ObservableProperty]
@@ -121,6 +127,18 @@ namespace PrimeAppBooks.ViewModels.Windows
         }
 
         [RelayCommand]
+        private void NavigateToSales()
+        {
+            _navigationService.NavigateTo<SalesInvoicesPage>();
+        }
+
+        [RelayCommand]
+        private void NavigateToPurchases()
+        {
+            _navigationService.NavigateTo<PurchaseInvoicesPage>();
+        }
+
+        [RelayCommand]
         private void NavigateToSettings()
         {
             _navigationService.NavigateTo<Settings>();
@@ -137,6 +155,8 @@ namespace PrimeAppBooks.ViewModels.Windows
             IsUserManagementSelected = false;
             IsSecurityCenterSelected = false;
             IsHelpSupportSelected = false;
+            IsSalesSelected = false;
+            IsPurchasesSelected = false;
         }
 
         private void OnPageNavigated(object sender, Page page)
@@ -168,6 +188,14 @@ namespace PrimeAppBooks.ViewModels.Windows
 
                 case Settings:
                     IsSettingsSelected = true;
+                    break;
+
+                case SalesInvoicesPage:
+                    IsSalesSelected = true;
+                    break;
+
+                case PurchaseInvoicesPage:
+                    IsPurchasesSelected = true;
                     break;
             }
         }

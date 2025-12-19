@@ -28,6 +28,79 @@
     </Style>
 
     <!-- Enhanced Radio Button Style for Settings Categories with Simple Hover Effect -->
+    <Style x:Key="ModernExpandedRadioButtonStyle" TargetType="RadioButton">
+        <Setter Property="Foreground" Value="#CCCCCC" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="LightBlue" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="15,12" />
+        <Setter Property="Margin" Value="2" />
+        <Setter Property="Cursor" Value="Hand" />
+
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <Border x:Name="MainBorder"
+                    Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    CornerRadius="8"
+                    Padding="{TemplateBinding Padding}"
+                    Margin="{TemplateBinding Margin}"
+                    Cursor="{TemplateBinding Cursor}">
+                        <Grid>
+                            <Rectangle x:Name="SelectionIndicator"
+                               Width="4"
+                               HorizontalAlignment="Left"
+                               Fill="#007ACC"
+                               RadiusX="2"
+                               RadiusY="2"
+                               Opacity="0"
+                               Margin="-12,0,0,0" />
+                            <ContentPresenter x:Name="ContentPresenter"
+                                      Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}"
+                                      HorizontalAlignment="Left"
+                                      VerticalAlignment="Center"
+                                      Margin="8,0,0,0" />
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <!-- Simple Hover Effect - Just change background color -->
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="MainBorder" Property="Background" Value="#1A1A1A" />
+                        </Trigger>
+
+                        <!-- Checked State -->
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="MainBorder" Property="Background" Value="#1E3A5F" />
+                            <Setter TargetName="MainBorder" Property="BorderBrush" Value="#007ACC" />
+                            <Setter TargetName="SelectionIndicator" Property="Opacity" Value="1" />
+                            <Setter TargetName="ContentPresenter" Property="TextElement.Foreground" Value="#FFFFFF" />
+                        </Trigger>
+
+                        <!-- Pressed State -->
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="MainBorder" Property="Background" Value="#0F2A44" />
+                        </Trigger>
+
+                        <!-- Checked + Hover State -->
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsChecked" Value="True" />
+                                <Condition Property="IsMouseOver" Value="True" />
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="MainBorder" Property="Background" Value="#2A4A6F" />
+                        </MultiTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Enhanced Radio Button Style for Settings Categories with Simple Hover Effect -->
     <Style x:Key="ModernRadioButtonStyle" TargetType="RadioButton">
         <Setter Property="Foreground" Value="#CCCCCC" />
         <Setter Property="FontSize" Value="13" />

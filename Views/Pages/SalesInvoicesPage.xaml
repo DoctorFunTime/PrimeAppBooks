@@ -1,0 +1,83 @@
+<base:BaseAnimatedPage
+    x:Class="PrimeAppBooks.Views.Pages.SalesInvoicesPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:base="clr-namespace:PrimeAppBooks.Views.Pages"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:hc="https://handyorg.github.io/handycontrol"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:pages="clr-namespace:PrimeAppBooks.ViewModels.Pages"
+    d:DataContext="{d:DesignInstance Type=pages:SalesInvoicesPageViewModel}"
+    d:DesignHeight="900"
+    d:DesignWidth="1280"
+    Background="Transparent"
+    mc:Ignorable="d">
+
+    <ScrollViewer Style="{StaticResource ModernScrollViewer}">
+        <Grid Margin="5">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!-- Header Section -->
+            <Border Grid.Row="0" Margin="5,10" Style="{StaticResource ModernCardStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Style="{StaticResource WelcomeTitleText}" Text="Sales Invoices" />
+                        <TextBlock Style="{StaticResource WelcomeSubtitleText}" Text="Manage your customer invoices and receivables" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                        <Button
+                            Margin="5,0"
+                            Command="{Binding CreateNewInvoiceCommand}"
+                            Content="📝 New Sales Invoice"
+                            Style="{StaticResource ModernActionButton}" />
+                        <Button
+                            Margin="5,0"
+                            Command="{Binding LoadInvoicesCommand}"
+                            Content="🔄 Refresh"
+                            Style="{StaticResource ModernSecondaryButton}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Search & Filters -->
+            <Border Grid.Row="1" Margin="5" Style="{StaticResource ModernCardStyle}">
+                <Grid>
+                    <StackPanel Orientation="Horizontal">
+                        <StackPanel Margin="0,0,15,0" Width="300">
+                            <TextBlock Style="{StaticResource FilterLabelText}" Text="Search Invoices" />
+                            <TextBox Style="{StaticResource ModernTextBoxStyle}" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Invoices List -->
+            <Border Grid.Row="2" Margin="5,10" Style="{StaticResource ModernCardStyle}">
+                <DataGrid
+                    ItemsSource="{Binding Invoices}"
+                    AutoGenerateColumns="False"
+                    IsReadOnly="True"
+                    Style="{StaticResource ModernDataGridStyle}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Invoice #" Binding="{Binding InvoiceNumber}" Width="*" />
+                        <DataGridTextColumn Header="Customer ID" Binding="{Binding CustomerId}" Width="*" />
+                        <DataGridTextColumn Header="Date" Binding="{Binding InvoiceDate, StringFormat='MMM dd, yyyy'}" Width="*" />
+                        <DataGridTextColumn Header="Due Date" Binding="{Binding DueDate, StringFormat='MMM dd, yyyy'}" Width="*" />
+                        <DataGridTextColumn Header="Total" Binding="{Binding TotalAmount, StringFormat=C}" Width="*" />
+                        <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="*" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
+        </Grid>
+    </ScrollViewer>
+</base:BaseAnimatedPage>

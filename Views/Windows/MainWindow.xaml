@@ -228,6 +228,18 @@
                                                         IsChecked="{Binding IsTransactionsSelected}"
                                                         Style="{StaticResource ModernRadioButtonStyle}" />
                                             <RadioButton
+                                                        Command="{Binding NavigateToSalesCommand}"
+                                                        Content="🛒  Sales"
+                                                        GroupName="Navigation"
+                                                        IsChecked="{Binding IsSalesSelected}"
+                                                        Style="{StaticResource ModernRadioButtonStyle}" />
+                                            <RadioButton
+                                                        Command="{Binding NavigateToPurchasesCommand}"
+                                                        Content="🛍️  Purchases"
+                                                        GroupName="Navigation"
+                                                        IsChecked="{Binding IsPurchasesSelected}"
+                                                        Style="{StaticResource ModernRadioButtonStyle}" />
+                                            <RadioButton
                                                         Command="{Binding NavigateToReportsCommand}"
                                                         Content="📈  Financial Reports"
                                                         GroupName="Navigation"
@@ -314,6 +326,20 @@
                                                     IsChecked="{Binding IsTransactionsSelected}"
                                                     Style="{StaticResource CollapsedRadioButtonStyle}"
                                                     ToolTip="Transactions" />
+                                        <RadioButton
+                                                    Command="{Binding NavigateToSalesCommand}"
+                                                    Content="🛒"
+                                                    GroupName="CollapsedNavigation"
+                                                    IsChecked="{Binding IsSalesSelected}"
+                                                    Style="{StaticResource CollapsedRadioButtonStyle}"
+                                                    ToolTip="Sales" />
+                                        <RadioButton
+                                                    Command="{Binding NavigateToPurchasesCommand}"
+                                                    Content="🛍️"
+                                                    GroupName="CollapsedNavigation"
+                                                    IsChecked="{Binding IsPurchasesSelected}"
+                                                    Style="{StaticResource CollapsedRadioButtonStyle}"
+                                                    ToolTip="Purchases" />
                                         <RadioButton
                                                     Command="{Binding NavigateToReportsCommand}"
                                                     Content="📈"

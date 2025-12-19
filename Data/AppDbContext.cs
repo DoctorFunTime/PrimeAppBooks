@@ -18,6 +18,11 @@ namespace PrimeAppBooks.Data
         public DbSet<ChartOfAccount> ChartOfAccounts { get; set; }
         public DbSet<JournalTemplate> JournalTemplates { get; set; }
 
+        public DbSet<SalesInvoice> SalesInvoices { get; set; }
+        public DbSet<SalesInvoiceLine> SalesInvoiceLines { get; set; }
+        public DbSet<PurchaseInvoice> PurchaseInvoices { get; set; }
+        public DbSet<PurchaseInvoiceLine> PurchaseInvoiceLines { get; set; }
+
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
         }

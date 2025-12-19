@@ -248,5 +248,157 @@ namespace PrimeAppBooks.Models.Pages
             public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
             public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
         }
+
+        #region Sales Invoices
+
+        public class SalesInvoice
+        {
+            [Key]
+            public int SalesInvoiceId { get; set; }
+
+            [Required]
+            [MaxLength(100)]
+            public string InvoiceNumber { get; set; }
+
+            public int CustomerId { get; set; }
+
+            [Required]
+            public DateTime InvoiceDate { get; set; }
+
+            [Required]
+            public DateTime DueDate { get; set; }
+
+            [Required]
+            public decimal TotalAmount { get; set; }
+
+            public decimal TaxAmount { get; set; } = 0;
+
+            public decimal DiscountAmount { get; set; } = 0;
+
+            [Required]
+            public decimal NetAmount { get; set; }
+
+            public decimal AmountReceived { get; set; } = 0;
+
+            [Required]
+            public decimal Balance { get; set; }
+
+            [MaxLength(20)]
+            public string Status { get; set; } = "DRAFT";
+
+            public string Terms { get; set; }
+            public string Notes { get; set; }
+
+            public int CreatedBy { get; set; }
+            public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+            public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+            public ICollection<SalesInvoiceLine> Lines { get; set; } = new List<SalesInvoiceLine>();
+        }
+
+        public class SalesInvoiceLine
+        {
+            [Key]
+            public int LineId { get; set; }
+
+            [Required]
+            public int SalesInvoiceId { get; set; }
+
+            [Required]
+            public string Description { get; set; }
+
+            [Required]
+            public int AccountId { get; set; }
+
+            [Required]
+            public decimal Quantity { get; set; }
+
+            [Required]
+            public decimal UnitPrice { get; set; }
+
+            [Required]
+            public decimal Amount { get; set; }
+
+            public SalesInvoice SalesInvoice { get; set; }
+            public ChartOfAccount Account { get; set; }
+        }
+
+        #endregion
+
+        #region Purchase Invoices
+
+        public class PurchaseInvoice
+        {
+            [Key]
+            public int PurchaseInvoiceId { get; set; }
+
+            [Required]
+            [MaxLength(100)]
+            public string InvoiceNumber { get; set; }
+
+            public int VendorId { get; set; }
+
+            [Required]
+            public DateTime InvoiceDate { get; set; }
+
+            [Required]
+            public DateTime DueDate { get; set; }
+
+            [Required]
+            public decimal TotalAmount { get; set; }
+
+            public decimal TaxAmount { get; set; } = 0;
+
+            public decimal DiscountAmount { get; set; } = 0;
+
+            [Required]
+            public decimal NetAmount { get; set; }
+
+            public decimal AmountPaid { get; set; } = 0;
+
+            [Required]
+            public decimal Balance { get; set; }
+
+            [MaxLength(20)]
+            public string Status { get; set; } = "DRAFT";
+
+            public string Terms { get; set; }
+            public string Notes { get; set; }
+
+            public int CreatedBy { get; set; }
+            public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+            public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+            public ICollection<PurchaseInvoiceLine> Lines { get; set; } = new List<PurchaseInvoiceLine>();
+        }
+
+        public class PurchaseInvoiceLine
+        {
+            [Key]
+            public int LineId { get; set; }
+
+            [Required]
+            public int PurchaseInvoiceId { get; set; }
+
+            [Required]
+            public string Description { get; set; }
+
+            [Required]
+            public int AccountId { get; set; }
+
+            [Required]
+            public decimal Quantity { get; set; }
+
+            [Required]
+            public decimal UnitPrice { get; set; }
+
+            [Required]
+            public decimal Amount { get; set; }
+
+            public PurchaseInvoice PurchaseInvoice { get; set; }
+            public ChartOfAccount Account { get; set; }
+        }
+
+        #endregion
     }
 }

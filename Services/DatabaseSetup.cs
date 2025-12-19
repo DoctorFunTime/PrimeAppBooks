@@ -147,7 +147,8 @@ namespace PrimeAppBooks.Services
                 CreateInventoryAccountingTableAsync(),
                 CreateLoanAccountingTableAsync(),
                 CreateInvestmentAccountingTableAsync(),
-                CreateAuditLogTableAsync()
+                CreateAuditLogTableAsync(),
+                CreateNewInvoiceTablesAsync()
             );
             ReportProgress("Created base transaction tables (Phase 1/3)");
 

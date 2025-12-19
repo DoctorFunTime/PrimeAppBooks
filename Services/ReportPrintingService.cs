@@ -154,7 +154,7 @@ namespace PrimeAppBooks.Services
             }
 
             AddSpacer(doc, 5);
-            AddTotal(doc, "Total Revenue", data.TotalRevenue);
+            AddTotal(doc, "Net Revenue", data.TotalRevenue);
             AddSpacer(doc, 12);
 
             // COST OF GOODS SOLD
@@ -167,10 +167,10 @@ namespace PrimeAppBooks.Services
                 AddSpacer(doc, 5);
                 AddTotal(doc, "Total Cost of Goods Sold", data.TotalCOGS);
                 AddSpacer(doc, 12);
-
-                AddSubtotal(doc, "GROSS PROFIT", data.GrossProfit);
-                AddSpacer(doc, 12);
             }
+
+            AddSubtotal(doc, "GROSS PROFIT", data.GrossProfit);
+            AddSpacer(doc, 12);
 
             // OPERATING EXPENSES
             if (data.OperatingExpenses.Any())
@@ -382,7 +382,48 @@ namespace PrimeAppBooks.Services
 
         public string ExportBalanceSheetToPdf(BalanceSheetData data, string filePath)
         {
-            throw new NotImplementedException("PDF export requires QuestPDF package. Please install it first or use Print instead.");
+            var document = Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.Size(PageSizes.A4);
+                    page.Margin(1, Unit.Inch);
+
+                    page.Content().Column(col =>
+                    {
+                        // Header
+                        col.Item().Text(data.CompanyName).Bold().FontSize(14);
+                        col.Item().Text("Balance Sheet").Bold().FontSize(12);
+                        col.Item().Text($"As of {data.EndDate:MMMM dd, yyyy}");
+                        col.Item().PaddingBottom(20);
+
+                        // Assets - Simple listing
+                        col.Item().Text("ASSETS").Bold();
+                        foreach (var asset in data.CurrentAssets)
+                            col.Item().PaddingLeft(10).Text($"{asset.AccountName} {asset.Amount:N2}");
+                        foreach (var asset in data.FixedAssets)
+                            col.Item().PaddingLeft(10).Text($"{asset.AccountName} {asset.Amount:N2}");
+                        col.Item().Text($"Total Assets: {data.TotalAssets:N2}").Bold();
+
+                        // Liabilities - Simple listing
+                        col.Item().PaddingTop(10).Text("LIABILITIES").Bold();
+                        foreach (var liability in data.CurrentLiabilities)
+                            col.Item().PaddingLeft(10).Text($"{liability.AccountName} {liability.Amount:N2}");
+                        foreach (var liability in data.LongTermLiabilities)
+                            col.Item().PaddingLeft(10).Text($"{liability.AccountName} {liability.Amount:N2}");
+                        col.Item().Text($"Total Liabilities: {data.TotalLiabilities:N2}").Bold();
+
+                        // Equity - Simple listing
+                        col.Item().PaddingTop(10).Text("EQUITY").Bold();
+                        foreach (var equity in data.Equity)
+                            col.Item().PaddingLeft(10).Text($"{equity.AccountName} {equity.Amount:N2}");
+                        col.Item().Text($"Total Equity: {data.TotalEquity:N2}").Bold();
+                    });
+                });
+            });
+
+            document.GeneratePdf(filePath);
+            return filePath;
         }
 
         public string ExportIncomeStatementToPdf(IncomeStatementData data, string filePath)
@@ -501,78 +542,144 @@ namespace PrimeAppBooks.Services
 
         private void AddLineItem(FlowDocument doc, string label, decimal amount, int indent = 0)
         {
-            var para = new Paragraph();
-            para.Margin = new Thickness(indent * 15, 1, 0, 1);
-            para.FontSize = 10.5;
+            // Use BlockUIContainer with Grid for proper layout
+            var grid = new System.Windows.Controls.Grid();
+            grid.Margin = new Thickness(indent * 15, 1, 0, 1);
 
-            var labelRun = new Run(label);
-            var amountRun = new Run(amount.ToString("N2"));
-            amountRun.FontFamily = new FontFamily("Consolas");
+            // Define two columns: one for label (auto-width), one for amount (right-aligned)
+            grid.ColumnDefinitions.Add(new System.Windows.Controls.ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            grid.ColumnDefinitions.Add(new System.Windows.Controls.ColumnDefinition { Width = GridLength.Auto });
 
-            // Add color coding for negative amounts
+            // Label TextBlock
+            var labelBlock = new System.Windows.Controls.TextBlock();
+            labelBlock.Text = label;
+            labelBlock.FontSize = 10.5;
+            labelBlock.FontFamily = new FontFamily("Calibri");
+            System.Windows.Controls.Grid.SetColumn(labelBlock, 0);
+            grid.Children.Add(labelBlock);
+
+            // Amount TextBlock
+            var amountBlock = new System.Windows.Controls.TextBlock();
+            amountBlock.Text = amount.ToString("N2");
+            amountBlock.FontSize = 10.5;
+            amountBlock.FontFamily = new FontFamily("Consolas");
+            amountBlock.HorizontalAlignment = System.Windows.HorizontalAlignment.Right;
+            amountBlock.TextAlignment = TextAlignment.Right;
+            amountBlock.MinWidth = 120;
+            amountBlock.Margin = new Thickness(10, 0, 0, 0);
+
             if (amount < 0)
             {
-                amountRun.Foreground = Brushes.Red;
+                amountBlock.Foreground = Brushes.Red;
             }
 
-            para.Inlines.Add(labelRun);
-            para.Inlines.Add(new Run(new string(' ', Math.Max(1, 65 - label.Length - amountRun.Text.Length))));
-            para.Inlines.Add(amountRun);
+            System.Windows.Controls.Grid.SetColumn(amountBlock, 1);
+            grid.Children.Add(amountBlock);
 
-            doc.Blocks.Add(para);
+            var container = new BlockUIContainer(grid);
+            container.Margin = new Thickness(0);
+            doc.Blocks.Add(container);
         }
 
         private void AddSubtotal(FlowDocument doc, string label, decimal amount)
         {
-            var para = new Paragraph();
-            para.Margin = new Thickness(0, 3, 0, 3);
-            para.FontWeight = FontWeights.SemiBold;
-            para.FontSize = 11;
-            para.BorderBrush = new SolidColorBrush(Color.FromRgb(189, 195, 199));
-            para.BorderThickness = new Thickness(0, 1, 0, 0);
-            para.Padding = new Thickness(0, 4, 0, 0);
+            // Create a section for the border
+            var section = new Section();
+            section.Margin = new Thickness(0, 3, 0, 3);
+            section.BorderBrush = new SolidColorBrush(Color.FromRgb(189, 195, 199));
+            section.BorderThickness = new Thickness(0, 1, 0, 0);
+            section.Padding = new Thickness(0, 4, 0, 0);
 
-            var labelRun = new Run(label);
-            var amountRun = new Run(amount.ToString("N2"));
-            amountRun.FontFamily = new FontFamily("Consolas");
+            // Use BlockUIContainer with Grid for proper layout
+            var grid = new System.Windows.Controls.Grid();
+
+            // Define two columns
+            grid.ColumnDefinitions.Add(new System.Windows.Controls.ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            grid.ColumnDefinitions.Add(new System.Windows.Controls.ColumnDefinition { Width = GridLength.Auto });
+
+            // Label TextBlock
+            var labelBlock = new System.Windows.Controls.TextBlock();
+            labelBlock.Text = label;
+            labelBlock.FontSize = 11;
+            labelBlock.FontWeight = FontWeights.SemiBold;
+            labelBlock.FontFamily = new FontFamily("Calibri");
+            System.Windows.Controls.Grid.SetColumn(labelBlock, 0);
+            grid.Children.Add(labelBlock);
+
+            // Amount TextBlock
+            var amountBlock = new System.Windows.Controls.TextBlock();
+            amountBlock.Text = amount.ToString("N2");
+            amountBlock.FontSize = 11;
+            amountBlock.FontWeight = FontWeights.SemiBold;
+            amountBlock.FontFamily = new FontFamily("Consolas");
+            amountBlock.HorizontalAlignment = System.Windows.HorizontalAlignment.Right;
+            amountBlock.TextAlignment = TextAlignment.Right;
+            amountBlock.MinWidth = 120;
+            amountBlock.Margin = new Thickness(10, 0, 0, 0);
 
             if (amount < 0)
             {
-                amountRun.Foreground = Brushes.Red;
+                amountBlock.Foreground = Brushes.Red;
             }
 
-            para.Inlines.Add(labelRun);
-            para.Inlines.Add(new Run(new string(' ', Math.Max(1, 65 - label.Length - amountRun.Text.Length))));
-            para.Inlines.Add(amountRun);
+            System.Windows.Controls.Grid.SetColumn(amountBlock, 1);
+            grid.Children.Add(amountBlock);
 
-            doc.Blocks.Add(para);
+            var container = new BlockUIContainer(grid);
+            container.Margin = new Thickness(0);
+            section.Blocks.Add(container);
+            doc.Blocks.Add(section);
         }
 
         private void AddTotal(FlowDocument doc, string label, decimal amount, bool isFinal = false)
         {
-            var para = new Paragraph();
-            para.Margin = new Thickness(0, 5, 0, 5);
-            para.FontWeight = FontWeights.Bold;
-            para.FontSize = 12;
-            para.BorderBrush = new SolidColorBrush(Color.FromRgb(52, 73, 94));
-            para.BorderThickness = isFinal ? new Thickness(0, 3, 0, 3) : new Thickness(0, 2, 0, 1);
-            para.Padding = new Thickness(0, 5, 0, 5);
-            para.Background = isFinal ? new SolidColorBrush(Color.FromRgb(236, 240, 241)) : Brushes.Transparent;
+            // Create a section for the border and background
+            var section = new Section();
+            section.Margin = new Thickness(0, 5, 0, 5);
+            section.BorderBrush = new SolidColorBrush(Color.FromRgb(52, 73, 94));
+            section.BorderThickness = isFinal ? new Thickness(0, 3, 0, 3) : new Thickness(0, 2, 0, 1);
+            section.Padding = new Thickness(0, 5, 0, 5);
+            section.Background = isFinal ? new SolidColorBrush(Color.FromRgb(236, 240, 241)) : Brushes.Transparent;
 
-            var labelRun = new Run(label);
-            var amountRun = new Run(amount.ToString("N2"));
-            amountRun.FontFamily = new FontFamily("Consolas");
+            // Use BlockUIContainer with Grid for proper layout
+            var grid = new System.Windows.Controls.Grid();
+
+            // Define two columns
+            grid.ColumnDefinitions.Add(new System.Windows.Controls.ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            grid.ColumnDefinitions.Add(new System.Windows.Controls.ColumnDefinition { Width = GridLength.Auto });
+
+            // Label TextBlock
+            var labelBlock = new System.Windows.Controls.TextBlock();
+            labelBlock.Text = label;
+            labelBlock.FontSize = 12;
+            labelBlock.FontWeight = FontWeights.Bold;
+            labelBlock.FontFamily = new FontFamily("Calibri");
+            System.Windows.Controls.Grid.SetColumn(labelBlock, 0);
+            grid.Children.Add(labelBlock);
+
+            // Amount TextBlock
+            var amountBlock = new System.Windows.Controls.TextBlock();
+            amountBlock.Text = amount.ToString("N2");
+            amountBlock.FontSize = 12;
+            amountBlock.FontWeight = FontWeights.Bold;
+            amountBlock.FontFamily = new FontFamily("Consolas");
+            amountBlock.HorizontalAlignment = System.Windows.HorizontalAlignment.Right;
+            amountBlock.TextAlignment = TextAlignment.Right;
+            amountBlock.MinWidth = 120;
+            amountBlock.Margin = new Thickness(10, 0, 0, 0);
 
             if (amount < 0)
             {
-                amountRun.Foreground = Brushes.Red;
+                amountBlock.Foreground = Brushes.Red;
             }
 
-            para.Inlines.Add(labelRun);
-            para.Inlines.Add(new Run(new string(' ', Math.Max(1, 65 - label.Length - amountRun.Text.Length))));
-            para.Inlines.Add(amountRun);
+            System.Windows.Controls.Grid.SetColumn(amountBlock, 1);
+            grid.Children.Add(amountBlock);
 
-            doc.Blocks.Add(para);
+            var container = new BlockUIContainer(grid);
+            container.Margin = new Thickness(0);
+            section.Blocks.Add(container);
+            doc.Blocks.Add(section);
         }
 
         private void AddSpacer(FlowDocument doc, double height = 10)

@@ -26,7 +26,7 @@ namespace PrimeAppBooks.Services
         {
             var report = new BalanceSheetData
             {
-                ReportTitle = "Balance Sheet",
+                ReportTitle = "Statement of Financial Position",
                 StartDate = asOfDate,
                 EndDate = asOfDate
             };

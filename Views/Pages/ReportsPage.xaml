@@ -1,12 +1,13 @@
 ﻿<base:BaseAnimatedPage
     x:Class="PrimeAppBooks.Views.Pages.ReportsPage"
-        xmlns:base="clr-namespace:PrimeAppBooks.Views.Pages"
+    xmlns:base="clr-namespace:PrimeAppBooks.Views.Pages"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
     xmlns:converters="clr-namespace:PrimeAppBooks.Conveters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:hc="https://handyorg.github.io/handycontrol"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:pages="clr-namespace:PrimeAppBooks.ViewModels.Pages" d:DataContext="{d:DesignInstance Type=pages:ReportsPageViewModel}"
     d:DesignHeight="900"
     d:DesignWidth="1280"
     Background="Transparent"
@@ -74,7 +75,7 @@
                         <DatePicker
                             Width="120"
                             Margin="0,0,10,0"
-                            SelectedDate="{Binding StartDate}"
+                            SelectedDate="{Binding StartDate, Mode=TwoWay}"
                             Style="{StaticResource CompactDatePickerStyle}" />
                         <TextBlock
                             VerticalAlignment="Center"
@@ -83,7 +84,7 @@
                         <DatePicker
                             Width="120"
                             Margin="10,0,10,0"
-                            SelectedDate="{Binding EndDate}"
+                            SelectedDate="{Binding EndDate, Mode=TwoWay}"
                             Style="{StaticResource CompactDatePickerStyle}" />
                         <ComboBox
                             Width="120"
@@ -133,26 +134,30 @@
                                     Text="📄 Financial Statements" />
                             </Expander.Header>
                             <StackPanel>
-                                <Button
+                                <RadioButton
                                     Margin="0,5"
                                     Command="{Binding GenerateBalanceSheetCommand}"
                                     Content="Balance Sheet"
-                                    Style="{StaticResource ModernSecondaryButton}" />
-                                <Button
+                                    GroupName="FSGroup"
+                                    Style="{StaticResource ModernExpandedRadioButtonStyle}" />
+                                <RadioButton
                                     Margin="0,5"
                                     Command="{Binding GenerateIncomeStatementCommand}"
                                     Content="Income Statement"
-                                    Style="{StaticResource ModernSecondaryButton}" />
-                                <Button
+                                    GroupName="FSGroup"
+                                    Style="{StaticResource ModernExpandedRadioButtonStyle}" />
+                                <RadioButton
                                     Margin="0,5"
                                     Command="{Binding GenerateCashFlowCommand}"
                                     Content="Cash Flow Statement"
-                                    Style="{StaticResource ModernSecondaryButton}" />
-                                <Button
+                                    GroupName="FSGroup"
+                                    Style="{StaticResource ModernExpandedRadioButtonStyle}" />
+                                <RadioButton
                                     Margin="0,5"
                                     Command="{Binding GenerateTrialBalanceCommand}"
                                     Content="Trial Balance"
-                                    Style="{StaticResource ModernSecondaryButton}" />
+                                    GroupName="FSGroup"
+                                    Style="{StaticResource ModernExpandedRadioButtonStyle}" />
                             </StackPanel>
                         </Expander>
 
@@ -165,22 +170,25 @@
                                     Text="📊 Management Reports" />
                             </Expander.Header>
                             <StackPanel>
-                                <Button
+                                <RadioButton
                                     Margin="0,5"
                                     Content="A/R Aging Summary"
-                                    Style="{StaticResource ModernSecondaryButton}" />
-                                <Button
+                                    GroupName="MRGroup"
+                                    Style="{StaticResource ModernExpandedRadioButtonStyle}" />
+                                <RadioButton
                                     Margin="0,5"
                                     Content="A/P Aging Summary"
-                                    Style="{StaticResource ModernSecondaryButton}" />
-                                <Button
+                                    Style="{StaticResource ModernExpandedRadioButtonStyle}" />
+                                <RadioButton
                                     Margin="0,5"
                                     Content="Budget vs Actual"
-                                    Style="{StaticResource ModernSecondaryButton}" />
-                                <Button
+                                    GroupName="MRGroup"
+                                    Style="{StaticResource ModernExpandedRadioButtonStyle}" />
+                                <RadioButton
                                     Margin="0,5"
                                     Content="Profit and Loss"
-                                    Style="{StaticResource ModernSecondaryButton}" />
+                                    GroupName="MRGroup"
+                                    Style="{StaticResource ModernExpandedRadioButtonStyle}" />
                             </StackPanel>
                         </Expander>
 
@@ -193,18 +201,21 @@
                                     Text="🧾 Tax Reports" />
                             </Expander.Header>
                             <StackPanel>
-                                <Button
+                                <RadioButton
                                     Margin="0,5"
                                     Content="VAT Report"
-                                    Style="{StaticResource ModernSecondaryButton}" />
-                                <Button
+                                    GroupName="TXGroup"
+                                    Style="{StaticResource ModernExpandedRadioButtonStyle}" />
+                                <RadioButton
                                     Margin="0,5"
                                     Content="Tax Summary"
-                                    Style="{StaticResource ModernSecondaryButton}" />
-                                <Button
+                                    GroupName="TXGroup"
+                                    Style="{StaticResource ModernExpandedRadioButtonStyle}" />
+                                <RadioButton
                                     Margin="0,5"
                                     Content="1099 Preparation"
-                                    Style="{StaticResource ModernSecondaryButton}" />
+                                    GroupName="TXGroup"
+                                    Style="{StaticResource ModernExpandedRadioButtonStyle}" />
                             </StackPanel>
                         </Expander>
                     </StackPanel>
@@ -235,12 +246,12 @@
                                 <ComboBox
                                     Grid.Column="0"
                                     Margin="0,0,10,0"
-                                    ItemsSource="{Binding OutputFormats}"
-                                    SelectedItem="{Binding SelectedFormat}"
+                                    SelectedItem="{Binding SelectedFormat,Mode=TwoWay}"
+                                    SelectedValuePath="Content"
                                     Style="{StaticResource ModernComboBox}">
-                                    <ComboBoxItem Content="PDF" />
-                                    <ComboBoxItem Content="Excel" />
-                                    <ComboBoxItem Content="Print" />
+                                    <sys:String>PDF</sys:String>
+                                    <sys:String>Excel</sys:String>
+                                    <sys:String>Print</sys:String>
                                 </ComboBox>
 
                                 <StackPanel

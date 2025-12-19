@@ -7,7 +7,7 @@ namespace PrimeAppBooks.Models
     public class ReportData
     {
         public string ReportTitle { get; set; }
-        public string CompanyName { get; set; } = "PrimeAppBooks";
+        public string CompanyName { get; set; } = "PrimeApp Books";
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public DateTime GeneratedDate { get; set; } = DateTime.Now;

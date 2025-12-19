@@ -7,6 +7,7 @@ using PrimeAppBooks.Models;
 using PrimeAppBooks.Services;
 using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -29,8 +30,23 @@ namespace PrimeAppBooks.ViewModels.Pages
         [ObservableProperty]
         private DateTime? _endDate = DateTime.Now;
 
-        [ObservableProperty]
         private string _selectedDatePreset = "This Month";
+
+        public string SelectedDatePreset
+        {
+            get => _selectedDatePreset;
+            set
+            {
+                if (SetProperty(ref _selectedDatePreset, value))
+                {
+                    // Apply the preset when the value changes
+                    if (!string.IsNullOrEmpty(value) && value != "Custom")
+                    {
+                        ApplyDatePreset(value);
+                    }
+                }
+            }
+        }
 
         [ObservableProperty]
         private string _selectedFormat = "Print";
@@ -46,21 +62,13 @@ namespace PrimeAppBooks.ViewModels.Pages
             _serviceProvider = serviceProvider;
 
             // Set default date range to current month
-            ApplyDatePreset("This Month");
+            //ApplyDatePreset("This Month");
 
             // Load recent reports (in a real app, this would be from a database or file)
             LoadRecentReports();
         }
 
         #region Date Range Management
-
-        partial void OnSelectedDatePresetChanged(string value)
-        {
-            if (!string.IsNullOrEmpty(value) && value != "Custom")
-            {
-                ApplyDatePreset(value);
-            }
-        }
 
         [RelayCommand]
         private void ApplyDateFilter()
@@ -103,7 +111,7 @@ namespace PrimeAppBooks.ViewModels.Pages
             }
         }
 
-        #endregion
+        #endregion Date Range Management
 
         #region Report Generation Commands
 
@@ -118,6 +126,8 @@ namespace PrimeAppBooks.ViewModels.Pages
 
                 var data = await reportService.GenerateBalanceSheetAsync(EndDate ?? DateTime.Now);
 
+                Debug.Print($"Selected value is {SelectedFormat}");
+
                 if (SelectedFormat == "PDF")
                 {
                     var filePath = GetSaveFilePath("Balance_Sheet.pdf");
@@ -128,7 +138,7 @@ namespace PrimeAppBooks.ViewModels.Pages
                         AddRecentReport("Balance Sheet", "📊", filePath);
                     }
                 }
-                else // Print
+                else
                 {
                     var document = printService.GenerateBalanceSheetDocument(data);
                     printService.PrintDocument(document, "Balance Sheet");
@@ -242,7 +252,7 @@ namespace PrimeAppBooks.ViewModels.Pages
             await GenerateBalanceSheet();
         }
 
-        #endregion
+        #endregion Report Generation Commands
 
         #region Helper Methods
 
@@ -309,6 +319,6 @@ namespace PrimeAppBooks.ViewModels.Pages
             // For now, just show empty list
         }
 
-        #endregion
+        #endregion Helper Methods
     }
 }
