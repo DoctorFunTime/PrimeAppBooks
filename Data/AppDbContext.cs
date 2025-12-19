@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PrimeAppBooks.Configurations.AppDbContextConfigurations;
+using PrimeAppBooks.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,7 +24,21 @@ namespace PrimeAppBooks.Data
         public DbSet<PurchaseInvoice> PurchaseInvoices { get; set; }
         public DbSet<PurchaseInvoiceLine> PurchaseInvoiceLines { get; set; }
 
+        // New Reference Tables
+        public DbSet<Vendor> Vendors { get; set; }
+
+        public DbSet<Customer> Customers { get; set; }
+        public DbSet<PaymentMethod> PaymentMethods { get; set; }
+        public DbSet<Currency> Currencies { get; set; }
+        public DbSet<TaxRate> TaxRates { get; set; }
+        public DbSet<AccountingPeriod> AccountingPeriods { get; set; }
+        public DbSet<AccountingSetting> AccountingSettings { get; set; }
+
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+        {
+        }
+
+        protected AppDbContext() : base()
         {
         }
 

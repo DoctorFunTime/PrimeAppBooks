@@ -198,7 +198,7 @@
                                 <Button
                                     Command="{Binding AddLineCommand}"
                                     Content="➕ Add Line"
-                                    Style="{StaticResource ModernActionButton}" />
+                                    Style="{StaticResource ModernSecondaryButton}" />
                             </StackPanel>
                         </Grid>
 

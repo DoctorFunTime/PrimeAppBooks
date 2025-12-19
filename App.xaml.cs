@@ -65,6 +65,10 @@ namespace PrimeAppBooks
             // New Sales and Purchase ViewModels
             services.AddTransient<SalesInvoicesPageViewModel>();
             services.AddTransient<PurchaseInvoicesPageViewModel>();
+            services.AddTransient<AddSalesInvoicePageViewModel>();
+            services.AddTransient<AddPurchaseInvoicePageViewModel>();
+            services.AddTransient<AddCustomerPageViewModel>();
+            services.AddTransient<CustomersPageViewModel>();
 
             //Subpages
             services.AddTransient<JournalPageViewModel>();
@@ -83,6 +87,10 @@ namespace PrimeAppBooks
             // New Sales and Purchase Pages
             services.AddTransient<SalesInvoicesPage>();
             services.AddTransient<PurchaseInvoicesPage>();
+            services.AddTransient<AddSalesInvoicePage>();
+            services.AddTransient<AddPurchaseInvoicePage>();
+            services.AddTransient<AddCustomerPage>();
+            services.AddTransient<CustomersPage>();
 
             //Sub pages
             services.AddTransient<JournalPage>();
@@ -174,6 +182,10 @@ namespace PrimeAppBooks
             // New Pages Animations
             navigationService.RegisterPageAnimation<SalesInvoicesPage>(AnimationDirection.FromBottom);
             navigationService.RegisterPageAnimation<PurchaseInvoicesPage>(AnimationDirection.FromBottom);
+            navigationService.RegisterPageAnimation<AddSalesInvoicePage>(AnimationDirection.FromRight);
+            navigationService.RegisterPageAnimation<AddPurchaseInvoicePage>(AnimationDirection.FromRight);
+            navigationService.RegisterPageAnimation<AddCustomerPage>(AnimationDirection.FromRight);
+            navigationService.RegisterPageAnimation<CustomersPage>(AnimationDirection.FromRight);
         }
     }
 }

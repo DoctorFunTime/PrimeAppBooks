@@ -383,44 +383,44 @@ namespace PrimeAppBooks.Services
         public string ExportBalanceSheetToPdf(BalanceSheetData data, string filePath)
         {
             var document = Document.Create(container =>
-            {
-                container.Page(page =>
-                {
-                    page.Size(PageSizes.A4);
-                    page.Margin(1, Unit.Inch);
+             {
+                 container.Page(page =>
+                 {
+                     page.Size(PageSizes.A4);
+                     page.Margin(1, Unit.Inch);
 
-                    page.Content().Column(col =>
-                    {
-                        // Header
-                        col.Item().Text(data.CompanyName).Bold().FontSize(14);
-                        col.Item().Text("Balance Sheet").Bold().FontSize(12);
-                        col.Item().Text($"As of {data.EndDate:MMMM dd, yyyy}");
-                        col.Item().PaddingBottom(20);
+                     page.Content().Column(col =>
+                     {
+                         // Header
+                         col.Item().Text(data.CompanyName).Bold().FontSize(14);
+                         col.Item().Text("Balance Sheet").Bold().FontSize(12);
+                         col.Item().Text($"As of {data.EndDate:MMMM dd, yyyy}");
+                         col.Item().PaddingBottom(20);
 
-                        // Assets - Simple listing
-                        col.Item().Text("ASSETS").Bold();
-                        foreach (var asset in data.CurrentAssets)
-                            col.Item().PaddingLeft(10).Text($"{asset.AccountName} {asset.Amount:N2}");
-                        foreach (var asset in data.FixedAssets)
-                            col.Item().PaddingLeft(10).Text($"{asset.AccountName} {asset.Amount:N2}");
-                        col.Item().Text($"Total Assets: {data.TotalAssets:N2}").Bold();
+                         // Assets - Simple listing
+                         col.Item().Text("ASSETS").Bold();
+                         foreach (var asset in data.CurrentAssets)
+                             col.Item().PaddingLeft(10).Text($"{asset.AccountName} {asset.Amount:N2}");
+                         foreach (var asset in data.FixedAssets)
+                             col.Item().PaddingLeft(10).Text($"{asset.AccountName} {asset.Amount:N2}");
+                         col.Item().Text($"Total Assets: {data.TotalAssets:N2}").Bold();
 
-                        // Liabilities - Simple listing
-                        col.Item().PaddingTop(10).Text("LIABILITIES").Bold();
-                        foreach (var liability in data.CurrentLiabilities)
-                            col.Item().PaddingLeft(10).Text($"{liability.AccountName} {liability.Amount:N2}");
-                        foreach (var liability in data.LongTermLiabilities)
-                            col.Item().PaddingLeft(10).Text($"{liability.AccountName} {liability.Amount:N2}");
-                        col.Item().Text($"Total Liabilities: {data.TotalLiabilities:N2}").Bold();
+                         // Liabilities - Simple listing
+                         col.Item().PaddingTop(10).Text("LIABILITIES").Bold();
+                         foreach (var liability in data.CurrentLiabilities)
+                             col.Item().PaddingLeft(10).Text($"{liability.AccountName} {liability.Amount:N2}");
+                         foreach (var liability in data.LongTermLiabilities)
+                             col.Item().PaddingLeft(10).Text($"{liability.AccountName} {liability.Amount:N2}");
+                         col.Item().Text($"Total Liabilities: {data.TotalLiabilities:N2}").Bold();
 
-                        // Equity - Simple listing
-                        col.Item().PaddingTop(10).Text("EQUITY").Bold();
-                        foreach (var equity in data.Equity)
-                            col.Item().PaddingLeft(10).Text($"{equity.AccountName} {equity.Amount:N2}");
-                        col.Item().Text($"Total Equity: {data.TotalEquity:N2}").Bold();
-                    });
-                });
-            });
+                         // Equity - Simple listing
+                         col.Item().PaddingTop(10).Text("EQUITY").Bold();
+                         foreach (var equity in data.Equity)
+                             col.Item().PaddingLeft(10).Text($"{equity.AccountName} {equity.Amount:N2}");
+                         col.Item().Text($"Total Equity: {data.TotalEquity:N2}").Bold();
+                     });
+                 });
+             });
 
             document.GeneratePdf(filePath);
             return filePath;

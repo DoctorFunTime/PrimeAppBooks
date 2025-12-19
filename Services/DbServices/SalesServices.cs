@@ -34,61 +34,11 @@ namespace PrimeAppBooks.Services.DbServices
                 _context.SalesInvoices.Add(invoice);
                 await _context.SaveChangesAsync();
 
-                // Automated Journal Posting
-                var arAccount = await _context.ChartOfAccounts
-                    .FirstOrDefaultAsync(a => a.AccountSubtype == "CURRENT_ASSET" && a.AccountName == "Accounts Receivable");
-
-                if (arAccount == null)
+                // Only automate journal posting if Status is POSTED
+                if (invoice.Status == "POSTED")
                 {
-                    // If for some reason 1100 isn't there, try by number
-                    arAccount = await _context.ChartOfAccounts.FirstOrDefaultAsync(a => a.AccountNumber == "1100");
+                    await PostToJournalInternalAsync(invoice);
                 }
-
-                if (arAccount == null)
-                {
-                    throw new Exception("Core account 'Accounts Receivable' (1100) not found in Chart of Accounts. Please run database setup.");
-                }
-
-                var journalEntry = new JournalEntry
-                {
-                    JournalDate = invoice.InvoiceDate,
-                    Description = $"Sales Invoice: {invoice.InvoiceNumber}",
-                    Reference = invoice.InvoiceNumber,
-                    JournalType = "SALES",
-                    Status = "POSTED",
-                    Amount = invoice.TotalAmount,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow,
-                    JournalLines = new List<JournalLine>()
-                };
-
-                // Debit Accounts Receivable
-                journalEntry.JournalLines.Add(new JournalLine
-                {
-                    AccountId = arAccount.AccountId,
-                    Description = $"Receivable for Invoice {invoice.InvoiceNumber}",
-                    DebitAmount = invoice.TotalAmount,
-                    CreditAmount = 0,
-                    LineDate = invoice.InvoiceDate,
-                    CreatedAt = DateTime.UtcNow
-                });
-
-                // Credit Revenue Accounts from Lines
-                foreach (var line in invoice.Lines)
-                {
-                    journalEntry.JournalLines.Add(new JournalLine
-                    {
-                        AccountId = line.AccountId,
-                        Description = line.Description,
-                        DebitAmount = 0,
-                        CreditAmount = line.Amount,
-                        LineDate = invoice.InvoiceDate,
-                        CreatedAt = DateTime.UtcNow
-                    });
-                }
-
-                _context.JournalEntries.Add(journalEntry);
-                await _context.SaveChangesAsync();
                 
                 await transaction.CommitAsync();
                 return invoice;
@@ -98,6 +48,94 @@ namespace PrimeAppBooks.Services.DbServices
                 await transaction.RollbackAsync();
                 throw;
             }
+        }
+
+        public async Task<bool> PostInvoiceAsync(int invoiceId)
+        {
+            var invoice = await _context.SalesInvoices
+                .Include(i => i.Lines)
+                .FirstOrDefaultAsync(i => i.SalesInvoiceId == invoiceId);
+
+            if (invoice == null || invoice.Status == "POSTED") return false;
+
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                invoice.Status = "POSTED";
+                invoice.UpdatedAt = DateTime.UtcNow;
+
+                await PostToJournalInternalAsync(invoice);
+                
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+                return true;
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+
+        private async Task PostToJournalInternalAsync(SalesInvoice invoice)
+        {
+            // Automated Journal Posting
+            var arAccount = await _context.ChartOfAccounts
+                .FirstOrDefaultAsync(a => a.AccountSubtype == "CURRENT_ASSET" && a.AccountName == "Accounts Receivable");
+
+            if (arAccount == null)
+            {
+                arAccount = await _context.ChartOfAccounts.FirstOrDefaultAsync(a => a.AccountNumber == "1100");
+            }
+
+            if (arAccount == null)
+            {
+                throw new Exception("Core account 'Accounts Receivable' (1100) not found in Chart of Accounts. Please run database setup.");
+            }
+
+            // Generate Journal Number
+            var journalNumber = await GenerateJournalNumberAsync();
+
+            var journalEntry = new JournalEntry
+            {
+                JournalNumber = journalNumber,
+                JournalDate = invoice.InvoiceDate,
+                Description = $"Sales Invoice: {invoice.InvoiceNumber}",
+                Reference = invoice.InvoiceNumber,
+                JournalType = "SALES",
+                Status = "POSTED",
+                Amount = invoice.TotalAmount,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                JournalLines = new List<JournalLine>()
+            };
+
+            // Debit Accounts Receivable
+            journalEntry.JournalLines.Add(new JournalLine
+            {
+                AccountId = arAccount.AccountId,
+                Description = $"Receivable for Invoice {invoice.InvoiceNumber}",
+                DebitAmount = invoice.TotalAmount,
+                CreditAmount = 0,
+                LineDate = invoice.InvoiceDate,
+                CreatedAt = DateTime.UtcNow
+            });
+
+            // Credit Revenue Accounts from Lines
+            foreach (var line in invoice.Lines)
+            {
+                journalEntry.JournalLines.Add(new JournalLine
+                {
+                    AccountId = line.AccountId,
+                    Description = line.Description,
+                    DebitAmount = 0,
+                    CreditAmount = line.Amount,
+                    LineDate = invoice.InvoiceDate,
+                    CreatedAt = DateTime.UtcNow
+                });
+            }
+
+            _context.JournalEntries.Add(journalEntry);
         }
 
         public async Task<List<SalesInvoice>> GetAllInvoicesAsync()
@@ -124,6 +162,31 @@ namespace PrimeAppBooks.Services.DbServices
             _context.SalesInvoices.Remove(invoice);
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        private async Task<string> GenerateJournalNumberAsync()
+        {
+            var year = DateTime.Now.Year;
+            var prefix = $"JE{year}";
+
+            var lastNumber = await _context.JournalEntries
+                .Where(j => j.JournalNumber.StartsWith(prefix))
+                .OrderByDescending(j => j.JournalNumber)
+                .Select(j => j.JournalNumber)
+                .FirstOrDefaultAsync();
+
+            if (string.IsNullOrEmpty(lastNumber))
+            {
+                return $"{prefix}0001";
+            }
+
+            var numberPart = lastNumber.Substring(prefix.Length);
+            if (int.TryParse(numberPart, out int number))
+            {
+                return $"{prefix}{(number + 1):D4}";
+            }
+
+            return $"{prefix}0001";
         }
     }
 }

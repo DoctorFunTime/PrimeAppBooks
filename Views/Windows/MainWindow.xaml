@@ -227,6 +227,15 @@
                                                         GroupName="Navigation"
                                                         IsChecked="{Binding IsTransactionsSelected}"
                                                         Style="{StaticResource ModernRadioButtonStyle}" />
+
+                                            <Rectangle Height="1" Margin="16,10" Fill="#20FFFFFF" />
+
+                                            <TextBlock
+                                                        Margin="16,10,0,20"
+                                                        FontSize="11"
+                                                        FontWeight="Bold"
+                                                        Foreground="#90FFFFFF"
+                                                        Text="FINANCIALS" />
                                             <RadioButton
                                                         Command="{Binding NavigateToSalesCommand}"
                                                         Content="🛒  Sales"
@@ -252,15 +261,31 @@
                                                         IsChecked="{Binding IsAuditTrailsSelected}"
                                                         Style="{StaticResource ModernRadioButtonStyle}" />
 
-                                            <Rectangle
-                                                        Height="1"
-                                                        Margin="16,20"
-                                                        Fill="#40FFFFFF"
-                                                        RadiusX="0.5"
-                                                        RadiusY="0.5" />
+                                            <Rectangle Height="1" Margin="16,10" Fill="#20FFFFFF" />
 
                                             <TextBlock
-                                                        Margin="16,12,0,20"
+                                                        Margin="16,10,0,20"
+                                                        FontSize="11"
+                                                        FontWeight="Bold"
+                                                        Foreground="#90FFFFFF"
+                                                        Text="RELATIONSHIPS" />
+                                            <RadioButton
+                                                        Command="{Binding NavigateToCustomersCommand}"
+                                                        Content="👥  Customers"
+                                                        GroupName="Navigation"
+                                                        IsChecked="{Binding IsCustomersSelected}"
+                                                        Style="{StaticResource ModernRadioButtonStyle}" />
+                                            <RadioButton
+                                                        Command="{Binding NavigateToVendorsCommand}"
+                                                        Content="🏢  Vendors"
+                                                        GroupName="Navigation"
+                                                        IsChecked="{Binding IsVendorsSelected}"
+                                                        Style="{StaticResource ModernRadioButtonStyle}" />
+
+                                            <Rectangle Height="1" Margin="16,10" Fill="#20FFFFFF" />
+
+                                            <TextBlock
+                                                        Margin="16,10,0,20"
                                                         FontSize="11"
                                                         FontWeight="Bold"
                                                         Foreground="#90FFFFFF"
@@ -320,12 +345,29 @@
                                                     Style="{StaticResource CollapsedRadioButtonStyle}"
                                                     ToolTip="Chart of Accounts" />
                                         <RadioButton
+                                                    Command="{Binding NavigateToDashboardCommand}"
+                                                    Content="🏠"
+                                                    GroupName="CollapsedNavigation"
+                                                    IsChecked="{Binding IsDashboardSelected}"
+                                                    Style="{StaticResource CollapsedRadioButtonStyle}"
+                                                    ToolTip="Dashboard" />
+                                        <RadioButton
+                                                    Command="{Binding NavigateToChartOfAccountsCommand}"
+                                                    Content="📊"
+                                                    GroupName="CollapsedNavigation"
+                                                    IsChecked="{Binding IsChartOfAccountsSelected}"
+                                                    Style="{StaticResource CollapsedRadioButtonStyle}"
+                                                    ToolTip="Chart of Accounts" />
+                                        <RadioButton
                                                     Command="{Binding NavigateToTransactionsCommand}"
                                                     Content="💸"
                                                     GroupName="CollapsedNavigation"
                                                     IsChecked="{Binding IsTransactionsSelected}"
                                                     Style="{StaticResource CollapsedRadioButtonStyle}"
                                                     ToolTip="Transactions" />
+
+                                        <Rectangle Height="1" Margin="8,10" Fill="#20FFFFFF" />
+
                                         <RadioButton
                                                     Command="{Binding NavigateToSalesCommand}"
                                                     Content="🛒"
@@ -355,12 +397,24 @@
                                                     Style="{StaticResource CollapsedRadioButtonStyle}"
                                                     ToolTip="Audit Trail" />
 
-                                        <Rectangle
-                                                    Height="1"
-                                                    Margin="8,12,8,12"
-                                                    Fill="#40FFFFFF"
-                                                    RadiusX="0.5"
-                                                    RadiusY="0.5" />
+                                        <Rectangle Height="1" Margin="8,10" Fill="#20FFFFFF" />
+
+                                        <RadioButton
+                                                    Command="{Binding NavigateToCustomersCommand}"
+                                                    Content="👥"
+                                                    GroupName="CollapsedNavigation"
+                                                    IsChecked="{Binding IsCustomersSelected}"
+                                                    Style="{StaticResource CollapsedRadioButtonStyle}"
+                                                    ToolTip="Customers" />
+                                        <RadioButton
+                                                    Command="{Binding NavigateToVendorsCommand}"
+                                                    Content="🏢"
+                                                    GroupName="CollapsedNavigation"
+                                                    IsChecked="{Binding IsVendorsSelected}"
+                                                    Style="{StaticResource CollapsedRadioButtonStyle}"
+                                                    ToolTip="Vendors" />
+
+                                        <Rectangle Height="1" Margin="8,10" Fill="#20FFFFFF" />
 
                                         <RadioButton
                                                     Command="{Binding NavigateToSettingsCommand}"

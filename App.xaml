@@ -50,6 +50,7 @@
             <converters:BooleanToIntConverter x:Key="BooleanToIntConverter" />
             <converters:WidthToVisibilityConverter x:Key="WidthToVisibilityConverter" />
             <converters:BalanceIndicatorConverter x:Key="BalanceIndicatorConverter" />
+            <converters:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter" />
 
             <!--  System Converters  -->
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />

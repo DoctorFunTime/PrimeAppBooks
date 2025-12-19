@@ -21,8 +21,11 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <!-- Header Section -->
-            <Border Grid.Row="0" Margin="5,10" Style="{StaticResource ModernCardStyle}">
+            <!--  Header Section  -->
+            <Border
+                Grid.Row="0"
+                Margin="5,10"
+                Style="{StaticResource ModernCardStyle}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -34,7 +37,12 @@
                         <TextBlock Style="{StaticResource WelcomeSubtitleText}" Text="Manage your customer invoices and receivables" />
                     </StackPanel>
 
-                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <StackPanel Grid.Column="1">
+                        <Button
+                            Margin="5,0"
+                            Command="{Binding AddCustomerCommand}"
+                            Content="👥 Add Customer"
+                            Style="{StaticResource ModernSecondaryButton}" />
                         <Button
                             Margin="5,0"
                             Command="{Binding CreateNewInvoiceCommand}"
@@ -49,11 +57,14 @@
                 </Grid>
             </Border>
 
-            <!-- Search & Filters -->
-            <Border Grid.Row="1" Margin="5" Style="{StaticResource ModernCardStyle}">
+            <!--  Search & Filters  -->
+            <Border
+                Grid.Row="1"
+                Margin="5"
+                Style="{StaticResource ModernCardStyle}">
                 <Grid>
                     <StackPanel Orientation="Horizontal">
-                        <StackPanel Margin="0,0,15,0" Width="300">
+                        <StackPanel Width="300" Margin="0,0,15,0">
                             <TextBlock Style="{StaticResource FilterLabelText}" Text="Search Invoices" />
                             <TextBox Style="{StaticResource ModernTextBoxStyle}" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
                         </StackPanel>
@@ -61,20 +72,161 @@
                 </Grid>
             </Border>
 
-            <!-- Invoices List -->
-            <Border Grid.Row="2" Margin="5,10" Style="{StaticResource ModernCardStyle}">
+            <!--  Invoices List  -->
+            <Border
+                Grid.Row="2"
+                Margin="5,10"
+                Style="{StaticResource ModernCardStyle}">
                 <DataGrid
-                    ItemsSource="{Binding Invoices}"
                     AutoGenerateColumns="False"
                     IsReadOnly="True"
+                    ItemsSource="{Binding Invoices}"
                     Style="{StaticResource ModernDataGridStyle}">
+
+                    <!--  Set row height and vertical alignment with enhanced selection state  -->
+                    <DataGrid.RowStyle>
+                        <Style BasedOn="{StaticResource MaterialDesignDataGridRow}" TargetType="DataGridRow">
+                            <Setter Property="Height" Value="40" />
+                            <Setter Property="BorderThickness" Value="0" />
+                            <Setter Property="VerticalAlignment" Value="Center" />
+                            <Setter Property="VerticalContentAlignment" Value="Center" />
+                            <Setter Property="Foreground" Value="White" />
+                            <Setter Property="Background" Value="Transparent" />
+                            <Style.Triggers>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Background" Value="#2A4A7B" />
+                                    <!--  Selected background color  -->
+                                    <Setter Property="BorderBrush" Value="#4472C4" />
+                                    <Setter Property="BorderThickness" Value="1" />
+                                    <Setter Property="Foreground" Value="White" />
+                                </Trigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#1E3A5F" />
+                                    <!--  Hover color  -->
+                                    <Setter Property="Foreground" Value="White" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.RowStyle>
+
+                    <!--  Enhanced cell styling with selection state  -->
+                    <DataGrid.CellStyle>
+                        <Style BasedOn="{StaticResource MaterialDesignDataGridCell}" TargetType="DataGridCell">
+                            <Setter Property="VerticalAlignment" Value="Center" />
+                            <Setter Property="VerticalContentAlignment" Value="Center" />
+                            <Setter Property="BorderThickness" Value="0" />
+                            <Setter Property="Background" Value="Transparent" />
+                            <Style.Triggers>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Background" Value="Transparent" />
+                                    <!--  Let row handle background  -->
+                                    <Setter Property="BorderBrush" Value="Transparent" />
+                                    <Setter Property="Foreground" Value="White" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.CellStyle>
+
+                    <!--  Update column header style  -->
+                    <DataGrid.ColumnHeaderStyle>
+                        <Style BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}" TargetType="DataGridColumnHeader">
+                            <Setter Property="Foreground" Value="#FF4472C4" />
+                            <Setter Property="FontWeight" Value="Bold" />
+                            <Setter Property="FontFamily" Value="Segoe UI" />
+                            <Setter Property="FontSize" Value="12" />
+                            <Setter Property="VerticalContentAlignment" Value="Center" />
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            <Setter Property="Height" Value="35" />
+                            <Setter Property="Background" Value="#1E1E1E" />
+                            <Setter Property="BorderBrush" Value="#3A3A3A" />
+                            <Setter Property="BorderThickness" Value="0,0,0,1" />
+                        </Style>
+                    </DataGrid.ColumnHeaderStyle>
+
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Invoice #" Binding="{Binding InvoiceNumber}" Width="*" />
-                        <DataGridTextColumn Header="Customer ID" Binding="{Binding CustomerId}" Width="*" />
-                        <DataGridTextColumn Header="Date" Binding="{Binding InvoiceDate, StringFormat='MMM dd, yyyy'}" Width="*" />
-                        <DataGridTextColumn Header="Due Date" Binding="{Binding DueDate, StringFormat='MMM dd, yyyy'}" Width="*" />
-                        <DataGridTextColumn Header="Total" Binding="{Binding TotalAmount, StringFormat=C}" Width="*" />
-                        <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="*" />
+                        <DataGridTextColumn
+                            Width="Auto"
+                            Binding="{Binding InvoiceNumber}"
+                            Header="Invoice #">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="VerticalAlignment" Value="Center" />
+                                    <Setter Property="FontFamily" Value="Segoe UI" />
+                                    <Setter Property="FontWeight" Value="Medium" />
+                                    <Setter Property="Foreground" Value="Gainsboro" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+
+                        <DataGridTextColumn
+                            Width="Auto"
+                            Binding="{Binding CustomerId}"
+                            Header="Customer ID">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="VerticalAlignment" Value="Center" />
+                                    <Setter Property="FontFamily" Value="Segoe UI" />
+                                    <Setter Property="FontWeight" Value="Medium" />
+                                    <Setter Property="Foreground" Value="Gainsboro" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+
+                        <DataGridTextColumn
+                            Width="Auto"
+                            Binding="{Binding InvoiceDate, StringFormat='MMM dd, yyyy'}"
+                            Header="Date">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="VerticalAlignment" Value="Center" />
+                                    <Setter Property="FontFamily" Value="Segoe UI" />
+                                    <Setter Property="FontWeight" Value="Medium" />
+                                    <Setter Property="Foreground" Value="Gainsboro" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+
+                        <DataGridTextColumn
+                            Width="Auto"
+                            Binding="{Binding DueDate, StringFormat='MMM dd, yyyy'}"
+                            Header="Due Date">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="VerticalAlignment" Value="Center" />
+                                    <Setter Property="FontFamily" Value="Segoe UI" />
+                                    <Setter Property="FontWeight" Value="Medium" />
+                                    <Setter Property="Foreground" Value="Gainsboro" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+
+                        <DataGridTextColumn
+                            Width="Auto"
+                            Binding="{Binding TotalAmount, StringFormat=C}"
+                            Header="Total">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="VerticalAlignment" Value="Center" />
+                                    <Setter Property="FontFamily" Value="Segoe UI" />
+                                    <Setter Property="FontWeight" Value="Medium" />
+                                    <Setter Property="Foreground" Value="Gainsboro" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+
+                        <DataGridTextColumn
+                            Width="Auto"
+                            Binding="{Binding Status}"
+                            Header="Status">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="VerticalAlignment" Value="Center" />
+                                    <Setter Property="FontFamily" Value="Segoe UI" />
+                                    <Setter Property="FontWeight" Value="Medium" />
+                                    <Setter Property="Foreground" Value="Gainsboro" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
                     </DataGrid.Columns>
                 </DataGrid>
             </Border>

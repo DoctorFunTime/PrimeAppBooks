@@ -52,6 +52,12 @@ namespace PrimeAppBooks.ViewModels.Windows
         [ObservableProperty]
         private bool _isHelpSupportSelected;
 
+        [ObservableProperty]
+        private bool _isCustomersSelected;
+
+        [ObservableProperty]
+        private bool _isVendorsSelected;
+
         // ==========================================================
 
         [ObservableProperty]
@@ -144,6 +150,18 @@ namespace PrimeAppBooks.ViewModels.Windows
             _navigationService.NavigateTo<Settings>();
         }
 
+        [RelayCommand]
+        private void NavigateToCustomers()
+        {
+            _navigationService.NavigateTo<CustomersPage>();
+        }
+
+        [RelayCommand]
+        private void NavigateToVendors()
+        {
+            // _navigationService.NavigateTo<VendorsPage>(); 
+        }
+
         private void SetAllNavigationToFalse()
         {
             IsDashboardSelected = false;
@@ -157,6 +175,8 @@ namespace PrimeAppBooks.ViewModels.Windows
             IsHelpSupportSelected = false;
             IsSalesSelected = false;
             IsPurchasesSelected = false;
+            IsCustomersSelected = false;
+            IsVendorsSelected = false;
         }
 
         private void OnPageNavigated(object sender, Page page)
@@ -196,6 +216,10 @@ namespace PrimeAppBooks.ViewModels.Windows
 
                 case PurchaseInvoicesPage:
                     IsPurchasesSelected = true;
+                    break;
+                
+                case CustomersPage:
+                    IsCustomersSelected = true;
                     break;
             }
         }
