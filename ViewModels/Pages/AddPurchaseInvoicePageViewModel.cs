@@ -43,8 +43,15 @@ namespace PrimeAppBooks.ViewModels.Pages
         [ObservableProperty]
         private bool _isLoading;
 
+        [ObservableProperty]
+        private Currency _selectedCurrency;
+
+        [ObservableProperty]
+        private decimal _exchangeRate = 1.0m;
+
         public ObservableCollection<Vendor> Vendors { get; } = new();
         public ObservableCollection<ChartOfAccount> Accounts { get; } = new();
+        public ObservableCollection<Currency> Currencies { get; } = new();
         public ObservableCollection<InvoiceLineViewModel> BillLines { get; } = new();
         public ObservableCollection<string> ValidationErrors { get; } = new();
 
@@ -69,6 +76,10 @@ namespace PrimeAppBooks.ViewModels.Pages
 
                 var vendors = await context.Vendors.OrderBy(v => v.VendorName).ToListAsync();
                 var accounts = await context.ChartOfAccounts.Where(a => a.IsActive).OrderBy(a => a.AccountNumber).ToListAsync();
+                var currencies = await context.Currencies.OrderBy(c => c.CurrencyCode).ToListAsync();
+
+                var settingsService = scope.ServiceProvider.GetRequiredService<SettingsService>();
+                var baseCurrencyId = await settingsService.GetBaseCurrencyIdAsync();
 
                 await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
                 {
@@ -77,6 +88,12 @@ namespace PrimeAppBooks.ViewModels.Pages
 
                     Accounts.Clear();
                     foreach (var a in accounts) Accounts.Add(a);
+
+                    Currencies.Clear();
+                    foreach (var cur in currencies) Currencies.Add(cur);
+
+                    SelectedCurrency = Currencies.FirstOrDefault(c => c.CurrencyId == baseCurrencyId);
+                    ExchangeRate = 1.0m;
 
                     InvoiceNumber = $"PUR-{DateTime.Now:yyyyMMddHHmmss}";
                 });
@@ -135,7 +152,8 @@ namespace PrimeAppBooks.ViewModels.Pages
             int invalidLines = BillLines.Count(l => !l.IsValid);
             if (invalidLines > 0) ValidationErrors.Add($"• There are {invalidLines} invalid line(s). Check Account and Quantity.");
             
-            if (TotalAmount <= 0) ValidationErrors.Add("• Total invoice amount must be greater than zero.");
+            // Allow zero amount or keep it flexible
+            // if (TotalAmount <= 0) ValidationErrors.Add("• Total invoice amount must be greater than zero.");
             
             OnPropertyChanged(nameof(HasValidationErrors));
         }
@@ -181,6 +199,8 @@ namespace PrimeAppBooks.ViewModels.Pages
                     TotalAmount = TotalAmount,
                     NetAmount = TotalAmount,
                     Balance = TotalAmount,
+                    CurrencyId = SelectedCurrency?.CurrencyId,
+                    ExchangeRate = ExchangeRate,
                     Status = status,
                     Notes = Notes,
                     CreatedBy = 1,

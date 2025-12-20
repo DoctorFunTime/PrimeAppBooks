@@ -5,7 +5,9 @@
     xmlns:base="clr-namespace:PrimeAppBooks.Views.Pages"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:hc="https://handyorg.github.io/handycontrol"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:pages="clr-namespace:PrimeAppBooks.ViewModels.Pages" d:DataContext="{d:DesignInstance Type=pages:AccountTransactionsPageViewModel}"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:pages="clr-namespace:PrimeAppBooks.ViewModels.Pages"
+    d:DataContext="{d:DesignInstance Type=pages:AccountTransactionsPageViewModel}"
     d:DesignHeight="900"
     d:DesignWidth="1280"
     Background="Transparent"
@@ -80,13 +82,8 @@
         <!--  Transactions Grid  -->
         <Border Grid.Row="1" Style="{StaticResource ModernCardStyle}">
             <DataGrid
-                HorizontalAlignment="Stretch"
-                AutoGenerateColumns="False"
-                BorderThickness="0"
-                CanUserAddRows="False"
-                CanUserDeleteRows="False"
+                Margin="2"
                 GridLinesVisibility="None"
-                HeadersVisibility="All"
                 IsReadOnly="True"
                 ItemsSource="{Binding Transactions}"
                 ScrollViewer.HorizontalScrollBarVisibility="Auto"
@@ -97,7 +94,7 @@
                 <!--  Set row height and vertical alignment with enhanced selection state  -->
                 <DataGrid.RowStyle>
                     <Style BasedOn="{StaticResource MaterialDesignDataGridRow}" TargetType="DataGridRow">
-                        <Setter Property="Height" Value="60" />
+                        <Setter Property="Height" Value="40" />
                         <Setter Property="BorderThickness" Value="0" />
                         <Setter Property="VerticalAlignment" Value="Center" />
                         <Setter Property="VerticalContentAlignment" Value="Center" />
@@ -127,7 +124,6 @@
                         <Setter Property="VerticalContentAlignment" Value="Center" />
                         <Setter Property="BorderThickness" Value="0" />
                         <Setter Property="Background" Value="Transparent" />
-                        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                         <Style.Triggers>
                             <Trigger Property="IsSelected" Value="True">
                                 <Setter Property="Background" Value="Transparent" />
@@ -157,31 +153,70 @@
 
                 <DataGrid.Columns>
                     <DataGridTextColumn
-                        Width="100"
+                        Width="80"
                         Binding="{Binding LineDate, StringFormat=d}"
-                        Header="Date" />
+                        Header="Date">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="ToolTip" Value="{Binding LineDate, StringFormat=D}" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+
                     <DataGridTextColumn
                         Width="*"
                         Binding="{Binding JournalEntry.JournalNumber}"
-                        Header="Journal #" />
+                        Header="Journal #">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="ToolTip" Value="{Binding JournalEntry.JournalNumber}" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+
                     <DataGridTextColumn
                         Width="*"
-                        Binding="{Binding Description}"
-                        Header="Description" />
+                        Binding="{Binding JournalEntry.Description}"
+                        Header="Description">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="ToolTip" Value="{Binding JournalEntry.Description}" />
+                                <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+
                     <DataGridTextColumn
                         Width="*"
-                        Binding="{Binding Reference}"
-                        Header="Reference" />
+                        Binding="{Binding JournalEntry.Reference}"
+                        Header="Reference">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="ToolTip" Value="{Binding JournalEntry.Reference}" />
+                                <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
                     <DataGridTextColumn
-                        Width="120"
+                        Width="90"
                         Binding="{Binding DebitAmount, StringFormat=N2}"
-                        Header="Debit">
-                    </DataGridTextColumn>
+                        Header="Debit" />
                     <DataGridTextColumn
-                        Width="120"
+                        Width="90"
                         Binding="{Binding CreditAmount, StringFormat=N2}"
-                        Header="Credit">
-                    </DataGridTextColumn>
+                        Header="Credit" />
+                    <DataGridTextColumn
+                        Width="100"
+                        Binding="{Binding Currency.CurrencyCode}"
+                        Header="Currency" />
+                    <DataGridTextColumn
+                        Width="90"
+                        Binding="{Binding ForeignDebitAmount, StringFormat=N2}"
+                        Header="F.Debit" />
+                    <DataGridTextColumn
+                        Width="90"
+                        Binding="{Binding ForeignCreditAmount, StringFormat=N2}"
+                        Header="F.Credit" />
                 </DataGrid.Columns>
             </DataGrid>
         </Border>
@@ -248,8 +283,7 @@
         </Border>
 
         <!--  Loading Overlay  -->
-        <!--
-        <Border
+        <!--<Border
             Grid.RowSpan="3"
             Background="#80000000"
             Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">

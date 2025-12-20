@@ -117,7 +117,7 @@
                 Style="{StaticResource ModernCardStyle}">
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="*" />
@@ -164,7 +164,29 @@
                             FontSize="11"
                             Foreground="#E74C3C"
                             Text="{Binding DateValidationError}"
-                            Visibility="{Binding HasDateError, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                            Visibility="{Binding HasDescriptionError, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    </StackPanel>
+
+                    <!-- Multi-Currency Selection -->
+                    <StackPanel Grid.Column="3" Orientation="Horizontal">
+                        <StackPanel Margin="0,0,10,0" Width="120">
+                            <TextBlock Style="{StaticResource FilterLabelText}" Text="Currency" />
+                            <ComboBox
+                                Margin="0,5,0,0"
+                                DisplayMemberPath="CurrencyCode"
+                                ItemsSource="{Binding Currencies}"
+                                SelectedItem="{Binding SelectedCurrency}"
+                                Style="{StaticResource ModernComboBox}" />
+                        </StackPanel>
+                        <StackPanel Width="80">
+                            <TextBlock Style="{StaticResource FilterLabelText}" Text="Ex. Rate" />
+                            <hc:TextBox
+                                Margin="0,5,0,0"
+                                Width="120"
+                                hc:InfoElement.Placeholder="1.00"
+                                Style="{StaticResource ModernTextBoxStyle}"
+                                Text="{Binding ExchangeRate, StringFormat=N4, UpdateSourceTrigger=PropertyChanged}" />
+                        </StackPanel>
                     </StackPanel>
                 </Grid>
             </Border>
@@ -330,6 +352,19 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
+                                <!-- Foreign Debit Amount -->
+                                <DataGridTemplateColumn Width="Auto" Header="F.Debit">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <hc:TextBox
+                                                HorizontalAlignment="Stretch"
+                                                VerticalAlignment="Center"
+                                                Style="{StaticResource ModernTextBoxStyle}"
+                                                Text="{Binding ForeignDebitAmount, UpdateSourceTrigger=PropertyChanged, StringFormat=N2}" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+
                                 <!--  Credit Amount  -->
                                 <DataGridTemplateColumn Width="Auto" Header="Credit">
                                     <DataGridTemplateColumn.CellTemplate>
@@ -339,6 +374,19 @@
                                                 VerticalAlignment="Center"
                                                 Style="{StaticResource ModernTextBoxStyle}"
                                                 Text="{Binding CreditAmount, UpdateSourceTrigger=PropertyChanged, StringFormat=N2}" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+
+                                <!-- Foreign Credit Amount -->
+                                <DataGridTemplateColumn Width="Auto" Header="F.Credit">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <hc:TextBox
+                                                HorizontalAlignment="Stretch"
+                                                VerticalAlignment="Center"
+                                                Style="{StaticResource ModernTextBoxStyle}"
+                                                Text="{Binding ForeignCreditAmount, UpdateSourceTrigger=PropertyChanged, StringFormat=N2}" />
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>

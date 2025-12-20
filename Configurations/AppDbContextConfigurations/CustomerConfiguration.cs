@@ -50,6 +50,17 @@ namespace PrimeAppBooks.Configurations.AppDbContextConfigurations
             builder.Property(c => c.AutoInvoiceAmount).HasColumnName("auto_invoice_amount").HasPrecision(18, 2);
             builder.Property(c => c.NextAutoInvoiceDate).HasColumnName("next_auto_invoice_date");
 
+            // Student/Detailed Information Mapping
+            builder.Property(c => c.DateOfBirth).HasColumnName("date_of_birth");
+            builder.Property(c => c.Gender).HasColumnName("gender").HasMaxLength(10);
+            builder.Property(c => c.StudentId).HasColumnName("student_id").HasMaxLength(50);
+            builder.Property(c => c.GradeLevel).HasColumnName("grade_level").HasMaxLength(50);
+            builder.Property(c => c.GuardianName).HasColumnName("guardian_name").HasMaxLength(255);
+            builder.Property(c => c.GuardianPhone).HasColumnName("guardian_phone").HasMaxLength(50);
+            builder.Property(c => c.GuardianEmail).HasColumnName("guardian_email").HasMaxLength(255);
+            builder.Property(c => c.Nationality).HasColumnName("nationality").HasMaxLength(100);
+            builder.Property(c => c.NationalId).HasColumnName("national_id").HasMaxLength(50);
+
             builder.Property(c => c.CreatedAt)
                    .HasColumnName("created_at")
                    .HasDefaultValueSql("CURRENT_TIMESTAMP");

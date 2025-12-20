@@ -55,7 +55,7 @@ namespace PrimeAppBooks.ViewModels.Pages
 
             _ = LoadCustomers();
         }
-        
+
         private async Task LoadCustomers()
         {
             try

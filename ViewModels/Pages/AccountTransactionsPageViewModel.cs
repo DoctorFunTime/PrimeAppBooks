@@ -54,7 +54,6 @@ namespace PrimeAppBooks.ViewModels.Pages
         public async Task Initialize(ChartOfAccount account)
         {
             SelectedAccount = account;
-            System.Diagnostics.Debug.WriteLine($"Initialize called with account: {account?.AccountName ?? "NULL"}, ID: {account?.AccountId ?? 0}");
             await LoadTransactionsAsync();
         }
 
@@ -63,7 +62,6 @@ namespace PrimeAppBooks.ViewModels.Pages
         {
             if (SelectedAccount == null)
             {
-                System.Diagnostics.Debug.WriteLine("LoadTransactionsAsync: SelectedAccount is NULL, returning");
                 return;
             }
 
@@ -73,36 +71,24 @@ namespace PrimeAppBooks.ViewModels.Pages
                 using var scope = _serviceProvider.CreateScope();
                 var journalServices = scope.ServiceProvider.GetRequiredService<JournalServices>();
 
-                // Debug logging
-                System.Diagnostics.Debug.WriteLine($"Loading transactions for AccountId: {SelectedAccount.AccountId}, Account: {SelectedAccount.AccountName}");
-                System.Diagnostics.Debug.WriteLine($"Date Range: {StartDate?.ToString("yyyy-MM-dd") ?? "null"} to {EndDate?.ToString("yyyy-MM-dd") ?? "null"}");
-
                 var transactions = await journalServices.GetAccountTransactionsAsync(
                     SelectedAccount.AccountId,
                     StartDate,
                     EndDate);
-
-                System.Diagnostics.Debug.WriteLine($"Retrieved {transactions.Count} transactions from database");
 
                 await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
                 {
                     Transactions.Clear();
                     foreach (var transaction in transactions)
                     {
-                        System.Diagnostics.Debug.WriteLine($"  Transaction: LineId={transaction.LineId}, Debit={transaction.DebitAmount}, Credit={transaction.CreditAmount}");
                         Transactions.Add(transaction);
                     }
 
                     CalculateTotals();
                 });
-
-                System.Diagnostics.Debug.WriteLine($"Transactions collection now has {Transactions.Count} items");
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"ERROR loading transactions: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
-                
                 await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
                 {
                     _messageBoxService.ShowMessage($"Error loading transactions: {ex.Message}", "Error", "ErrorOutline");
@@ -116,8 +102,11 @@ namespace PrimeAppBooks.ViewModels.Pages
 
         private void CalculateTotals()
         {
-            TotalDebits = Transactions.Sum(t => t.DebitAmount);
-            TotalCredits = Transactions.Sum(t => t.CreditAmount);
+            // Totals should only reflect POSTED transactions to match COA balance
+            var postedTransactions = Transactions.Where(t => t.JournalEntry?.Status == "POSTED").ToList();
+
+            TotalDebits = postedTransactions.Sum(t => t.DebitAmount);
+            TotalCredits = postedTransactions.Sum(t => t.CreditAmount);
             NetChange = TotalDebits - TotalCredits;
         }
 

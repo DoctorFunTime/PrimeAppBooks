@@ -182,7 +182,7 @@ namespace PrimeAppBooks.Services
 
         private async Task PopulateCurrenciesAsync(AppDbContext context)
         {
-            if (await context.Currencies.AnyAsync()) return;
+            var existingCodes = await context.Currencies.Select(c => c.CurrencyCode).ToListAsync();
 
             var currencies = new List<Currency>
             {
@@ -190,10 +190,19 @@ namespace PrimeAppBooks.Services
                 new() { CurrencyCode = "EUR", CurrencyName = "Euro", Symbol = "€", IsBaseCurrency = false },
                 new() { CurrencyCode = "GBP", CurrencyName = "British Pound", Symbol = "£", IsBaseCurrency = false },
                 new() { CurrencyCode = "JPY", CurrencyName = "Japanese Yen", Symbol = "¥", IsBaseCurrency = false },
-                new() { CurrencyCode = "CAD", CurrencyName = "Canadian Dollar", Symbol = "C$", IsBaseCurrency = false }
+                new() { CurrencyCode = "CAD", CurrencyName = "Canadian Dollar", Symbol = "C$", IsBaseCurrency = false },
+                new() { CurrencyCode = "ZIG", CurrencyName = "Zimbabwe Gold", Symbol = "ZiG", IsBaseCurrency = false },
+                new() { CurrencyCode = "ZAR", CurrencyName = "South African Rand", Symbol = "R", IsBaseCurrency = false },
+                new() { CurrencyCode = "BWP", CurrencyName = "Botswana Pula", Symbol = "P", IsBaseCurrency = false }
             };
 
-            await context.Currencies.AddRangeAsync(currencies);
+            foreach (var currency in currencies)
+            {
+                if (!existingCodes.Contains(currency.CurrencyCode))
+                {
+                    await context.Currencies.AddAsync(currency);
+                }
+            }
         }
 
         private async Task PopulateTaxRatesAsync(AppDbContext context)
@@ -273,60 +282,10 @@ namespace PrimeAppBooks.Services
 
         private async Task CreateAccountingTriggersAsync(AppDbContext context)
         {
-            ReportProgress("Creating accounting triggers...");
-
-            // IMPORTANT: These triggers maintain 'CurrentBalance' on ChartOfAccounts.
-            // Using ExecuteSqlRawAsync to ensure valid SQL execution.
-
-            const string triggerFuncSql = @"
-                CREATE OR REPLACE FUNCTION update_account_balance()
-                RETURNS TRIGGER
-                LANGUAGE plpgsql
-                AS $$
-                BEGIN
-                    IF TG_OP = 'INSERT' THEN
-                        UPDATE ""ChartOfAccounts""
-                        SET ""CurrentBalance"" = ""CurrentBalance"" + NEW.""DebitAmount"" - NEW.""CreditAmount""
-                        WHERE ""AccountId"" = NEW.""AccountId"";
-                    ELSIF TG_OP = 'UPDATE' THEN
-                        UPDATE ""ChartOfAccounts""
-                        SET ""CurrentBalance"" = ""CurrentBalance"" - OLD.""DebitAmount"" + OLD.""CreditAmount""
-                        WHERE ""AccountId"" = OLD.""AccountId"";
-
-                        UPDATE ""ChartOfAccounts""
-                        SET ""CurrentBalance"" = ""CurrentBalance"" + NEW.""DebitAmount"" - NEW.""CreditAmount""
-                        WHERE ""AccountId"" = NEW.""AccountId"";
-                    ELSIF TG_OP = 'DELETE' THEN
-                        UPDATE ""ChartOfAccounts""
-                        SET ""CurrentBalance"" = ""CurrentBalance"" - OLD.""DebitAmount"" + OLD.""CreditAmount""
-                        WHERE ""AccountId"" = OLD.""AccountId"";
-                    END IF;
-                    RETURN NULL;
-                END;
-                $$;";
-
-            await context.Database.ExecuteSqlRawAsync(triggerFuncSql);
-
-            // Trigger for JournalLines
-            // Note: EF Core quotes table names by default, e.g., "JournalLines".
-            // We need to ensure the trigger uses the correct table name.
-            
-            const string triggerSql = @"
-                DO $$
-                BEGIN
-                    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'update_account_balance_trigger') THEN
-                        CREATE TRIGGER update_account_balance_trigger
-                        AFTER INSERT OR UPDATE OR DELETE ON ""JournalLines""
-                        FOR EACH ROW EXECUTE FUNCTION update_account_balance();
-                    END IF;
-                END $$;";
-
-            await context.Database.ExecuteSqlRawAsync(triggerSql);
-            
-            // Note: Removed number generation trigger as standard identity columns or app logic can handle it, 
-            // or explicitly rely on user inputs for AccountNumber (which ChartOfAccounts entity requires).
-            // Creating triggers for other tables (invoices, etc.) if needed can be added here,
-            // but typical EF apps handle logic in services.
+            // Note: Accounting balance updates have been transitioned from database triggers 
+            // to service-level logic in JournalServices.cs for better status control (Posted vs Draft).
+            // This method is now obsolete but kept as a placeholder if other triggers are needed.
+            await Task.CompletedTask;
         }
     }
 }

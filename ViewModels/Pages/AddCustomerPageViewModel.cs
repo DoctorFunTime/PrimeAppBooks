@@ -145,6 +145,70 @@ namespace PrimeAppBooks.ViewModels.Pages
             set => SetProperty(ref _isLoading, value);
         }
 
+        // Student/Detailed Properties
+        private DateTime? _dateOfBirth;
+        public DateTime? DateOfBirth
+        {
+            get => _dateOfBirth;
+            set => SetProperty(ref _dateOfBirth, value);
+        }
+
+        private string _gender;
+        public string Gender
+        {
+            get => _gender;
+            set => SetProperty(ref _gender, value);
+        }
+
+        private string _studentId;
+        public string StudentId
+        {
+            get => _studentId;
+            set => SetProperty(ref _studentId, value);
+        }
+
+        private string _gradeLevel;
+        public string GradeLevel
+        {
+            get => _gradeLevel;
+            set => SetProperty(ref _gradeLevel, value);
+        }
+
+        private string _guardianName;
+        public string GuardianName
+        {
+            get => _guardianName;
+            set => SetProperty(ref _guardianName, value);
+        }
+
+        private string _guardianPhone;
+        public string GuardianPhone
+        {
+            get => _guardianPhone;
+            set => SetProperty(ref _guardianPhone, value);
+        }
+
+        private string _guardianEmail;
+        public string GuardianEmail
+        {
+            get => _guardianEmail;
+            set => SetProperty(ref _guardianEmail, value);
+        }
+
+        private string _nationality;
+        public string Nationality
+        {
+            get => _nationality;
+            set => SetProperty(ref _nationality, value);
+        }
+
+        private string _nationalId;
+        public string NationalId
+        {
+            get => _nationalId;
+            set => SetProperty(ref _nationalId, value);
+        }
+
         private ChartOfAccount _selectedRevenueAccount;
         public ChartOfAccount SelectedRevenueAccount
         {
@@ -228,6 +292,18 @@ namespace PrimeAppBooks.ViewModels.Pages
                     customer.AutoInvoiceInterval = IsAutoInvoiceEnabled ? Interval : 1;
                     customer.AutoInvoiceAmount = IsAutoInvoiceEnabled ? AutoInvoiceAmount : 0;
                     customer.NextAutoInvoiceDate = IsAutoInvoiceEnabled ? DateTime.SpecifyKind(NextInvoiceDate, DateTimeKind.Utc) : null;
+                    
+                    // Update Detailed Info
+                    customer.DateOfBirth = DateOfBirth.HasValue ? DateTime.SpecifyKind(DateOfBirth.Value, DateTimeKind.Utc) : null;
+                    customer.Gender = Gender;
+                    customer.StudentId = StudentId;
+                    customer.GradeLevel = GradeLevel;
+                    customer.GuardianName = GuardianName;
+                    customer.GuardianPhone = GuardianPhone;
+                    customer.GuardianEmail = GuardianEmail;
+                    customer.Nationality = Nationality;
+                    customer.NationalId = NationalId;
+                    
                     customer.UpdatedAt = DateTime.UtcNow;
 
                     context.Customers.Update(customer);
@@ -254,6 +330,18 @@ namespace PrimeAppBooks.ViewModels.Pages
                         AutoInvoiceInterval = IsAutoInvoiceEnabled ? Interval : 1,
                         AutoInvoiceAmount = IsAutoInvoiceEnabled ? AutoInvoiceAmount : 0,
                         NextAutoInvoiceDate = IsAutoInvoiceEnabled ? DateTime.SpecifyKind(NextInvoiceDate, DateTimeKind.Utc) : null,
+                        
+                        // New Detailed Info
+                        DateOfBirth = DateOfBirth.HasValue ? DateTime.SpecifyKind(DateOfBirth.Value, DateTimeKind.Utc) : null,
+                        Gender = Gender,
+                        StudentId = StudentId,
+                        GradeLevel = GradeLevel,
+                        GuardianName = GuardianName,
+                        GuardianPhone = GuardianPhone,
+                        GuardianEmail = GuardianEmail,
+                        Nationality = Nationality,
+                        NationalId = NationalId,
+                        
                         CreatedAt = DateTime.UtcNow,
                         UpdatedAt = DateTime.UtcNow
                     };
@@ -308,6 +396,16 @@ namespace PrimeAppBooks.ViewModels.Pages
                     AutoInvoiceAmount = customer.AutoInvoiceAmount;
                     if (customer.NextAutoInvoiceDate.HasValue)
                         NextInvoiceDate = customer.NextAutoInvoiceDate.Value;
+
+                    DateOfBirth = customer.DateOfBirth;
+                    Gender = customer.Gender;
+                    StudentId = customer.StudentId;
+                    GradeLevel = customer.GradeLevel;
+                    GuardianName = customer.GuardianName;
+                    GuardianPhone = customer.GuardianPhone;
+                    GuardianEmail = customer.GuardianEmail;
+                    Nationality = customer.Nationality;
+                    NationalId = customer.NationalId;
 
                     // Ensure accounts are loaded and match the selection
                     if (RevenueAccounts.Count == 0) await LoadAccounts();

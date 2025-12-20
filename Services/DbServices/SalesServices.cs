@@ -105,6 +105,8 @@ namespace PrimeAppBooks.Services.DbServices
                 JournalType = "SALES",
                 Status = "POSTED",
                 Amount = invoice.TotalAmount,
+                CurrencyId = invoice.CurrencyId,
+                ExchangeRate = invoice.ExchangeRate,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
                 JournalLines = new List<JournalLine>()
@@ -117,7 +119,13 @@ namespace PrimeAppBooks.Services.DbServices
                 Description = $"Receivable for Invoice {invoice.InvoiceNumber}",
                 DebitAmount = invoice.TotalAmount,
                 CreditAmount = 0,
+                ForeignDebitAmount = invoice.TotalAmount / (invoice.ExchangeRate > 0 ? invoice.ExchangeRate : 1),
+                ForeignCreditAmount = 0,
                 LineDate = invoice.InvoiceDate,
+                ContactId = invoice.CustomerId,
+                ContactType = "Customer",
+                CurrencyId = invoice.CurrencyId,
+                ExchangeRate = invoice.ExchangeRate,
                 CreatedAt = DateTime.UtcNow
             });
 
@@ -130,7 +138,13 @@ namespace PrimeAppBooks.Services.DbServices
                     Description = line.Description,
                     DebitAmount = 0,
                     CreditAmount = line.Amount,
+                    ForeignDebitAmount = 0,
+                    ForeignCreditAmount = line.Amount / (invoice.ExchangeRate > 0 ? invoice.ExchangeRate : 1),
                     LineDate = invoice.InvoiceDate,
+                    ContactId = invoice.CustomerId,
+                    ContactType = "Customer",
+                    CurrencyId = invoice.CurrencyId,
+                    ExchangeRate = invoice.ExchangeRate,
                     CreatedAt = DateTime.UtcNow
                 });
             }

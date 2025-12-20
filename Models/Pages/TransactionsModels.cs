@@ -68,6 +68,8 @@ namespace PrimeAppBooks.Models.Pages
             public string Status { get; set; } = "DRAFT";
             public int? PostedBy { get; set; }
             public DateTime? PostedAt { get; set; }
+            public int? CurrencyId { get; set; }
+            public decimal ExchangeRate { get; set; } = 1;
             public int CreatedBy { get; set; } = 1;
             public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
             public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
@@ -88,11 +90,18 @@ namespace PrimeAppBooks.Models.Pages
             public string Reference { get; set; } = string.Empty;
             public int? CostCenterId { get; set; }
             public int? ProjectId { get; set; }
+            public int? ContactId { get; set; }
+            public string? ContactType { get; set; } // "Customer", "Vendor", or null
+            public int? CurrencyId { get; set; }
+            public decimal ExchangeRate { get; set; } = 1;
+            public decimal ForeignDebitAmount { get; set; } = 0;
+            public decimal ForeignCreditAmount { get; set; } = 0;
             public int CreatedBy { get; set; } = 1;
             public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
             public JournalEntry JournalEntry { get; set; }
             public ChartOfAccount ChartOfAccount { get; set; }
+            public Currency Currency { get; set; }
         }
 
         public class ChartOfAccount
@@ -152,6 +161,8 @@ namespace PrimeAppBooks.Models.Pages
             public string Status { get; set; } = "DRAFT";
             public string Terms { get; set; }
             public string Notes { get; set; }
+            public int? CurrencyId { get; set; }
+            public decimal ExchangeRate { get; set; } = 1;
             public int CreatedBy { get; set; }
             public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
             public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
@@ -174,7 +185,7 @@ namespace PrimeAppBooks.Models.Pages
             public ChartOfAccount Account { get; set; }
         }
 
-        #endregion
+        #endregion Sales Invoices
 
         #region Purchase Invoices
 
@@ -194,6 +205,8 @@ namespace PrimeAppBooks.Models.Pages
             public string Status { get; set; } = "DRAFT";
             public string Terms { get; set; }
             public string Notes { get; set; }
+            public int? CurrencyId { get; set; }
+            public decimal ExchangeRate { get; set; } = 1;
             public int CreatedBy { get; set; }
             public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
             public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
@@ -216,6 +229,6 @@ namespace PrimeAppBooks.Models.Pages
             public ChartOfAccount Account { get; set; }
         }
 
-        #endregion
+        #endregion Purchase Invoices
     }
 }

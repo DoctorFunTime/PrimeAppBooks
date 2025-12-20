@@ -218,7 +218,7 @@
 
     <Style x:Key="CardValueText" TargetType="TextBlock">
         <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
-        <Setter Property="FontSize" Value="20" />
+        <Setter Property="FontSize" Value="17" />
         <Setter Property="FontWeight" Value="Bold" />
         <Setter Property="Margin" Value="5" />
     </Style>

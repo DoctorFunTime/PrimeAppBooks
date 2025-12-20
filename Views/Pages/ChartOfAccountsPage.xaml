@@ -1,11 +1,13 @@
 ﻿<base:BaseAnimatedPage
     x:Class="PrimeAppBooks.Views.Pages.ChartOfAccountsPage"
-    xmlns:base="clr-namespace:PrimeAppBooks.Views.Pages"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:base="clr-namespace:PrimeAppBooks.Views.Pages"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:hc="https://handyorg.github.io/handycontrol"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:pages="clr-namespace:PrimeAppBooks.ViewModels.Pages"
+    d:DataContext="{d:DesignInstance Type=pages:ChartOfAccountsPageViewModel}"
     d:DesignHeight="900"
     d:DesignWidth="1280"
     Background="Transparent"
@@ -146,15 +148,15 @@
                             <!--  TreeView for Account Hierarchy  -->
                             <TreeView
                                 Grid.Row="1"
+                                ItemContainerStyle="{StaticResource ModernTreeViewItemStyle}"
                                 ItemsSource="{Binding AccountHierarchy}"
-                                SelectedItemChanged="TreeView_SelectedItemChanged"
                                 PreviewMouseWheel="TreeView_PreviewMouseWheel"
                                 ScrollViewer.VerticalScrollBarVisibility="Disabled"
-                                Style="{StaticResource ModernTreeViewStyle}"
-                                ItemContainerStyle="{StaticResource ModernTreeViewItemStyle}">
+                                SelectedItemChanged="TreeView_SelectedItemChanged"
+                                Style="{StaticResource ModernTreeViewStyle}">
                                 <TreeView.ItemTemplate>
                                     <HierarchicalDataTemplate ItemsSource="{Binding ChildAccounts}">
-                                        <StackPanel Orientation="Horizontal" Margin="5">
+                                        <StackPanel Margin="5" Orientation="Horizontal">
                                             <TextBlock
                                                 Margin="0,0,10,0"
                                                 Style="{StaticResource DetailValueText}"
@@ -172,7 +174,7 @@
                                                 Foreground="{Binding CurrentBalance, Converter={StaticResource BalanceToColorConverter}}"
                                                 Style="{StaticResource DetailValueText}"
                                                 Text="{Binding CurrentBalance, StringFormat=C}" />
-                                            <StackPanel Orientation="Horizontal" Margin="10,0,0,0">
+                                            <StackPanel Margin="10,0,0,0" Orientation="Horizontal">
                                                 <Border
                                                     Width="10"
                                                     Height="10"
@@ -199,17 +201,14 @@
                             <!--  Account Details (shown when account selected)  -->
                             <StackPanel Margin="0,10,0,0" Visibility="{Binding SelectedAccount, Converter={StaticResource NullToVisibilityConverter}}">
                                 <!--  Account Header Info  -->
+                                <!--  Balance Information  -->
                                 <Border Margin="0,0,0,10" Style="{StaticResource DetailInfoBorder}">
                                     <StackPanel>
-                                        <TextBlock Style="{StaticResource DetailHeaderText}" Text="{Binding SelectedAccount.AccountName}" />
-                                        <TextBlock Style="{StaticResource DetailSubText}" Text="{Binding SelectedAccount.AccountNumber}" />
-                                        <Border
-                                            Margin="0,5,0,0"
-                                            HorizontalAlignment="Left"
-                                            Background="{Binding SelectedAccount.AccountType, Converter={StaticResource AccountTypeToColorConverter}}"
-                                            Style="{StaticResource TransactionStatusBadge}">
-                                            <TextBlock Style="{StaticResource StatusBadgeText}" Text="{Binding SelectedAccount.AccountType}" />
-                                        </Border>
+                                        <TextBlock Style="{StaticResource DetailLabelText}" Text="Current Balance (Posted)" />
+                                        <TextBlock
+                                            Foreground="{Binding SelectedAccountPostedBalance, Converter={StaticResource BalanceToColorConverter}}"
+                                            Style="{StaticResource DetailValueText}"
+                                            Text="{Binding SelectedAccountPostedBalance, StringFormat=C}" />
                                     </StackPanel>
                                 </Border>
 
@@ -298,7 +297,7 @@
             </Grid>
         </ScrollViewer>
 
-        <!-- Loading Overlay -->
+        <!--  Loading Overlay  -->
         <Border
             Background="#80000000"
             Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">

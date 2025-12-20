@@ -56,6 +56,9 @@ namespace PrimeAppBooks.Configurations.AppDbContextConfigurations
                    .HasColumnName("posted_at")
                    .HasConversion(v => v.HasValue && v.Value.Kind == DateTimeKind.Local ? v.Value.ToUniversalTime() : v, v => v);
 
+            builder.Property(j => j.CurrencyId).HasColumnName("currency_id");
+            builder.Property(j => j.ExchangeRate).HasColumnName("exchange_rate").HasPrecision(18, 6).HasDefaultValue(1);
+
             builder.Property(j => j.CreatedBy)
                    .HasColumnName("created_by")
                    .HasDefaultValue(1)

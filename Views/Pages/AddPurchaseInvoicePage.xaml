@@ -63,6 +63,7 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
 
                         <!-- Invoice Number -->
@@ -90,6 +91,27 @@
                             <StackPanel Margin="5">
                                 <TextBlock Style="{StaticResource DetailLabelText}" Text="Due Date" />
                                 <DatePicker SelectedDate="{Binding DueDate}" Style="{StaticResource CompactDatePickerStyle}" />
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!-- Multi-Currency -->
+                        <StackPanel Grid.Column="3" Orientation="Horizontal">
+                            <StackPanel Margin="5">
+                                <TextBlock Style="{StaticResource DetailLabelText}" Text="Currency" />
+                                <ComboBox
+                                    Width="90"
+                                    DisplayMemberPath="CurrencyCode"
+                                    ItemsSource="{Binding Currencies}"
+                                    SelectedItem="{Binding SelectedCurrency}"
+                                    Style="{StaticResource ModernComboBox}" />
+                            </StackPanel>
+                            <StackPanel Margin="5">
+                                <TextBlock Style="{StaticResource DetailLabelText}" Text="Ex. Rate" />
+                                <hc:TextBox
+                                    Width="80"
+                                    hc:InfoElement.Placeholder="1.00"
+                                    Style="{StaticResource ModernTextBoxStyle}"
+                                    Text="{Binding ExchangeRate, StringFormat=N4, UpdateSourceTrigger=PropertyChanged}" />
                             </StackPanel>
                         </StackPanel>
                     </Grid>

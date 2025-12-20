@@ -67,6 +67,9 @@ namespace PrimeAppBooks.Configurations.AppDbContextConfigurations
             builder.Property(s => s.Terms).HasColumnName("terms");
             builder.Property(s => s.Notes).HasColumnName("notes");
 
+            builder.Property(s => s.CurrencyId).HasColumnName("currency_id");
+            builder.Property(s => s.ExchangeRate).HasColumnName("exchange_rate").HasPrecision(18, 6).HasDefaultValue(1);
+
             builder.Property(s => s.CreatedBy).HasColumnName("created_by");
 
             builder.Property(s => s.CreatedAt)

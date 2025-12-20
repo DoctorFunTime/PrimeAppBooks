@@ -11,10 +11,12 @@ namespace PrimeAppBooks.Services.DbServices
     public class JournalServices
     {
         private readonly AppDbContext _context;
+        private readonly SettingsService _settingsService;
 
-        public JournalServices(AppDbContext context)
+        public JournalServices(AppDbContext context, SettingsService settingsService)
         {
             _context = context;
+            _settingsService = settingsService;
         }
 
         #region Journal Entries
@@ -26,11 +28,11 @@ namespace PrimeAppBooks.Services.DbServices
             {
                 journalEntry.CreatedAt = DateTime.UtcNow;
                 journalEntry.UpdatedAt = DateTime.UtcNow;
-                
+
                 // Ensure all DateTime properties are UTC
                 if (journalEntry.JournalDate.Kind != DateTimeKind.Utc)
                     journalEntry.JournalDate = DateTime.SpecifyKind(journalEntry.JournalDate, DateTimeKind.Utc);
-                
+
                 if (journalEntry.PostedAt.HasValue && journalEntry.PostedAt.Value.Kind != DateTimeKind.Utc)
                     journalEntry.PostedAt = DateTime.SpecifyKind(journalEntry.PostedAt.Value, DateTimeKind.Utc);
 
@@ -46,28 +48,43 @@ namespace PrimeAppBooks.Services.DbServices
                     journalEntry.Reference = await GenerateReferenceNumberAsync();
                 }
 
-                // Calculate total amount from lines
-                if (journalEntry.JournalLines?.Any() == true)
+                // Set timestamps for journal lines and ensure UTC
+                foreach (var line in journalEntry.JournalLines)
                 {
-                    // For a balanced entry, we can use either total debits or total credits
-                    // Using total debits as the amount
-                    journalEntry.Amount = journalEntry.JournalLines.Sum(l => l.DebitAmount);
-                    
-                    // Set timestamps for journal lines and ensure UTC
-                    foreach (var line in journalEntry.JournalLines)
+                    line.CreatedAt = DateTime.UtcNow;
+
+                    // Ensure LineDate is UTC
+                    if (line.LineDate.Kind != DateTimeKind.Utc)
+                        line.LineDate = DateTime.SpecifyKind(line.LineDate, DateTimeKind.Utc);
+
+                    // Handle Currency Conversion - ensure lines have parent's currency/rate if missing
+                    var effectiveCurrencyId = line.CurrencyId ?? journalEntry.CurrencyId;
+                    var effectiveExchangeRate = line.ExchangeRate > 0 ? line.ExchangeRate : (journalEntry.ExchangeRate > 0 ? journalEntry.ExchangeRate : 1.0m);
+
+                    if (effectiveCurrencyId.HasValue && effectiveExchangeRate > 0)
                     {
-                        line.CreatedAt = DateTime.UtcNow;
-                        
-                        // Ensure LineDate is UTC
-                        if (line.LineDate.Kind != DateTimeKind.Utc)
-                            line.LineDate = DateTime.SpecifyKind(line.LineDate, DateTimeKind.Utc);
+                        // Always prioritize calculating base from foreign if foreign exists
+                        if (line.ForeignDebitAmount > 0)
+                            line.DebitAmount = Math.Round(line.ForeignDebitAmount * effectiveExchangeRate, 2);
+                        else if (line.ForeignCreditAmount > 0)
+                            line.CreditAmount = Math.Round(line.ForeignCreditAmount * effectiveExchangeRate, 2);
                     }
                 }
 
+                // Recalculate total amount from lines after conversion
+                journalEntry.Amount = journalEntry.JournalLines.Sum(l => l.DebitAmount);
+
                 _context.JournalEntries.Add(journalEntry);
+
+                // Update account balances if creating directly as POSTED
+                if (journalEntry.Status == "POSTED")
+                {
+                    await UpdateAccountBalancesAsync(journalEntry, true);
+                }
+
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
-                
+
                 return journalEntry;
             }
             catch
@@ -81,7 +98,7 @@ namespace PrimeAppBooks.Services.DbServices
         {
             return await _context.JournalEntries
                 .Include(j => j.JournalLines)
-                    .ThenInclude(l => l.ChartOfAccount)
+                .ThenInclude(l => l.ChartOfAccount)
                 .OrderByDescending(j => j.CreatedAt)
                 .ToListAsync();
         }
@@ -90,7 +107,7 @@ namespace PrimeAppBooks.Services.DbServices
         {
             return await _context.JournalEntries
                 .Include(j => j.JournalLines)
-                    .ThenInclude(l => l.ChartOfAccount)
+                .ThenInclude(l => l.ChartOfAccount)
                 .FirstOrDefaultAsync(j => j.JournalId == journalId);
         }
 
@@ -102,56 +119,49 @@ namespace PrimeAppBooks.Services.DbServices
 
             if (journalEntry == null) return null;
 
-            // Update journal entry properties
+            // 1. Subtract OLD posted balances if it was POSTED
+            var oldStatus = _context.Entry(journalEntry).Property(j => j.Status).OriginalValue?.ToString();
+            if (oldStatus == "POSTED")
+            {
+                await UpdateAccountBalancesAsync(journalEntry, false);
+            }
+
+            // 2. Perform updates
             journalEntry.JournalNumber = updatedJournalEntry.JournalNumber;
             journalEntry.JournalDate = updatedJournalEntry.JournalDate;
             journalEntry.PeriodId = updatedJournalEntry.PeriodId;
-            
-            // Generate reference number if not provided
-            if (string.IsNullOrEmpty(updatedJournalEntry.Reference))
-            {
-                journalEntry.Reference = await GenerateReferenceNumberAsync();
-            }
-            else
-            {
-                journalEntry.Reference = updatedJournalEntry.Reference;
-            }
-            
             journalEntry.Description = updatedJournalEntry.Description;
             journalEntry.JournalType = updatedJournalEntry.JournalType;
             journalEntry.Status = updatedJournalEntry.Status;
             journalEntry.PostedBy = updatedJournalEntry.PostedBy;
             journalEntry.PostedAt = updatedJournalEntry.PostedAt;
+            journalEntry.CurrencyId = updatedJournalEntry.CurrencyId;
+            journalEntry.ExchangeRate = updatedJournalEntry.ExchangeRate;
             journalEntry.UpdatedAt = DateTime.UtcNow;
-            
-            // Ensure all DateTime properties are UTC
-            if (journalEntry.JournalDate.Kind != DateTimeKind.Utc)
-                journalEntry.JournalDate = DateTime.SpecifyKind(journalEntry.JournalDate, DateTimeKind.Utc);
-            
-            if (journalEntry.PostedAt.HasValue && journalEntry.PostedAt.Value.Kind != DateTimeKind.Utc)
-                journalEntry.PostedAt = DateTime.SpecifyKind(journalEntry.PostedAt.Value, DateTimeKind.Utc);
 
-            // Update journal lines
             if (updatedJournalEntry.JournalLines?.Any() == true)
             {
-                // Remove existing lines
                 _context.JournalLines.RemoveRange(journalEntry.JournalLines);
-
-                // Add updated lines
                 foreach (var line in updatedJournalEntry.JournalLines)
                 {
-                    line.JournalId = journalEntry.JournalId;
-                    line.CreatedAt = DateTime.UtcNow;
-                    
-                    // Ensure LineDate is UTC
-                    if (line.LineDate.Kind != DateTimeKind.Utc)
-                        line.LineDate = DateTime.SpecifyKind(line.LineDate, DateTimeKind.Utc);
-                    
+                    var effectiveCurrencyId = line.CurrencyId ?? journalEntry.CurrencyId;
+                    var effectiveExchangeRate = line.ExchangeRate > 0 ? line.ExchangeRate : (journalEntry.ExchangeRate > 0 ? journalEntry.ExchangeRate : 1.0m);
+                    if (effectiveCurrencyId.HasValue && effectiveExchangeRate > 0)
+                    {
+                        if (line.ForeignDebitAmount > 0)
+                            line.DebitAmount = Math.Round(line.ForeignDebitAmount * effectiveExchangeRate, 2);
+                        else if (line.ForeignCreditAmount > 0)
+                            line.CreditAmount = Math.Round(line.ForeignCreditAmount * effectiveExchangeRate, 2);
+                    }
                     _context.JournalLines.Add(line);
                 }
-
-                // Recalculate total amount
                 journalEntry.Amount = updatedJournalEntry.JournalLines.Sum(l => l.DebitAmount);
+            }
+
+            // 3. Add NEW posted balances if it is now POSTED
+            if (journalEntry.Status == "POSTED")
+            {
+                await UpdateAccountBalancesAsync(journalEntry, true);
             }
 
             await _context.SaveChangesAsync();
@@ -180,13 +190,16 @@ namespace PrimeAppBooks.Services.DbServices
                 .Include(j => j.JournalLines)
                 .FirstOrDefaultAsync(j => j.JournalId == journalId);
 
-            if (journalEntry == null) return false;
+            if (journalEntry == null || journalEntry.Status == "POSTED") return false;
 
             // Validate journal entry before posting
             if (!await ValidateJournalEntryAsync(journalEntry))
             {
                 throw new InvalidOperationException("Journal entry is not balanced or has validation errors.");
             }
+
+            // Update account balances
+            await UpdateAccountBalancesAsync(journalEntry, true);
 
             journalEntry.Status = "POSTED";
             journalEntry.PostedBy = userId;
@@ -199,8 +212,17 @@ namespace PrimeAppBooks.Services.DbServices
 
         public async Task<bool> VoidJournalEntryAsync(int journalId, int userId)
         {
-            var journalEntry = await _context.JournalEntries.FindAsync(journalId);
-            if (journalEntry == null) return false;
+            var journalEntry = await _context.JournalEntries
+                .Include(j => j.JournalLines)
+                .FirstOrDefaultAsync(j => j.JournalId == journalId);
+
+            if (journalEntry == null || journalEntry.Status == "VOID") return false;
+
+            // If it was posted, we need to reverse the balances
+            if (journalEntry.Status == "POSTED")
+            {
+                await UpdateAccountBalancesAsync(journalEntry, false);
+            }
 
             journalEntry.Status = "VOID";
             journalEntry.PostedBy = userId;
@@ -209,6 +231,20 @@ namespace PrimeAppBooks.Services.DbServices
 
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        private async Task UpdateAccountBalancesAsync(JournalEntry journalEntry, bool isAdding)
+        {
+            foreach (var line in journalEntry.JournalLines)
+            {
+                var account = await _context.ChartOfAccounts.FindAsync(line.AccountId);
+                if (account != null)
+                {
+                    var modifier = isAdding ? 1 : -1;
+                    account.CurrentBalance += (line.DebitAmount - line.CreditAmount) * modifier;
+                    account.UpdatedAt = DateTime.UtcNow;
+                }
+            }
         }
 
         public async Task<bool> IsJournalNumberUniqueAsync(string journalNumber)
@@ -220,7 +256,7 @@ namespace PrimeAppBooks.Services.DbServices
         {
             var year = DateTime.Now.Year;
             var prefix = $"JE{year}";
-            
+
             var lastNumber = await _context.JournalEntries
                 .Where(j => j.JournalNumber.StartsWith(prefix))
                 .OrderByDescending(j => j.JournalNumber)
@@ -246,7 +282,7 @@ namespace PrimeAppBooks.Services.DbServices
             var year = DateTime.Now.Year;
             var month = DateTime.Now.Month;
             var prefix = $"REF{year}{month:D2}";
-            
+
             var lastReference = await _context.JournalEntries
                 .Where(j => j.Reference != null && j.Reference.StartsWith(prefix))
                 .OrderByDescending(j => j.Reference)
@@ -326,9 +362,7 @@ namespace PrimeAppBooks.Services.DbServices
             }
 
             return await _context.ChartOfAccounts
-                .Where(a => a.IsActive && 
-                           (a.AccountNumber.Contains(searchTerm) || 
-                            a.AccountName.Contains(searchTerm)))
+                .Where(a => a.IsActive && (a.AccountNumber.Contains(searchTerm) || a.AccountName.Contains(searchTerm)))
                 .OrderBy(a => a.AccountNumber)
                 .ToListAsync();
         }
@@ -348,7 +382,7 @@ namespace PrimeAppBooks.Services.DbServices
                 _context.JournalTemplates.Add(template);
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
-                
+
                 return template;
             }
             catch
@@ -413,11 +447,13 @@ namespace PrimeAppBooks.Services.DbServices
         public async Task<decimal> GetAccountBalanceAsync(int accountId, DateTime? asOfDate = null)
         {
             var query = _context.JournalLines
-                .Where(l => l.AccountId == accountId);
+                .Include(l => l.JournalEntry)
+                .Where(l => l.AccountId == accountId && l.JournalEntry.Status == "POSTED");
 
             if (asOfDate.HasValue)
             {
-                query = query.Where(l => l.LineDate <= asOfDate.Value);
+                var utcDate = asOfDate.Value.Kind == DateTimeKind.Utc ? asOfDate.Value : asOfDate.Value.ToUniversalTime();
+                query = query.Where(l => l.LineDate <= utcDate);
             }
 
             var debitTotal = await query.SumAsync(l => l.DebitAmount);
@@ -443,25 +479,52 @@ namespace PrimeAppBooks.Services.DbServices
 
             return await query
                 .Include(l => l.JournalEntry)
+                .Include(l => l.Currency)
+                .Where(l => l.JournalEntry.Status == "POSTED")
                 .OrderBy(l => l.LineDate)
+                .ToListAsync();
+        }
+
+        public async Task<List<JournalLine>> GetJournalLinesAsync(DateTime? fromDate = null, DateTime? toDate = null)
+        {
+            var query = _context.JournalLines.AsQueryable();
+
+            if (fromDate.HasValue)
+            {
+                var utcFrom = fromDate.Value.Kind == DateTimeKind.Utc ? fromDate.Value : fromDate.Value.ToUniversalTime();
+                query = query.Where(l => l.LineDate >= utcFrom);
+            }
+
+            if (toDate.HasValue)
+            {
+                var utcTo = toDate.Value.Kind == DateTimeKind.Utc ? toDate.Value : toDate.Value.ToUniversalTime();
+                query = query.Where(l => l.LineDate <= utcTo);
+            }
+
+            return await query
+                .Include(l => l.JournalEntry)
+                .Include(l => l.ChartOfAccount)
                 .ToListAsync();
         }
 
         public async Task<Dictionary<string, decimal>> GetTrialBalanceAsync(DateTime? asOfDate = null)
         {
-            var query = _context.JournalLines.AsQueryable();
+            var query = _context.JournalLines
+                .Include(l => l.JournalEntry)
+                .Include(l => l.ChartOfAccount)
+                .Where(l => l.JournalEntry.Status == "POSTED");
 
             if (asOfDate.HasValue)
             {
-                query = query.Where(l => l.LineDate <= asOfDate.Value);
+                var utcDate = asOfDate.Value.Kind == DateTimeKind.Utc ? asOfDate.Value : asOfDate.Value.ToUniversalTime();
+                query = query.Where(l => l.LineDate <= utcDate);
             }
 
             var trialBalance = await query
-                .GroupBy(l => new { l.AccountId, l.JournalEntry.Description })
+                .GroupBy(l => new { l.AccountId, l.ChartOfAccount.AccountNumber, l.ChartOfAccount.AccountName })
                 .Select(g => new
                 {
-                    AccountId = g.Key.AccountId,
-                    AccountName = g.Key.Description,
+                    AccountKey = $"{g.Key.AccountNumber} - {g.Key.AccountName}",
                     DebitTotal = g.Sum(l => l.DebitAmount),
                     CreditTotal = g.Sum(l => l.CreditAmount)
                 })
@@ -470,8 +533,7 @@ namespace PrimeAppBooks.Services.DbServices
             var result = new Dictionary<string, decimal>();
             foreach (var item in trialBalance)
             {
-                var balance = item.DebitTotal - item.CreditTotal;
-                result[$"{item.AccountId} - {item.AccountName}"] = balance;
+                result[item.AccountKey] = item.DebitTotal - item.CreditTotal;
             }
 
             return result;

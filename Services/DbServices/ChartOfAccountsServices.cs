@@ -68,21 +68,27 @@ namespace PrimeAppBooks.Services.DbServices
             }
         }
 
+        // CORRECTED: Show ALL active accounts, but only include POSTED journal lines
         public async Task<List<ChartOfAccount>> GetAllAccountsAsync()
         {
             return await _context.ChartOfAccounts
                 .Include(a => a.ParentAccount)
                 .Include(a => a.ChildAccounts.Where(c => c.IsActive))
-                .Where(a => a.IsActive)
+                .Include(a => a.JournalLines.Where(jl => jl.JournalEntry.Status == "POSTED"))  // Filter journal lines, not accounts
+                    .ThenInclude(jl => jl.JournalEntry)
+                .Where(a => a.IsActive)  // Only filter accounts by IsActive
                 .OrderBy(a => a.AccountNumber)
                 .ToListAsync();
         }
 
+        // CORRECTED: Show ALL accounts (including inactive), but only include POSTED journal lines
         public async Task<List<ChartOfAccount>> GetAllAccountsIncludingInactiveAsync()
         {
             return await _context.ChartOfAccounts
                 .Include(a => a.ParentAccount)
                 .Include(a => a.ChildAccounts)
+                .Include(a => a.JournalLines.Where(jl => jl.JournalEntry.Status == "POSTED"))  // Filter journal lines, not accounts
+                    .ThenInclude(jl => jl.JournalEntry)
                 .OrderBy(a => a.AccountNumber)
                 .ToListAsync();
         }
@@ -342,8 +348,8 @@ namespace PrimeAppBooks.Services.DbServices
             var searchLower = searchTerm.ToLower();
             return await _context.ChartOfAccounts
                 .Include(a => a.ParentAccount)
-                .Where(a => a.IsActive && 
-                           (a.AccountNumber.Contains(searchLower) || 
+                .Where(a => a.IsActive &&
+                           (a.AccountNumber.Contains(searchLower) ||
                             a.AccountName.ToLower().Contains(searchLower) ||
                             (a.Description != null && a.Description.ToLower().Contains(searchLower))))
                 .OrderBy(a => a.AccountNumber)
@@ -388,11 +394,13 @@ namespace PrimeAppBooks.Services.DbServices
         public async Task<decimal> GetAccountBalanceAsync(int accountId, DateTime? asOfDate = null)
         {
             var query = _context.JournalLines
-                .Where(l => l.AccountId == accountId);
+                .Include(l => l.JournalEntry)
+                .Where(l => l.AccountId == accountId && l.JournalEntry.Status == "POSTED");
 
             if (asOfDate.HasValue)
             {
-                query = query.Where(l => l.LineDate <= asOfDate.Value);
+                var utcDate = asOfDate.Value.Kind == DateTimeKind.Utc ? asOfDate.Value : asOfDate.Value.ToUniversalTime();
+                query = query.Where(l => l.LineDate <= utcDate);
             }
 
             var debitTotal = await query.SumAsync(l => l.DebitAmount);
@@ -404,11 +412,13 @@ namespace PrimeAppBooks.Services.DbServices
         public async Task<Dictionary<int, decimal>> GetAccountBalancesAsync(List<int> accountIds, DateTime? asOfDate = null)
         {
             var query = _context.JournalLines
-                .Where(l => accountIds.Contains(l.AccountId));
+                .Include(l => l.JournalEntry)
+                .Where(l => accountIds.Contains(l.AccountId) && l.JournalEntry.Status == "POSTED");
 
             if (asOfDate.HasValue)
             {
-                query = query.Where(l => l.LineDate <= asOfDate.Value);
+                var utcDate = asOfDate.Value.Kind == DateTimeKind.Utc ? asOfDate.Value : asOfDate.Value.ToUniversalTime();
+                query = query.Where(l => l.LineDate <= utcDate);
             }
 
             var balances = await query
@@ -627,20 +637,22 @@ namespace PrimeAppBooks.Services.DbServices
 
         public async Task<Dictionary<string, decimal>> GetTrialBalanceAsync(DateTime? asOfDate = null)
         {
-            var query = _context.JournalLines.AsQueryable();
+            var query = _context.JournalLines
+                .Include(l => l.JournalEntry)
+                .Include(l => l.ChartOfAccount)
+                .Where(l => l.JournalEntry.Status == "POSTED");
 
             if (asOfDate.HasValue)
             {
-                query = query.Where(l => l.LineDate <= asOfDate.Value);
+                var utcDate = asOfDate.Value.Kind == DateTimeKind.Utc ? asOfDate.Value : asOfDate.Value.ToUniversalTime();
+                query = query.Where(l => l.LineDate <= utcDate);
             }
 
             var trialBalance = await query
-                .Include(l => l.ChartOfAccount)
                 .GroupBy(l => new { l.AccountId, l.ChartOfAccount.AccountNumber, l.ChartOfAccount.AccountName })
                 .Select(g => new
                 {
                     AccountKey = $"{g.Key.AccountNumber} - {g.Key.AccountName}",
-                    AccountId = g.Key.AccountId,
                     DebitTotal = g.Sum(l => l.DebitAmount),
                     CreditTotal = g.Sum(l => l.CreditAmount)
                 })
@@ -649,8 +661,7 @@ namespace PrimeAppBooks.Services.DbServices
             var result = new Dictionary<string, decimal>();
             foreach (var item in trialBalance)
             {
-                var balance = item.DebitTotal - item.CreditTotal;
-                result[item.AccountKey] = balance;
+                result[item.AccountKey] = item.DebitTotal - item.CreditTotal;
             }
 
             return result;

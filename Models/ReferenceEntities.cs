@@ -1,4 +1,5 @@
 using System;
+using static PrimeAppBooks.Models.Pages.TransactionsModels;
 
 namespace PrimeAppBooks.Models
 {
@@ -35,13 +36,26 @@ namespace PrimeAppBooks.Models
         public int? DefaultPaymentTermsId { get; set; }
         public string Notes { get; set; }
         public bool IsActive { get; set; } = true;
-        
+
         // Auto-Invoice Configuration
         public bool IsAutoInvoiceEnabled { get; set; } = false;
+
         public string AutoInvoiceFrequency { get; set; } // Monthly, Weekly, Daily
         public int AutoInvoiceInterval { get; set; } = 1;
         public decimal AutoInvoiceAmount { get; set; }
         public DateTime? NextAutoInvoiceDate { get; set; }
+
+        // Student/Detailed Information
+        public DateTime? DateOfBirth { get; set; }
+
+        public string? Gender { get; set; }
+        public string? StudentId { get; set; }
+        public string? GradeLevel { get; set; }
+        public string? GuardianName { get; set; }
+        public string? GuardianPhone { get; set; }
+        public string? GuardianEmail { get; set; }
+        public string? Nationality { get; set; }
+        public string? NationalId { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
@@ -62,6 +76,8 @@ namespace PrimeAppBooks.Models
         public string CurrencyName { get; set; }
         public string Symbol { get; set; }
         public bool IsBaseCurrency { get; set; }
+
+        public ICollection<JournalLine> JournalLines { get; set; } = new List<JournalLine>();
     }
 
     public class TaxRate

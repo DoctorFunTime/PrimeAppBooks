@@ -25,8 +25,30 @@ namespace PrimeAppBooks.ViewModels.Pages
         [ObservableProperty]
         private bool _isLoading = false;
 
-        [ObservableProperty]
         private ChartOfAccount _selectedAccount;
+
+        public ChartOfAccount SelectedAccount
+        {
+            get => _selectedAccount;
+            set
+            {
+                if (SetProperty(ref _selectedAccount, value))
+                {
+                    OnPropertyChanged(nameof(SelectedAccountPostedBalance));
+                }
+            }
+        }
+
+        public decimal SelectedAccountPostedBalance
+        {
+            get
+            {
+                if (SelectedAccount == null)
+                    return 0;
+
+                return CalculateAccountBalance(SelectedAccount);
+            }
+        }
 
         [ObservableProperty]
         private bool _showInactiveAccounts = false;
@@ -441,6 +463,38 @@ namespace PrimeAppBooks.ViewModels.Pages
             }
         }
 
+        /// <summary>
+        /// Calculate account balance from POSTED journal lines only
+        /// </summary>
+        private decimal CalculateAccountBalance(ChartOfAccount account)
+        {
+            if (account.JournalLines == null || !account.JournalLines.Any())
+                return 0;
+
+            // Only calculate from POSTED journal entries
+            var postedLines = account.JournalLines
+                .Where(jl => jl.JournalEntry?.Status == "POSTED")
+                .ToList();
+
+            if (!postedLines.Any())
+                return 0;
+
+            var debitTotal = postedLines.Sum(jl => jl.DebitAmount);
+            var creditTotal = postedLines.Sum(jl => jl.CreditAmount);
+
+            // Calculate balance based on normal balance type
+            if (account.NormalBalance == "DEBIT")
+            {
+                // Assets, Expenses: Debit increases, Credit decreases
+                return debitTotal - creditTotal;
+            }
+            else
+            {
+                // Liabilities, Equity, Revenue: Credit increases, Debit decreases
+                return creditTotal - debitTotal;
+            }
+        }
+
         private void UpdateStatistics()
         {
             TotalAccountsCount = Accounts.Count;
@@ -448,14 +502,27 @@ namespace PrimeAppBooks.ViewModels.Pages
             InactiveAccountsCount = Accounts.Count(a => !a.IsActive);
             AccountsWithTransactionsCount = Accounts.Count(a => a.JournalLines?.Any() == true);
 
-            // Calculate balances by account type
-            TotalAssetsBalance = Accounts.Where(a => a.AccountType == "ASSET" && a.IsActive).Sum(a => a.CurrentBalance);
-            TotalLiabilitiesBalance = Accounts.Where(a => a.AccountType == "LIABILITY" && a.IsActive).Sum(a => a.CurrentBalance);
-            
-            var equity = Accounts.Where(a => a.AccountType == "EQUITY" && a.IsActive).Sum(a => a.CurrentBalance);
-            TotalRevenueBalance = Accounts.Where(a => a.AccountType == "REVENUE" && a.IsActive).Sum(a => a.CurrentBalance);
-            TotalExpensesBalance = Accounts.Where(a => a.AccountType == "EXPENSE" && a.IsActive).Sum(a => a.CurrentBalance);
-            
+            // Calculate balances by account type using POSTED transactions only
+            TotalAssetsBalance = Accounts
+                .Where(a => a.AccountType == "ASSET" && a.IsActive)
+                .Sum(a => CalculateAccountBalance(a));
+
+            TotalLiabilitiesBalance = Accounts
+                .Where(a => a.AccountType == "LIABILITY" && a.IsActive)
+                .Sum(a => CalculateAccountBalance(a));
+
+            var equity = Accounts
+                .Where(a => a.AccountType == "EQUITY" && a.IsActive)
+                .Sum(a => CalculateAccountBalance(a));
+
+            TotalRevenueBalance = Accounts
+                .Where(a => a.AccountType == "REVENUE" && a.IsActive)
+                .Sum(a => CalculateAccountBalance(a));
+
+            TotalExpensesBalance = Accounts
+                .Where(a => a.AccountType == "EXPENSE" && a.IsActive)
+                .Sum(a => CalculateAccountBalance(a));
+
             // Equity should include Net Income (Revenue - Expenses)
             // Based on the accounting equation: Assets = Liabilities + Equity + (Revenue - Expenses)
             TotalEquityBalance = equity + TotalRevenueBalance - TotalExpensesBalance;
@@ -552,10 +619,17 @@ namespace PrimeAppBooks.ViewModels.Pages
                 NormalBalance = account.NormalBalance,
                 OpeningBalance = account.OpeningBalance,
                 OpeningBalanceDate = account.OpeningBalanceDate,
-                CurrentBalance = account.CurrentBalance,
+
+                // IMPORTANT: Calculate current balance from POSTED journal lines only
+                CurrentBalance = CalculateAccountBalance(account),
+
                 CreatedBy = account.CreatedBy,
                 CreatedAt = account.CreatedAt,
                 UpdatedAt = account.UpdatedAt,
+
+                // Copy the filtered journal lines (already filtered to POSTED in the query)
+                JournalLines = account.JournalLines,
+
                 ChildAccounts = new List<ChartOfAccount>()
             };
 

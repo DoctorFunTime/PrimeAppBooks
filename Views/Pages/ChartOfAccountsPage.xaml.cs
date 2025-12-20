@@ -22,7 +22,11 @@ namespace PrimeAppBooks.Views.Pages
         {
             if (DataContext is ChartOfAccountsPageViewModel viewModel && e.NewValue is ChartOfAccount selectedAccount)
             {
-                viewModel.SelectedAccount = selectedAccount;
+                // Find the account in the original Accounts collection to get the full data with JournalLines
+                var accountWithData = viewModel.Accounts.FirstOrDefault(a => a.AccountId == selectedAccount.AccountId);
+
+                // Use the account with full data if found, otherwise use the hierarchy account
+                viewModel.SelectedAccount = accountWithData ?? selectedAccount;
             }
         }
 

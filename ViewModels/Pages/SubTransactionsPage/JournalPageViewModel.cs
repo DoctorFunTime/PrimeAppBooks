@@ -1,6 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.EntityFrameworkCore;
+using PrimeAppBooks.Data;
 using PrimeAppBooks.Interfaces;
+using PrimeAppBooks.Models;
 using PrimeAppBooks.Services;
 using PrimeAppBooks.Services.DbServices;
 using PrimeAppBooks.Views.Pages.SubTransactionsPage;
@@ -24,14 +27,25 @@ namespace PrimeAppBooks.ViewModels.Pages.SubTransactionsPage
         private readonly BoxServices _messageBoxService = new();
         private readonly JournalServices _journalServices;
         private readonly IJournalNavigationService _journalNavigationService;
+        private readonly IServiceProvider _serviceProvider;
+        private readonly SettingsService _settingsService;
+        private readonly AppDbContext _context;
 
         private JournalEntry _editingJournalEntry;
 
-        public JournalPageViewModel(INavigationService navigationService, JournalServices journalServices, IJournalNavigationService journalNavigationService)
+        public JournalPageViewModel(INavigationService navigationService,
+            JournalServices journalServices,
+            IJournalNavigationService journalNavigationService,
+            IServiceProvider serviceProvider,
+            SettingsService settingsService,
+            AppDbContext context)
         {
             _navigationService = navigationService;
             _journalServices = journalServices;
             _journalNavigationService = journalNavigationService;
+            _serviceProvider = serviceProvider;
+            _settingsService = settingsService;
+            _context = context;
             _navigationService.PageNavigated += OnPageNavigated;
 
             // Initialize asynchronously with proper error handling
@@ -44,10 +58,16 @@ namespace PrimeAppBooks.ViewModels.Pages.SubTransactionsPage
             {
                 await LoadAccountsAsync();
                 await LoadTemplatesAsync();
+                await LoadCurrenciesAsync();
+
+                var baseCurrencyId = await _settingsService.GetBaseCurrencyIdAsync();
 
                 // Use Dispatcher to update UI thread
                 await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
                 {
+                    SelectedCurrency = Currencies.FirstOrDefault(c => c.CurrencyId == baseCurrencyId);
+                    ExchangeRate = 1.0m;
+
                     // Check if there's a journal ID to edit from the injected navigation service
                     var journalId = _journalNavigationService.EditingJournalId;
                     if (journalId > 0)
@@ -118,6 +138,36 @@ namespace PrimeAppBooks.ViewModels.Pages.SubTransactionsPage
             get => _currentStatus;
             set => SetProperty(ref _currentStatus, value);
         }
+
+        private Currency _selectedCurrency;
+
+        public Currency SelectedCurrency
+        {
+            get => _selectedCurrency;
+            set
+            {
+                if (SetProperty(ref _selectedCurrency, value))
+                {
+                    UpdateCalculations();
+                }
+            }
+        }
+
+        private decimal _exchangeRate = 1.0m;
+
+        public decimal ExchangeRate
+        {
+            get => _exchangeRate;
+            set
+            {
+                if (SetProperty(ref _exchangeRate, value))
+                {
+                    UpdateCalculations();
+                }
+            }
+        }
+
+        public ObservableCollection<Currency> Currencies { get; } = new();
 
         private ObservableCollection<JournalLineViewModel> _journalLines = new();
 
@@ -447,14 +497,20 @@ namespace PrimeAppBooks.ViewModels.Pages.SubTransactionsPage
                     Description = EntryDescription,
                     JournalType = "GENERAL",
                     Status = "DRAFT",
+                    CurrencyId = SelectedCurrency?.CurrencyId,
+                    ExchangeRate = ExchangeRate,
                     CreatedBy = 1, // TODO: Get from current user
-                    JournalLines = JournalLines.Where(l => l.AccountId > 0 && (l.DebitAmount > 0 || l.CreditAmount > 0))
+                    JournalLines = JournalLines.Where(l => l.AccountId > 0 && (l.DebitAmount > 0 || l.CreditAmount > 0 || l.ForeignDebitAmount > 0 || l.ForeignCreditAmount > 0))
                         .Select(l => new JournalLine
                         {
                             AccountId = l.AccountId,
                             LineDate = DateTime.SpecifyKind(l.LineDate, DateTimeKind.Utc),
                             DebitAmount = l.DebitAmount,
                             CreditAmount = l.CreditAmount,
+                            ForeignDebitAmount = l.ForeignDebitAmount,
+                            ForeignCreditAmount = l.ForeignCreditAmount,
+                            CurrencyId = SelectedCurrency?.CurrencyId,
+                            ExchangeRate = ExchangeRate,
                             Description = l.Description,
                             Reference = l.Reference,
                             CostCenterId = l.CostCenterId,
@@ -495,15 +551,8 @@ namespace PrimeAppBooks.ViewModels.Pages.SubTransactionsPage
         [RelayCommand]
         private async Task PostEntry()
         {
-            // Prevent posting when editing existing entries
-            if (_editingJournalEntry != null)
-            {
-                await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
-                {
-                    _messageBoxService.ShowMessage("Cannot post edited entries directly. Please save as draft first, then post from the transactions list.", "Edit Mode", "InfoOutline");
-                });
-                return;
-            }
+            // Relax posting restriction - allow posting drafts even if in "Edit" mode
+            // We just need to make sure we treat it as an update if it's already a draft.
 
             if (!ValidateEntry())
             {
@@ -527,21 +576,28 @@ namespace PrimeAppBooks.ViewModels.Pages.SubTransactionsPage
             {
                 var journalEntry = new JournalEntry
                 {
+                    JournalId = _editingJournalEntry?.JournalId ?? 0,
                     JournalNumber = string.IsNullOrEmpty(ReferenceNumber) ? await GenerateJournalNumberAsync() : ReferenceNumber,
                     JournalDate = DateTime.SpecifyKind(EntryDate, DateTimeKind.Utc),
                     Description = EntryDescription,
                     JournalType = "GENERAL",
                     Status = "POSTED",
+                    CurrencyId = SelectedCurrency?.CurrencyId,
+                    ExchangeRate = ExchangeRate,
                     CreatedBy = 1, // TODO: Get from current user
                     PostedBy = 1, // TODO: Get from current user
                     PostedAt = DateTime.UtcNow,
-                    JournalLines = JournalLines.Where(l => l.AccountId > 0 && (l.DebitAmount > 0 || l.CreditAmount > 0))
+                    JournalLines = JournalLines.Where(l => l.AccountId > 0 && (l.DebitAmount > 0 || l.CreditAmount > 0 || l.ForeignDebitAmount > 0 || l.ForeignCreditAmount > 0))
                         .Select(l => new JournalLine
                         {
                             AccountId = l.AccountId,
                             LineDate = DateTime.SpecifyKind(l.LineDate, DateTimeKind.Utc),
                             DebitAmount = l.DebitAmount,
                             CreditAmount = l.CreditAmount,
+                            ForeignDebitAmount = l.ForeignDebitAmount,
+                            ForeignCreditAmount = l.ForeignCreditAmount,
+                            CurrencyId = SelectedCurrency?.CurrencyId,
+                            ExchangeRate = ExchangeRate,
                             Description = l.Description,
                             Reference = l.Reference,
                             CostCenterId = l.CostCenterId,
@@ -550,14 +606,23 @@ namespace PrimeAppBooks.ViewModels.Pages.SubTransactionsPage
                         }).ToList()
                 };
 
-                var createdEntry = await _journalServices.CreateJournalEntryAsync(journalEntry);
-                await _journalServices.PostJournalEntryAsync(createdEntry.JournalId, 1); // TODO: Get from current user
+                JournalEntry savedEntry;
+                if (journalEntry.JournalId > 0)
+                {
+                    savedEntry = await _journalServices.UpdateJournalEntryAsync(journalEntry);
+                }
+                else
+                {
+                    savedEntry = await _journalServices.CreateJournalEntryAsync(journalEntry);
+                }
+
+                await _journalServices.PostJournalEntryAsync(savedEntry.JournalId, 1);
 
                 await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
                 {
                     _messageBoxService.ShowMessage("Journal entry posted successfully!", "Success", "CheckCircleOutline");
                 });
-                
+
                 ResetEntry();
             }
             catch (Exception ex)
@@ -584,26 +649,43 @@ namespace PrimeAppBooks.ViewModels.Pages.SubTransactionsPage
             ReferenceNumber = string.Empty;
             EntryDate = DateTime.Today;
             CurrentStatus = "DRAFT";
-            
+
             // Clear editing state
             _editingJournalEntry = null;
-            
+
             // Unsubscribe from all line events before clearing
             foreach (var line in JournalLines)
             {
                 line.AmountChanged -= OnLineAmountChanged;
             }
-            
+
             JournalLines.Clear();
             SelectedLine = null;
             UpdateCalculations();
-            
+
             // Notify that editing state has changed
             OnPropertyChanged(nameof(IsEditing));
             OnPropertyChanged(nameof(CanPost));
-            
+
             // Add one empty line to start fresh
             AddLine();
+        }
+
+        private async Task LoadCurrenciesAsync()
+        {
+            try
+            {
+                var currencies = await _context.Currencies.OrderBy(c => c.CurrencyCode).ToListAsync();
+                await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    Currencies.Clear();
+                    foreach (var c in currencies) Currencies.Add(c);
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error loading currencies: {ex.Message}");
+            }
         }
 
         [RelayCommand]
@@ -632,7 +714,7 @@ namespace PrimeAppBooks.ViewModels.Pages.SubTransactionsPage
 
                 await _journalServices.CreateTemplateAsync(template);
                 await LoadTemplatesAsync();
-                
+
                 // Show success message
                 await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
                 {
@@ -696,7 +778,7 @@ namespace PrimeAppBooks.ViewModels.Pages.SubTransactionsPage
             {
                 SelectedLine.AccountId = SelectedQuickAccount.AccountId;
                 UpdateCalculations();
-                
+
                 // Clear the selection and search text
                 SelectedQuickAccount = null;
                 AccountSearchText = string.Empty;
@@ -724,15 +806,15 @@ namespace PrimeAppBooks.ViewModels.Pages.SubTransactionsPage
                 if (result)
                 {
                     var success = await _journalServices.DeleteTemplateAsync(SelectedTemplate.TemplateId);
-                    
+
                     if (success)
                     {
                         // Reload templates to refresh the list
                         await LoadTemplatesAsync();
-                        
+
                         // Clear selection
                         SelectedTemplate = null;
-                        
+
                         await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
                         {
                             _messageBoxService.ShowMessage("Template deleted successfully!", "Success", "CheckCircleOutline");
@@ -799,7 +881,7 @@ namespace PrimeAppBooks.ViewModels.Pages.SubTransactionsPage
             try
             {
                 var templates = await _journalServices.GetAllTemplatesAsync();
-                
+
                 // Use Dispatcher to update UI thread
                 await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
                 {
@@ -830,10 +912,28 @@ namespace PrimeAppBooks.ViewModels.Pages.SubTransactionsPage
 
         private void UpdateCalculations()
         {
+            // Auto-calculate base amounts from foreign amounts if applicable
+            if (SelectedCurrency != null && !SelectedCurrency.IsBaseCurrency && ExchangeRate > 0)
+            {
+                foreach (var line in JournalLines)
+                {
+                    if (line.ForeignDebitAmount > 0)
+                    {
+                        line.DebitAmount = Math.Round(line.ForeignDebitAmount * ExchangeRate, 2);
+                        line.CreditAmount = 0;
+                    }
+                    else if (line.ForeignCreditAmount > 0)
+                    {
+                        line.CreditAmount = Math.Round(line.ForeignCreditAmount * ExchangeRate, 2);
+                        line.DebitAmount = 0;
+                    }
+                }
+            }
+
             TotalDebits = JournalLines.Sum(l => l.DebitAmount);
             TotalCredits = JournalLines.Sum(l => l.CreditAmount);
             Difference = TotalDebits - TotalCredits;
-            IsBalanced = Math.Abs(Difference) < 0.01m; // Allow for small rounding differences
+            IsBalanced = Math.Abs(Difference) < 0.01m; 
 
             DifferenceColor = IsBalanced ? Brushes.Green : Brushes.Red;
             BalanceStatus = IsBalanced ? "BALANCED" : "UNBALANCED";
@@ -923,8 +1023,10 @@ namespace PrimeAppBooks.ViewModels.Pages.SubTransactionsPage
             }
 
             // Validate lines - only check lines that have data
-            var validLines = JournalLines.Where(l => l.AccountId > 0 && (l.DebitAmount > 0 || l.CreditAmount > 0)).ToList();
-            
+            var validLines = JournalLines.Where(l => l.AccountId > 0 && 
+                (l.DebitAmount > 0 || l.CreditAmount > 0 || l.ForeignDebitAmount > 0 || l.ForeignCreditAmount > 0)).ToList();
+
+
             if (!validLines.Any())
             {
                 ValidationErrors.Add("At least one journal line with account and amount is required");
@@ -937,14 +1039,43 @@ namespace PrimeAppBooks.ViewModels.Pages.SubTransactionsPage
                     ValidationErrors.Add($"Line {line.LineNumber}: Account is required");
                 }
 
-                if (line.DebitAmount <= 0 && line.CreditAmount <= 0)
+                if (line.DebitAmount <= 0 && line.CreditAmount <= 0 && line.ForeignDebitAmount <= 0 && line.ForeignCreditAmount <= 0)
                 {
-                    ValidationErrors.Add($"Line {line.LineNumber}: Either debit or credit amount must be greater than zero");
+                    ValidationErrors.Add($"Line {line.LineNumber}: Either base or foreign amount must be greater than zero");
                 }
 
-                if (line.DebitAmount > 0 && line.CreditAmount > 0)
+                if ((line.DebitAmount > 0 || line.ForeignDebitAmount > 0) && (line.CreditAmount > 0 || line.ForeignCreditAmount > 0))
                 {
                     ValidationErrors.Add($"Line {line.LineNumber}: Cannot have both debit and credit amounts");
+                }
+
+                // New: Prevent mixing base and foreign amounts in the same entry
+                if (SelectedCurrency != null && !SelectedCurrency.IsBaseCurrency)
+                {
+                    bool hasBaseAmount = line.DebitAmount > 0 || line.CreditAmount > 0;
+                    bool hasForeignAmount = line.ForeignDebitAmount > 0 || line.ForeignCreditAmount > 0;
+
+                    // This is subtle: because UpdateCalculations might overwrite base amounts,
+                    // we want to catch if the user is TRYING to enter base amounts directly
+                    // when they should be entering foreign ones.
+                    // But for now, let's keep it simple: if it's a foreign currency entry,
+                    // we expect foreign columns to be the primary source.
+                }
+            }
+
+            // Global check for mixed currency logic
+            if (SelectedCurrency != null && !SelectedCurrency.IsBaseCurrency)
+            {
+                bool anyBaseAmountEntered = JournalLines.Any(l => l.DebitAmount > 0 || l.CreditAmount > 0);
+                bool anyForeignAmountEntered = JournalLines.Any(l => l.ForeignDebitAmount > 0 || l.ForeignCreditAmount > 0);
+
+                // If they have both, it's confusing. But our UpdateCalculations already converts.
+                // The real issue is if they enter 50 USD on one line and 500 ZIG on another.
+                // Let's check for lines that ONLY have base amounts when a foreign currency is selected.
+                var linesWithOnlyBase = validLines.Where(l => (l.DebitAmount > 0 || l.CreditAmount > 0) && l.ForeignDebitAmount == 0 && l.ForeignCreditAmount == 0).ToList();
+                if (linesWithOnlyBase.Any() && anyForeignAmountEntered)
+                {
+                    ValidationErrors.Add("Mixed currency detected: Some lines use base currency while others use foreign. Please use foreign columns for all lines when a foreign currency is selected.");
                 }
             }
 
@@ -1007,6 +1138,8 @@ namespace PrimeAppBooks.ViewModels.Pages.SubTransactionsPage
             ReferenceNumber = journalEntry.Reference ?? string.Empty;
             EntryDate = journalEntry.JournalDate.Kind == DateTimeKind.Utc ? journalEntry.JournalDate.ToLocalTime() : journalEntry.JournalDate;
             CurrentStatus = journalEntry.Status;
+            SelectedCurrency = Currencies.FirstOrDefault(c => c.CurrencyId == journalEntry.CurrencyId);
+            ExchangeRate = journalEntry.ExchangeRate;
 
             // Clear existing lines
             foreach (var line in JournalLines)
@@ -1027,6 +1160,8 @@ namespace PrimeAppBooks.ViewModels.Pages.SubTransactionsPage
                         LineDate = line.LineDate.Kind == DateTimeKind.Utc ? line.LineDate.ToLocalTime() : line.LineDate,
                         DebitAmount = line.DebitAmount,
                         CreditAmount = line.CreditAmount,
+                        ForeignDebitAmount = line.ForeignDebitAmount,
+                        ForeignCreditAmount = line.ForeignCreditAmount,
                         Description = line.Description,
                         Reference = line.Reference,
                         CostCenterId = line.CostCenterId,
@@ -1046,7 +1181,7 @@ namespace PrimeAppBooks.ViewModels.Pages.SubTransactionsPage
             }
 
             UpdateCalculations();
-            
+
             // Notify that editing state has changed
             OnPropertyChanged(nameof(IsEditing));
             OnPropertyChanged(nameof(CanPost));
@@ -1171,6 +1306,36 @@ namespace PrimeAppBooks.ViewModels.Pages.SubTransactionsPage
                 if (SetProperty(ref _creditAmount, value))
                 {
                     OnCreditAmountChanged(value);
+                }
+            }
+        }
+
+        private decimal _foreignDebitAmount;
+
+        public decimal ForeignDebitAmount
+        {
+            get => _foreignDebitAmount;
+            set
+            {
+                if (SetProperty(ref _foreignDebitAmount, value))
+                {
+                    if (value > 0) ForeignCreditAmount = 0;
+                    AmountChanged?.Invoke(this, EventArgs.Empty);
+                }
+            }
+        }
+
+        private decimal _foreignCreditAmount;
+
+        public decimal ForeignCreditAmount
+        {
+            get => _foreignCreditAmount;
+            set
+            {
+                if (SetProperty(ref _foreignCreditAmount, value))
+                {
+                    if (value > 0) ForeignDebitAmount = 0;
+                    AmountChanged?.Invoke(this, EventArgs.Empty);
                 }
             }
         }

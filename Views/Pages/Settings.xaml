@@ -203,6 +203,34 @@
                                             Style="{StaticResource ModernTextBoxStyle}"
                                             Text="{Binding CompanyLegalName}" />
                                     </Grid>
+ 
+                                     <Grid Style="{StaticResource SettingsRowStyle}">
+                                         <Grid.ColumnDefinitions>
+                                             <ColumnDefinition Width="180" />
+                                             <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="20" />
+                                            <ColumnDefinition Width="180" />
+                                            <ColumnDefinition Width="*" />
+                                         </Grid.ColumnDefinitions>
+                                         <TextBlock
+                                             Grid.Column="0"
+                                             Style="{StaticResource SettingsLabelStyle}"
+                                            Text="Company Email:" />
+                                        <hc:TextBox
+                                            Grid.Column="1"
+                                            hc:InfoElement.Placeholder="Email address"
+                                            Style="{StaticResource ModernTextBoxStyle}"
+                                            Text="{Binding CompanyEmail}" />
+                                        <TextBlock
+                                            Grid.Column="3"
+                                            Style="{StaticResource SettingsLabelStyle}"
+                                            Text="Company Phone:" />
+                                        <hc:TextBox
+                                            Grid.Column="4"
+                                            hc:InfoElement.Placeholder="Phone number"
+                                            Style="{StaticResource ModernTextBoxStyle}"
+                                            Text="{Binding CompanyPhone}" />
+                                     </Grid>
 
                                     <Grid Style="{StaticResource SettingsRowStyle}">
                                         <Grid.ColumnDefinitions>
@@ -272,11 +300,12 @@
                                         <TextBlock
                                             Grid.Column="0"
                                             Style="{StaticResource SettingsLabelStyle}"
-                                            Text="Currency:" />
+                                            Text="Base Currency:" />
                                         <ComboBox
                                             Grid.Column="1"
                                             ItemsSource="{Binding Currencies}"
-                                            SelectedItem="{Binding SelectedCurrency}"
+                                            SelectedItem="{Binding SelectedBaseCurrency}"
+                                            DisplayMemberPath="CurrencyCode"
                                             Style="{StaticResource ModernComboBox}" />
                                         <TextBlock
                                             Grid.Column="3"

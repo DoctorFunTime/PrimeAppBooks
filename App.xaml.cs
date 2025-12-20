@@ -35,6 +35,7 @@ namespace PrimeAppBooks
             // Register core services
             services.AddSingleton<QuickBooksAuthService>();
             services.AddSingleton<QuickBooksService>();
+            services.AddScoped<SettingsService>();
             services.AddScoped<TransactionsServices>();
             services.AddScoped<JournalServices>();  // Changed from Singleton to Scoped
             services.AddScoped<ChartOfAccountsServices>();  // Add Chart of Accounts service

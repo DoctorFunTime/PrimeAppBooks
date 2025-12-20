@@ -28,13 +28,6 @@
                             <TextBlock Style="{StaticResource WelcomeTitleText}" Text="Welcome back, Sarah!" />
                             <TextBlock Style="{StaticResource WelcomeSubtitleText}" Text="Here's your comprehensive financial overview" />
                         </StackPanel>
-
-                        <Button
-                            Grid.Column="1"
-                            Margin="5,0"
-                            Command="{Binding ExportTransactionsCommand}"
-                            Content="📊 Connect to Quickbooks"
-                            Style="{StaticResource ModernSecondaryButton}" />
                     </Grid>
                 </Border>
 
@@ -44,7 +37,7 @@
                     <Border Style="{StaticResource ModernCardStyle}">
                         <StackPanel Style="{StaticResource CardContentContainer}">
                             <TextBlock Style="{StaticResource CashHeaderText}" Text="💰 Cash Balance" />
-                            <TextBlock Style="{StaticResource CardValueText}" Text="{Binding Address}" />
+                            <TextBlock Style="{StaticResource CardValueText}" Text="{Binding CashBalance, StringFormat=C}" />
                             <TextBlock Style="{StaticResource CardSubText}" Text="+2.8% from last month" />
                         </StackPanel>
                     </Border>
@@ -53,7 +46,7 @@
                     <Border Style="{StaticResource ModernCardStyle}">
                         <StackPanel Style="{StaticResource CardContentContainer}">
                             <TextBlock Style="{StaticResource ReceivablesHeaderText}" Text="📥 Receivables" />
-                            <TextBlock Style="{StaticResource CardValueText}" Text="{Binding CompanyName}" />
+                            <TextBlock Style="{StaticResource CardValueText}" Text="{Binding Receivables, StringFormat=C}" />
                             <TextBlock Style="{StaticResource CardSubText}" Text="12 outstanding" />
                         </StackPanel>
                     </Border>
@@ -62,7 +55,7 @@
                     <Border Style="{StaticResource ModernCardStyle}">
                         <StackPanel Style="{StaticResource CardContentContainer}">
                             <TextBlock Style="{StaticResource PayablesHeaderText}" Text="📤 Payables" />
-                            <TextBlock Style="{StaticResource CardValueText}" Text="$15,240.00" />
+                            <TextBlock Style="{StaticResource CardValueText}" Text="{Binding Payables, StringFormat=C}" />
                             <TextBlock Style="{StaticResource CardSubText}" Text="Due in 30 days" />
                         </StackPanel>
                     </Border>
@@ -71,7 +64,7 @@
                     <Border Style="{StaticResource ModernCardStyle}">
                         <StackPanel Style="{StaticResource CardContentContainer}">
                             <TextBlock Style="{StaticResource IncomeHeaderText}" Text="📊 Net Income" />
-                            <TextBlock Style="{StaticResource CardValueText}" Text="$54,310.00" />
+                            <TextBlock Style="{StaticResource CardValueText}" Text="{Binding NetIncome, StringFormat=C}" />
                             <TextBlock Style="{StaticResource CardSubText}" Text="YTD 2024" />
                         </StackPanel>
                     </Border>
@@ -83,7 +76,7 @@
                     <Border Style="{StaticResource ModernCardStyle}">
                         <StackPanel Style="{StaticResource CardContentContainer}">
                             <TextBlock Style="{StaticResource RevenueHeaderText}" Text="📈 Monthly Revenue" />
-                            <TextBlock Style="{StaticResource CardValueText}" Text="$18,760.00" />
+                            <TextBlock Style="{StaticResource CardValueText}" Text="{Binding MonthlyRevenue, StringFormat=C}" />
                             <TextBlock Style="{StaticResource CardSubText}" Text="+12.5% vs last month" />
                         </StackPanel>
                     </Border>
@@ -92,7 +85,7 @@
                     <Border Style="{StaticResource ModernCardStyle}">
                         <StackPanel Style="{StaticResource CardContentContainer}">
                             <TextBlock Style="{StaticResource ExpensesHeaderText}" Text="📉 Monthly Expenses" />
-                            <TextBlock Style="{StaticResource CardValueText}" Text="$12,340.00" />
+                            <TextBlock Style="{StaticResource CardValueText}" Text="{Binding MonthlyExpenses, StringFormat=C}" />
                             <TextBlock Style="{StaticResource CardSubText}" Text="-3.2% vs last month" />
                         </StackPanel>
                     </Border>
@@ -101,7 +94,7 @@
                     <Border Style="{StaticResource ModernCardStyle}">
                         <StackPanel Style="{StaticResource CardContentContainer}">
                             <TextBlock Style="{StaticResource ProfitHeaderText}" Text="💎 Profit Margin" />
-                            <TextBlock Style="{StaticResource CardValueText}" Text="34.2%" />
+                            <TextBlock Style="{StaticResource CardValueText}" Text="{Binding ProfitMargin}" />
                             <TextBlock Style="{StaticResource CardSubText}" Text="Above target (30%)" />
                         </StackPanel>
                     </Border>
@@ -173,54 +166,24 @@
 
                             <StackPanel Grid.Column="1" Margin="20,0,0,0">
                                 <TextBlock Style="{StaticResource SectionHeaderText}" Text="Top Expenses" />
-                                <Border Margin="0,10,0,5" Style="{StaticResource ExpenseItemBorder}">
-                                    <Grid>
-                                        <TextBlock
-                                            HorizontalAlignment="Left"
-                                            Foreground="White"
-                                            Text="Rent" />
-                                        <TextBlock
-                                            HorizontalAlignment="Right"
-                                            Foreground="White"
-                                            Text="$3,500" />
-                                    </Grid>
-                                </Border>
-                                <Border Margin="0,0,0,5" Style="{StaticResource ExpenseItemBorder}">
-                                    <Grid>
-                                        <TextBlock
-                                            HorizontalAlignment="Left"
-                                            Foreground="White"
-                                            Text="Utilities" />
-                                        <TextBlock
-                                            HorizontalAlignment="Right"
-                                            Foreground="White"
-                                            Text="$780" />
-                                    </Grid>
-                                </Border>
-                                <Border Margin="0,0,0,5" Style="{StaticResource ExpenseItemBorder}">
-                                    <Grid>
-                                        <TextBlock
-                                            HorizontalAlignment="Left"
-                                            Foreground="White"
-                                            Text="Marketing" />
-                                        <TextBlock
-                                            HorizontalAlignment="Right"
-                                            Foreground="White"
-                                            Text="$1,200" />
-                                    </Grid>
-                                </Border>
-                                <Border Margin="0,0,0,5" Style="{StaticResource ExpenseItemBorder}">
-                                    <Grid>
-                                        <TextBlock
-                                            HorizontalAlignment="Left"
-                                            Foreground="White"
-                                            Text="Office Supplies" />
-                                        <TextBlock
-                                            HorizontalAlignment="Right"
-                                            Foreground="White"
-                                            Text="$340" />
-                                    </Grid>
-                                </Border>
+                                <ItemsControl Margin="0,10,0,5" ItemsSource="{Binding TopExpenses}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Margin="0,0,0,5" Style="{StaticResource ExpenseItemBorder}">
+                                                <Grid>
+                                                    <TextBlock
+                                                        HorizontalAlignment="Left"
+                                                        Foreground="White"
+                                                        Text="{Binding Name}" />
+                                                    <TextBlock
+                                                        HorizontalAlignment="Right"
+                                                        Foreground="White"
+                                                        Text="{Binding Amount}" />
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
                             </StackPanel>
                         </Grid>
                     </Border>

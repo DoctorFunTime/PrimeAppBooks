@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PrimeAppBooks.Data;
@@ -11,9 +12,11 @@ using PrimeAppBooks.Data;
 namespace PrimeAppBooks.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251220182549_DashboardStats")]
+    partial class DashboardStats
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -718,8 +721,6 @@ namespace PrimeAppBooks.Migrations
 
                     b.HasKey("LineId");
 
-                    b.HasIndex("CurrencyId");
-
                     b.HasIndex("JournalId")
                         .HasDatabaseName("idx_journal_lines_journal");
 
@@ -1399,11 +1400,6 @@ namespace PrimeAppBooks.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("PrimeAppBooks.Models.Currency", "Currency")
-                        .WithMany("JournalLines")
-                        .HasForeignKey("CurrencyId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("PrimeAppBooks.Models.Pages.TransactionsModels+JournalEntry", "JournalEntry")
                         .WithMany("JournalLines")
                         .HasForeignKey("JournalId")
@@ -1411,8 +1407,6 @@ namespace PrimeAppBooks.Migrations
                         .IsRequired();
 
                     b.Navigation("ChartOfAccount");
-
-                    b.Navigation("Currency");
 
                     b.Navigation("JournalEntry");
                 });
@@ -1494,11 +1488,6 @@ namespace PrimeAppBooks.Migrations
                     b.Navigation("Account");
 
                     b.Navigation("SalesInvoice");
-                });
-
-            modelBuilder.Entity("PrimeAppBooks.Models.Currency", b =>
-                {
-                    b.Navigation("JournalLines");
                 });
 
             modelBuilder.Entity("PrimeAppBooks.Models.Pages.TransactionsModels+Bill", b =>
