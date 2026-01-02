@@ -8,7 +8,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:pages="clr-namespace:PrimeAppBooks.ViewModels.Pages"
     d:DataContext="{d:DesignInstance Type=pages:AddCustomerPageViewModel}"
-    d:DesignHeight="900"
+    d:DesignHeight="9000"
     d:DesignWidth="1280"
     Background="Transparent"
     mc:Ignorable="d">
@@ -20,8 +20,11 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <!-- Header Section -->
-            <Border Grid.Row="0" Margin="0,0,0,20" Style="{StaticResource ModernCardStyle}">
+            <!--  Header Section  -->
+            <Border
+                Grid.Row="0"
+                Margin="0,0,0,20"
+                Style="{StaticResource ModernCardStyle}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -30,7 +33,7 @@
 
                     <StackPanel Grid.Column="0">
                         <TextBlock Style="{StaticResource WelcomeTitleText}" Text="{Binding PageTitle}" />
-                        <TextBlock Style="{StaticResource WelcomeSubtitleText}" Text="Enter customer details and configure automated invoicing schedules" />
+                        <TextBlock Style="{StaticResource WelcomeSubtitleText}" Text="Comprehensive customer/student registration with automated billing configuration" />
                     </StackPanel>
 
                     <StackPanel Grid.Column="1" Orientation="Horizontal">
@@ -39,156 +42,505 @@
                             Command="{Binding NavigateBackCommand}"
                             Content="← Back"
                             Style="{StaticResource ModernSecondaryButton}" />
+                        <Button
+                            Margin="5,0"
+                            Command="{Binding SaveCustomerCommand}"
+                            Content="💾 Save Customer"
+                            Style="{StaticResource ModernActionButton}" />
                     </StackPanel>
                 </Grid>
             </Border>
 
-            <!-- Main Form -->
-            <Grid Grid.Row="1">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="2*" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
+            <!--  Main Content  -->
+            <StackPanel Grid.Row="1">
 
-                <!-- Basic Information -->
-                <StackPanel Grid.Column="0" Margin="0,0,20,0">
-                    <Border Margin="0,0,0,20" Style="{StaticResource ModernCardStyle}">
-                        <StackPanel Margin="10">
-                            <TextBlock Margin="0,0,0,15" Style="{StaticResource SectionHeaderText}" Text="Basic Information" />
-                            
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                
-                                <StackPanel Grid.Column="0" Margin="5">
-                                    <TextBlock Style="{StaticResource DetailLabelText}" Text="Customer Name *" />
-                                    <hc:TextBox Style="{StaticResource ModernTextBoxStyle}" Text="{Binding CustomerName, UpdateSourceTrigger=PropertyChanged}" hc:InfoElement.Placeholder="Full legal name" />
-                                </StackPanel>
+                <!--  Basic Information  -->
+                <Border Margin="0,0,0,20" Style="{StaticResource ModernCardStyle}">
+                    <StackPanel Margin="25">
+                        <TextBlock
+                            Margin="0,0,0,20"
+                            Style="{StaticResource SectionHeaderText}"
+                            Text="📋 Basic Information" />
 
-                                <StackPanel Grid.Column="1" Margin="5">
-                                    <TextBlock Style="{StaticResource DetailLabelText}" Text="Customer Code" />
-                                    <hc:TextBox Style="{StaticResource ModernTextBoxStyle}" Text="{Binding CustomerCode, UpdateSourceTrigger=PropertyChanged}" hc:InfoElement.Placeholder="Internal reference code" />
-                                </StackPanel>
-                            </Grid>
+                        <!--  Name and Code  -->
+                        <Grid Style="{StaticResource SettingsRowStyle}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="20" />
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock
+                                Grid.Column="0"
+                                Style="{StaticResource SettingsLabelStyle}"
+                                Text="Customer Name: *" />
+                            <hc:TextBox
+                                Grid.Column="1"
+                                hc:InfoElement.Placeholder="Full legal name"
+                                Style="{StaticResource ModernTextBoxStyle}"
+                                Text="{Binding CustomerName, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBlock
+                                Grid.Column="3"
+                                Style="{StaticResource SettingsLabelStyle}"
+                                Text="Customer Code: *" />
+                            <hc:TextBox
+                                Grid.Column="4"
+                                hc:InfoElement.Placeholder="Internal reference code"
+                                Style="{StaticResource ModernTextBoxStyle}"
+                                Text="{Binding CustomerCode, UpdateSourceTrigger=PropertyChanged}" />
+                        </Grid>
 
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                
-                                <StackPanel Grid.Column="0" Margin="5">
-                                    <TextBlock Style="{StaticResource DetailLabelText}" Text="Contact Person" />
-                                    <hc:TextBox Style="{StaticResource ModernTextBoxStyle}" Text="{Binding ContactPerson}" hc:InfoElement.Placeholder="Primary contact" />
-                                </StackPanel>
+                        <!--  Contact and Tax ID  -->
+                        <Grid Style="{StaticResource SettingsRowStyle}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="20" />
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock
+                                Grid.Column="0"
+                                Style="{StaticResource SettingsLabelStyle}"
+                                Text="Contact Person: *" />
+                            <hc:TextBox
+                                Grid.Column="1"
+                                hc:InfoElement.Placeholder="Primary contact name"
+                                Style="{StaticResource ModernTextBoxStyle}"
+                                Text="{Binding ContactPerson}" />
+                            <TextBlock
+                                Grid.Column="3"
+                                Style="{StaticResource SettingsLabelStyle}"
+                                Text="Tax ID / VAT #:" />
+                            <hc:TextBox
+                                Grid.Column="4"
+                                hc:InfoElement.Placeholder="Tax registration number"
+                                Style="{StaticResource ModernTextBoxStyle}"
+                                Text="{Binding TaxId}" />
+                        </Grid>
 
-                                <StackPanel Grid.Column="1" Margin="5">
-                                    <TextBlock Style="{StaticResource DetailLabelText}" Text="Tax ID / VAT #" />
-                                    <hc:TextBox Style="{StaticResource ModernTextBoxStyle}" Text="{Binding TaxId}" hc:InfoElement.Placeholder="Tax registration number" />
-                                </StackPanel>
-                            </Grid>
+                        <!--  Email and Phone  -->
+                        <Grid Style="{StaticResource SettingsRowStyle}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="20" />
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock
+                                Grid.Column="0"
+                                Style="{StaticResource SettingsLabelStyle}"
+                                Text="Email Address:" />
+                            <hc:TextBox
+                                Grid.Column="1"
+                                hc:InfoElement.Placeholder="example@company.com"
+                                Style="{StaticResource ModernTextBoxStyle}"
+                                Text="{Binding Email}" />
+                            <TextBlock
+                                Grid.Column="3"
+                                Style="{StaticResource SettingsLabelStyle}"
+                                Text="Phone Number: *" />
+                            <hc:TextBox
+                                Grid.Column="4"
+                                hc:InfoElement.Placeholder="+1 (555) 000-0000"
+                                Style="{StaticResource ModernTextBoxStyle}"
+                                Text="{Binding Phone}" />
+                        </Grid>
 
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                
-                                <StackPanel Grid.Column="0" Margin="5">
-                                    <TextBlock Style="{StaticResource DetailLabelText}" Text="Email Address" />
-                                    <hc:TextBox Style="{StaticResource ModernTextBoxStyle}" Text="{Binding Email}" hc:InfoElement.Placeholder="example@company.com" />
-                                </StackPanel>
-
-                                <StackPanel Grid.Column="1" Margin="5">
-                                    <TextBlock Style="{StaticResource DetailLabelText}" Text="Phone Number" />
-                                    <hc:TextBox Style="{StaticResource ModernTextBoxStyle}" Text="{Binding Phone}" hc:InfoElement.Placeholder="+1 (555) 000-0000" />
-                                </StackPanel>
-                            </Grid>
-
-                            <StackPanel Margin="5">
-                                <TextBlock Style="{StaticResource DetailLabelText}" Text="Default Revenue Account" />
-                                <ComboBox 
-                                    ItemsSource="{Binding RevenueAccounts}" 
-                                    SelectedItem="{Binding SelectedRevenueAccount}" 
+                        <!--  Revenue Account  -->
+                        <Grid Style="{StaticResource SettingsRowStyle}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock
+                                Grid.Column="0"
+                                Style="{StaticResource SettingsLabelStyle}"
+                                Text="Revenue Account:" />
+                            <StackPanel Grid.Column="1">
+                                <ComboBox
                                     DisplayMemberPath="AccountName"
+                                    ItemsSource="{Binding RevenueAccounts}"
+                                    SelectedItem="{Binding SelectedRevenueAccount}"
                                     Style="{StaticResource ModernComboBox}" />
-                                <TextBlock Text="Select the default account this customer's invoices will post to." Foreground="#60FFFFFF" FontSize="11" Margin="0,4,0,0" />
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="11"
+                                    Foreground="#60FFFFFF"
+                                    Text="Default account for posting this customer's invoices" />
                             </StackPanel>
-                        </StackPanel>
-                    </Border>
+                        </Grid>
+                    </StackPanel>
+                </Border>
 
-                    <Border Style="{StaticResource ModernCardStyle}">
-                        <StackPanel Margin="10">
-                            <TextBlock Margin="0,0,0,15" Style="{StaticResource SectionHeaderText}" Text="Addresses &amp; Notes" />
-                            
-                            <StackPanel Margin="5">
-                                <TextBlock Style="{StaticResource DetailLabelText}" Text="Billing Address" />
-                                <hc:TextBox AcceptsReturn="True" Height="60" Style="{StaticResource ModernTextBoxStyle}" Text="{Binding BillingAddress}" TextWrapping="Wrap" />
-                            </StackPanel>
+                <!--  Student/Personal Information  -->
+                <Border Margin="0,0,0,20" Style="{StaticResource ModernCardStyle}">
+                    <StackPanel Margin="25">
+                        <TextBlock
+                            Margin="0,0,0,20"
+                            Style="{StaticResource SectionHeaderText}"
+                            Text="🎓 Student / Personal Information" />
 
-                            <StackPanel Margin="5">
-                                <TextBlock Style="{StaticResource DetailLabelText}" Text="Shipping Address" />
-                                <hc:TextBox AcceptsReturn="True" Height="60" Style="{StaticResource ModernTextBoxStyle}" Text="{Binding ShippingAddress}" TextWrapping="Wrap" />
-                            </StackPanel>
+                        <!--  Student ID and Grade Level  -->
+                        <Grid Style="{StaticResource SettingsRowStyle}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="20" />
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock
+                                Grid.Column="0"
+                                Style="{StaticResource SettingsLabelStyle}"
+                                Text="Student ID:" />
+                            <hc:TextBox
+                                Grid.Column="1"
+                                Width="300"
+                                HorizontalAlignment="Left"
+                                hc:InfoElement.Placeholder="Student identification number"
+                                Style="{StaticResource ModernTextBoxStyle}"
+                                Text="{Binding StudentId}" />
+                            <TextBlock
+                                Grid.Column="3"
+                                Style="{StaticResource SettingsLabelStyle}"
+                                Text="Grade Level:" />
+                            <ComboBox
+                                Grid.Column="4"
+                                ItemsSource="{Binding GradeLevels}"
+                                SelectedItem="{Binding GradeLevel}"
+                                Style="{StaticResource ModernComboBox}" />
+                        </Grid>
 
-                            <StackPanel Margin="5">
-                                <TextBlock Style="{StaticResource DetailLabelText}" Text="Additional Notes" />
-                                <hc:TextBox AcceptsReturn="True" Height="60" Style="{StaticResource ModernTextBoxStyle}" Text="{Binding Notes}" TextWrapping="Wrap" />
-                            </StackPanel>
-                        </StackPanel>
-                    </Border>
-                </StackPanel>
+                        <!--  Date of Birth and Gender  -->
+                        <Grid Style="{StaticResource SettingsRowStyle}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="20" />
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock
+                                Grid.Column="0"
+                                Style="{StaticResource SettingsLabelStyle}"
+                                Text="Date of Birth:" />
+                            <DatePicker
+                                Grid.Column="1"
+                                HorizontalAlignment="Left"
+                                SelectedDate="{Binding DateOfBirth}"
+                                Style="{StaticResource CompactDatePickerStyle}" />
+                            <TextBlock
+                                Grid.Column="3"
+                                Style="{StaticResource SettingsLabelStyle}"
+                                Text="Gender:" />
+                            <ComboBox
+                                Grid.Column="4"
+                                ItemsSource="{Binding Genders}"
+                                SelectedItem="{Binding Gender}"
+                                Style="{StaticResource ModernComboBox}" />
+                        </Grid>
 
-                <!-- Configuration Side Panel -->
-                <StackPanel Grid.Column="1">
-                    <Border Margin="0,0,0,20" Style="{StaticResource ModernCardStyle}">
-                        <StackPanel Margin="10">
-                            <TextBlock Margin="0,0,0,15" Style="{StaticResource SectionHeaderText}" Text="⚙️ Auto-Invoice Setup" />
-                            
-                            <CheckBox Margin="5" Content="Enable Automated Invoicing" IsChecked="{Binding IsAutoInvoiceEnabled}" Style="{StaticResource MaterialDesignCheckBox}" />
-                            
-                            <StackPanel IsEnabled="{Binding IsAutoInvoiceEnabled}">
-                                <StackPanel Margin="5,15,5,5">
-                                    <TextBlock Style="{StaticResource DetailLabelText}" Text="Frequency" />
-                                    <ComboBox ItemsSource="{Binding Frequencies}" SelectedItem="{Binding SelectedFrequency}" Style="{StaticResource ModernComboBox}" />
+                        <!--  Nationality and National ID  -->
+                        <Grid Style="{StaticResource SettingsRowStyle}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="20" />
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock
+                                Grid.Column="0"
+                                Style="{StaticResource SettingsLabelStyle}"
+                                Text="Nationality:" />
+                            <hc:TextBox
+                                Grid.Column="1"
+                                Width="300"
+                                HorizontalAlignment="Left"
+                                hc:InfoElement.Placeholder="Country of citizenship"
+                                Style="{StaticResource ModernTextBoxStyle}"
+                                Text="{Binding Nationality}" />
+                            <TextBlock
+                                Grid.Column="3"
+                                Style="{StaticResource SettingsLabelStyle}"
+                                Text="National ID:" />
+                            <hc:TextBox
+                                Grid.Column="4"
+                                hc:InfoElement.Placeholder="Government ID number"
+                                Style="{StaticResource ModernTextBoxStyle}"
+                                Text="{Binding NationalId}" />
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!--  Guardian Information  -->
+                <Border Margin="0,0,0,20" Style="{StaticResource ModernCardStyle}">
+                    <StackPanel Margin="25">
+                        <TextBlock
+                            Margin="0,0,0,20"
+                            Style="{StaticResource SectionHeaderText}"
+                            Text="👨‍👩‍👧 Guardian / Emergency Contact" />
+
+                        <!--  Guardian Name  -->
+                        <Grid Style="{StaticResource SettingsRowStyle}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock
+                                Grid.Column="0"
+                                Style="{StaticResource SettingsLabelStyle}"
+                                Text="Guardian Name:" />
+                            <hc:TextBox
+                                Grid.Column="1"
+                                hc:InfoElement.Placeholder="Parent or guardian full name"
+                                Style="{StaticResource ModernTextBoxStyle}"
+                                Text="{Binding GuardianName}" />
+                        </Grid>
+
+                        <!--  Guardian Email and Phone  -->
+                        <Grid Style="{StaticResource SettingsRowStyle}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="20" />
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock
+                                Grid.Column="0"
+                                Style="{StaticResource SettingsLabelStyle}"
+                                Text="Guardian Email:" />
+                            <hc:TextBox
+                                Grid.Column="1"
+                                hc:InfoElement.Placeholder="guardian@example.com"
+                                Style="{StaticResource ModernTextBoxStyle}"
+                                Text="{Binding GuardianEmail}" />
+                            <TextBlock
+                                Grid.Column="3"
+                                Style="{StaticResource SettingsLabelStyle}"
+                                Text="Guardian Phone:" />
+                            <hc:TextBox
+                                Grid.Column="4"
+                                hc:InfoElement.Placeholder="+1 (555) 000-0000"
+                                Style="{StaticResource ModernTextBoxStyle}"
+                                Text="{Binding GuardianPhone}" />
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!--  Addresses  -->
+                <Border Margin="0,0,0,20" Style="{StaticResource ModernCardStyle}">
+                    <StackPanel Margin="25">
+                        <TextBlock
+                            Margin="0,0,0,20"
+                            Style="{StaticResource SectionHeaderText}"
+                            Text="📍 Addresses" />
+
+                        <!--  Billing Address  -->
+                        <Grid Style="{StaticResource SettingsRowStyle}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock
+                                Grid.Column="0"
+                                Style="{StaticResource SettingsLabelStyle}"
+                                Text="Billing Address:" />
+                            <hc:TextBox
+                                Grid.Column="1"
+                                Height="60"
+                                hc:InfoElement.Placeholder="Street address, city, state, postal code"
+                                AcceptsReturn="True"
+                                Style="{StaticResource ModernTextBoxStyle}"
+                                Text="{Binding BillingAddress}"
+                                TextWrapping="Wrap" />
+                        </Grid>
+
+                        <!--  Shipping Address  -->
+                        <Grid Style="{StaticResource SettingsRowStyle}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock
+                                Grid.Column="0"
+                                Style="{StaticResource SettingsLabelStyle}"
+                                Text="Shipping Address:" />
+                            <hc:TextBox
+                                Grid.Column="1"
+                                Height="60"
+                                hc:InfoElement.Placeholder="Leave blank if same as billing address"
+                                AcceptsReturn="True"
+                                Style="{StaticResource ModernTextBoxStyle}"
+                                Text="{Binding ShippingAddress}"
+                                TextWrapping="Wrap" />
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!--  Auto-Invoice Configuration  -->
+                <Border Margin="0,0,0,20" Style="{StaticResource ModernCardStyle}">
+                    <StackPanel Margin="25">
+                        <Grid Margin="0,0,0,20">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock
+                                Grid.Column="0"
+                                Style="{StaticResource SectionHeaderText}"
+                                Text="⚙️ Automated Invoicing Configuration" />
+                            <CheckBox
+                                Grid.Column="1"
+                                VerticalAlignment="Center"
+                                Content="Enable Auto-Invoice"
+                                FontWeight="SemiBold"
+                                Foreground="White"
+                                IsChecked="{Binding IsAutoInvoiceEnabled}" />
+                        </Grid>
+
+                        <StackPanel IsEnabled="{Binding IsAutoInvoiceEnabled}">
+                            <!--  Frequency and Interval  -->
+                            <Grid Style="{StaticResource SettingsRowStyle}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="180" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="20" />
+                                    <ColumnDefinition Width="180" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock
+                                    Grid.Column="0"
+                                    Style="{StaticResource SettingsLabelStyle}"
+                                    Text="Frequency:" />
+                                <ComboBox
+                                    Grid.Column="1"
+                                    Width="200"
+                                    HorizontalAlignment="Left"
+                                    ItemsSource="{Binding Frequencies}"
+                                    SelectedItem="{Binding SelectedFrequency}"
+                                    Style="{StaticResource ModernComboBox}" />
+                                <TextBlock
+                                    Grid.Column="3"
+                                    Style="{StaticResource SettingsLabelStyle}"
+                                    Text="Every (Interval):" />
+                                <hc:TextBox
+                                    Grid.Column="4"
+                                    Width="200"
+                                    HorizontalAlignment="Left"
+                                    hc:InfoElement.Placeholder="1"
+                                    Style="{StaticResource ModernTextBoxStyle}"
+                                    Text="{Binding Interval}" />
+                            </Grid>
+
+                            <!--  Amount and Next Date  -->
+                            <Grid Style="{StaticResource SettingsRowStyle}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="180" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="20" />
+                                    <ColumnDefinition Width="180" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock
+                                    Grid.Column="0"
+                                    Style="{StaticResource SettingsLabelStyle}"
+                                    Text="Invoice Amount:" />
+                                <hc:TextBox
+                                    Grid.Column="1"
+                                    Width="200"
+                                    HorizontalAlignment="Left"
+                                    hc:InfoElement.Placeholder="0.00"
+                                    Style="{StaticResource ModernTextBoxStyle}"
+                                    Text="{Binding AutoInvoiceAmount}" />
+                                <TextBlock
+                                    Grid.Column="3"
+                                    Style="{StaticResource SettingsLabelStyle}"
+                                    Text="Next Invoice Date:" />
+                                <DatePicker
+                                    Grid.Column="4"
+                                    Width="200"
+                                    HorizontalAlignment="Left"
+                                    SelectedDate="{Binding NextInvoiceDate}"
+                                    Style="{StaticResource CompactDatePickerStyle}" />
+                            </Grid>
+
+                            <Border
+                                Margin="0,10,0,0"
+                                Padding="15"
+                                Background="#20FFFFFF"
+                                CornerRadius="4">
+                                <StackPanel>
+                                    <TextBlock
+                                        Margin="0,0,0,8"
+                                        FontWeight="SemiBold"
+                                        Style="{StaticResource DetailLabelText}"
+                                        Text="ℹ️ Auto-Invoice Summary" />
+                                    <TextBlock
+                                        FontSize="12"
+                                        Foreground="#95A5A6"
+                                        Style="{StaticResource DetailValueText}"
+                                        TextWrapping="Wrap">
+                                        <Run Text="This customer will be automatically invoiced " />
+                                        <Run
+                                            FontWeight="SemiBold"
+                                            Foreground="White"
+                                            Text="{Binding SelectedFrequency, Mode=OneWay}" />
+                                        <Run Text=" for an amount of " />
+                                        <Run
+                                            FontWeight="SemiBold"
+                                            Foreground="#3498DB"
+                                            Text="{Binding AutoInvoiceAmount, StringFormat='{}{0:C}', Mode=OneWay}" />
+                                        <Run Text=". The next invoice will be generated on " />
+                                        <Run
+                                            FontWeight="SemiBold"
+                                            Foreground="White"
+                                            Text="{Binding NextInvoiceDate, StringFormat='{}{0:d}', Mode=OneWay}" />
+                                        <Run Text="." />
+                                    </TextBlock>
                                 </StackPanel>
-
-                                <StackPanel Margin="5">
-                                    <TextBlock Style="{StaticResource DetailLabelText}" Text="Every (Interval)" />
-                                    <hc:TextBox Text="{Binding Interval}" Style="{StaticResource ModernTextBoxStyle}" />
-                                </StackPanel>
-
-                                <StackPanel Margin="5">
-                                    <TextBlock Style="{StaticResource DetailLabelText}" Text="Auto-Billing Amount" />
-                                    <hc:TextBox Text="{Binding AutoInvoiceAmount}" Style="{StaticResource ModernTextBoxStyle}" hc:InfoElement.Placeholder="0.00" />
-                                </StackPanel>
-
-                                <StackPanel Margin="5">
-                                    <TextBlock Style="{StaticResource DetailLabelText}" Text="Next Scheduled Date" />
-                                    <DatePicker SelectedDate="{Binding NextInvoiceDate}" Style="{StaticResource CompactDatePickerStyle}" />
-                                </StackPanel>
-                                
-                                <Border Margin="5,15,5,5" Padding="10" Background="#20FFFFFF" CornerRadius="4">
-                                    <TextBlock Style="{StaticResource DetailValueText}" Text="This customer will be automatically invoiced based on these rules." TextWrapping="Wrap" Foreground="#95A5A6" FontSize="11" />
-                                </Border>
-                            </StackPanel>
+                            </Border>
                         </StackPanel>
-                    </Border>
+                    </StackPanel>
+                </Border>
 
-                    <Border Style="{StaticResource ModernCardStyle}">
-                        <StackPanel Margin="20">
-                            <Button
-                                Command="{Binding SaveCustomerCommand}"
-                                Content="💾 Save Customer"
-                                Style="{StaticResource ModernActionButton}" />
-                        </StackPanel>
-                    </Border>
-                </StackPanel>
-            </Grid>
+                <!--  Additional Notes  -->
+                <Border Margin="0,0,0,20" Style="{StaticResource ModernCardStyle}">
+                    <StackPanel Margin="25">
+                        <TextBlock
+                            Margin="0,0,0,20"
+                            Style="{StaticResource SectionHeaderText}"
+                            Text="📝 Additional Notes" />
 
-            <!-- Loading Overlay -->
+                        <Grid Style="{StaticResource SettingsRowStyle}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock
+                                Grid.Column="0"
+                                Margin="0,8,0,0"
+                                VerticalAlignment="Top"
+                                Style="{StaticResource SettingsLabelStyle}"
+                                Text="Notes:" />
+                            <hc:TextBox
+                                Grid.Column="1"
+                                Height="80"
+                                hc:InfoElement.Placeholder="Any additional information, special requirements, or internal notes about this customer..."
+                                AcceptsReturn="True"
+                                Style="{StaticResource ModernTextBoxStyle}"
+                                Text="{Binding Notes}"
+                                TextWrapping="Wrap" />
+                        </Grid>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+
+            <!--  Loading Overlay  -->
             <Border
                 Grid.RowSpan="2"
                 Background="#80000000"

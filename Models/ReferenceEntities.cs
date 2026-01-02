@@ -34,7 +34,7 @@ namespace PrimeAppBooks.Models
         public string TaxId { get; set; }
         public int? DefaultRevenueAccountId { get; set; }
         public int? DefaultPaymentTermsId { get; set; }
-        public string Notes { get; set; }
+        public string Notes { get; set; } = string.Empty;
         public bool IsActive { get; set; } = true;
 
         // Auto-Invoice Configuration

@@ -19,7 +19,9 @@ namespace PrimeAppBooks.ViewModels.Pages
         private readonly IServiceProvider _serviceProvider;
         private readonly BoxServices _messageBoxService = new();
 
+        // Basic Information
         private string _customerName;
+
         public string CustomerName
         {
             get => _customerName;
@@ -27,6 +29,7 @@ namespace PrimeAppBooks.ViewModels.Pages
         }
 
         private string _customerCode;
+
         public string CustomerCode
         {
             get => _customerCode;
@@ -34,6 +37,7 @@ namespace PrimeAppBooks.ViewModels.Pages
         }
 
         private string _contactPerson;
+
         public string ContactPerson
         {
             get => _contactPerson;
@@ -41,6 +45,7 @@ namespace PrimeAppBooks.ViewModels.Pages
         }
 
         private string _email;
+
         public string Email
         {
             get => _email;
@@ -48,6 +53,7 @@ namespace PrimeAppBooks.ViewModels.Pages
         }
 
         private string _phone;
+
         public string Phone
         {
             get => _phone;
@@ -55,6 +61,7 @@ namespace PrimeAppBooks.ViewModels.Pages
         }
 
         private string _billingAddress;
+
         public string BillingAddress
         {
             get => _billingAddress;
@@ -62,6 +69,7 @@ namespace PrimeAppBooks.ViewModels.Pages
         }
 
         private string _shippingAddress;
+
         public string ShippingAddress
         {
             get => _shippingAddress;
@@ -69,6 +77,7 @@ namespace PrimeAppBooks.ViewModels.Pages
         }
 
         private string _taxId;
+
         public string TaxId
         {
             get => _taxId;
@@ -76,13 +85,16 @@ namespace PrimeAppBooks.ViewModels.Pages
         }
 
         private string _notes;
+
         public string Notes
         {
             get => _notes;
             set => SetProperty(ref _notes, value);
         }
 
+        // Auto-Invoice Configuration
         private bool _isAutoInvoiceEnabled;
+
         public bool IsAutoInvoiceEnabled
         {
             get => _isAutoInvoiceEnabled;
@@ -90,6 +102,7 @@ namespace PrimeAppBooks.ViewModels.Pages
         }
 
         private string _selectedFrequency;
+
         public string SelectedFrequency
         {
             get => _selectedFrequency;
@@ -97,6 +110,7 @@ namespace PrimeAppBooks.ViewModels.Pages
         }
 
         private int _interval = 1;
+
         public int Interval
         {
             get => _interval;
@@ -104,49 +118,24 @@ namespace PrimeAppBooks.ViewModels.Pages
         }
 
         private DateTime _nextInvoiceDate = DateTime.Today.AddMonths(1);
+
         public DateTime NextInvoiceDate
         {
             get => _nextInvoiceDate;
             set => SetProperty(ref _nextInvoiceDate, value);
         }
 
-        private string _pageTitle = "Customer Registration";
-        public string PageTitle
-        {
-            get => _pageTitle;
-            set => SetProperty(ref _pageTitle, value);
-        }
-
-        private bool _isEditMode;
-        public bool IsEditMode
-        {
-            get => _isEditMode;
-            set => SetProperty(ref _isEditMode, value);
-        }
-
-        private int? _editingCustomerId;
-        public int? EditingCustomerId
-        {
-            get => _editingCustomerId;
-            set => SetProperty(ref _editingCustomerId, value);
-        }
-
         private decimal _autoInvoiceAmount;
+
         public decimal AutoInvoiceAmount
         {
             get => _autoInvoiceAmount;
             set => SetProperty(ref _autoInvoiceAmount, value);
         }
 
-        private bool _isLoading;
-        public bool IsLoading
-        {
-            get => _isLoading;
-            set => SetProperty(ref _isLoading, value);
-        }
-
-        // Student/Detailed Properties
+        // Student/Personal Information
         private DateTime? _dateOfBirth;
+
         public DateTime? DateOfBirth
         {
             get => _dateOfBirth;
@@ -154,6 +143,7 @@ namespace PrimeAppBooks.ViewModels.Pages
         }
 
         private string _gender;
+
         public string Gender
         {
             get => _gender;
@@ -161,6 +151,7 @@ namespace PrimeAppBooks.ViewModels.Pages
         }
 
         private string _studentId;
+
         public string StudentId
         {
             get => _studentId;
@@ -168,6 +159,7 @@ namespace PrimeAppBooks.ViewModels.Pages
         }
 
         private string _gradeLevel;
+
         public string GradeLevel
         {
             get => _gradeLevel;
@@ -175,6 +167,7 @@ namespace PrimeAppBooks.ViewModels.Pages
         }
 
         private string _guardianName;
+
         public string GuardianName
         {
             get => _guardianName;
@@ -182,6 +175,7 @@ namespace PrimeAppBooks.ViewModels.Pages
         }
 
         private string _guardianPhone;
+
         public string GuardianPhone
         {
             get => _guardianPhone;
@@ -189,6 +183,7 @@ namespace PrimeAppBooks.ViewModels.Pages
         }
 
         private string _guardianEmail;
+
         public string GuardianEmail
         {
             get => _guardianEmail;
@@ -196,6 +191,7 @@ namespace PrimeAppBooks.ViewModels.Pages
         }
 
         private string _nationality;
+
         public string Nationality
         {
             get => _nationality;
@@ -203,22 +199,69 @@ namespace PrimeAppBooks.ViewModels.Pages
         }
 
         private string _nationalId;
+
         public string NationalId
         {
             get => _nationalId;
             set => SetProperty(ref _nationalId, value);
         }
 
+        // UI State
+        private string _pageTitle = "Customer Registration";
+
+        public string PageTitle
+        {
+            get => _pageTitle;
+            set => SetProperty(ref _pageTitle, value);
+        }
+
+        private bool _isEditMode;
+
+        public bool IsEditMode
+        {
+            get => _isEditMode;
+            set => SetProperty(ref _isEditMode, value);
+        }
+
+        private int? _editingCustomerId;
+
+        public int? EditingCustomerId
+        {
+            get => _editingCustomerId;
+            set => SetProperty(ref _editingCustomerId, value);
+        }
+
+        private bool _isLoading;
+
+        public bool IsLoading
+        {
+            get => _isLoading;
+            set => SetProperty(ref _isLoading, value);
+        }
+
+        // Account Selection
         private ChartOfAccount _selectedRevenueAccount;
+
         public ChartOfAccount SelectedRevenueAccount
         {
             get => _selectedRevenueAccount;
             set => SetProperty(ref _selectedRevenueAccount, value);
         }
 
+        // Collections
         public ObservableCollection<ChartOfAccount> RevenueAccounts { get; } = new();
 
-        public ObservableCollection<string> Frequencies { get; } = new() { "Weekly", "Monthly", "Quarterly", "Yearly" };
+        public ObservableCollection<string> Frequencies { get; } = new() { "Daily", "Weekly", "Monthly", "Quarterly", "Yearly" };
+        public ObservableCollection<string> Genders { get; } = new() { "Male", "Female", "Other", "Prefer not to say" };
+
+        public ObservableCollection<string> GradeLevels { get; } = new()
+        {
+            "Pre-K", "Kindergarten",
+            "Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6",
+            "Grade 7", "Grade 8", "Grade 9", "Grade 10", "Grade 11", "Grade 12", "Form 1",
+            "Form 2", "Form 3", "Form 4", "Form 5", "Form 6",
+            "Undergraduate", "Graduate", "Postgraduate"
+        };
 
         public AddCustomerPageViewModel(INavigationService navigationService, IServiceProvider serviceProvider)
         {
@@ -234,8 +277,9 @@ namespace PrimeAppBooks.ViewModels.Pages
             {
                 using var scope = _serviceProvider.CreateScope();
                 var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                var accounts = await Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync(context.ChartOfAccounts);
-                
+                var accounts = await Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync(
+                    System.Linq.Queryable.Where(context.ChartOfAccounts, a => a.AccountType == "REVENUE"));
+
                 await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
                 {
                     RevenueAccounts.Clear();
@@ -254,9 +298,13 @@ namespace PrimeAppBooks.ViewModels.Pages
         [RelayCommand]
         private async Task SaveCustomer()
         {
-            if (string.IsNullOrWhiteSpace(CustomerName))
+            // Validate required fields
+            if (string.IsNullOrWhiteSpace(CustomerName) || 
+                string.IsNullOrWhiteSpace(CustomerCode) ||
+                string.IsNullOrWhiteSpace(ContactPerson) || 
+                string.IsNullOrWhiteSpace(Phone))
             {
-                _messageBoxService.ShowMessage("Please enter a customer name.", "Validation Error", "Warning");
+                _messageBoxService.ShowMessage("Please fill in all required fields (marked with *).", "Validation Error", "Warning");
                 return;
             }
 
@@ -276,34 +324,7 @@ namespace PrimeAppBooks.ViewModels.Pages
                         return;
                     }
 
-                    // Update existing customer
-                    customer.CustomerName = CustomerName;
-                    customer.CustomerCode = CustomerCode;
-                    customer.ContactPerson = ContactPerson;
-                    customer.Email = Email;
-                    customer.Phone = Phone;
-                    customer.TaxId = TaxId;
-                    customer.BillingAddress = BillingAddress;
-                    customer.ShippingAddress = ShippingAddress;
-                    customer.DefaultRevenueAccountId = SelectedRevenueAccount?.AccountId;
-                    customer.Notes = Notes;
-                    customer.IsAutoInvoiceEnabled = IsAutoInvoiceEnabled;
-                    customer.AutoInvoiceFrequency = IsAutoInvoiceEnabled ? SelectedFrequency : null;
-                    customer.AutoInvoiceInterval = IsAutoInvoiceEnabled ? Interval : 1;
-                    customer.AutoInvoiceAmount = IsAutoInvoiceEnabled ? AutoInvoiceAmount : 0;
-                    customer.NextAutoInvoiceDate = IsAutoInvoiceEnabled ? DateTime.SpecifyKind(NextInvoiceDate, DateTimeKind.Utc) : null;
-                    
-                    // Update Detailed Info
-                    customer.DateOfBirth = DateOfBirth.HasValue ? DateTime.SpecifyKind(DateOfBirth.Value, DateTimeKind.Utc) : null;
-                    customer.Gender = Gender;
-                    customer.StudentId = StudentId;
-                    customer.GradeLevel = GradeLevel;
-                    customer.GuardianName = GuardianName;
-                    customer.GuardianPhone = GuardianPhone;
-                    customer.GuardianEmail = GuardianEmail;
-                    customer.Nationality = Nationality;
-                    customer.NationalId = NationalId;
-                    
+                    UpdateCustomerProperties(customer);
                     customer.UpdatedAt = DateTime.UtcNow;
 
                     context.Customers.Update(customer);
@@ -312,39 +333,10 @@ namespace PrimeAppBooks.ViewModels.Pages
                 }
                 else
                 {
-                    // Create new customer
-                    var customer = new Customer
-                    {
-                        CustomerName = CustomerName,
-                        CustomerCode = CustomerCode,
-                        ContactPerson = ContactPerson,
-                        Email = Email,
-                        Phone = Phone,
-                        BillingAddress = BillingAddress,
-                        ShippingAddress = ShippingAddress,
-                        TaxId = TaxId,
-                        Notes = Notes,
-                        DefaultRevenueAccountId = SelectedRevenueAccount?.AccountId,
-                        IsAutoInvoiceEnabled = IsAutoInvoiceEnabled,
-                        AutoInvoiceFrequency = IsAutoInvoiceEnabled ? SelectedFrequency : null,
-                        AutoInvoiceInterval = IsAutoInvoiceEnabled ? Interval : 1,
-                        AutoInvoiceAmount = IsAutoInvoiceEnabled ? AutoInvoiceAmount : 0,
-                        NextAutoInvoiceDate = IsAutoInvoiceEnabled ? DateTime.SpecifyKind(NextInvoiceDate, DateTimeKind.Utc) : null,
-                        
-                        // New Detailed Info
-                        DateOfBirth = DateOfBirth.HasValue ? DateTime.SpecifyKind(DateOfBirth.Value, DateTimeKind.Utc) : null,
-                        Gender = Gender,
-                        StudentId = StudentId,
-                        GradeLevel = GradeLevel,
-                        GuardianName = GuardianName,
-                        GuardianPhone = GuardianPhone,
-                        GuardianEmail = GuardianEmail,
-                        Nationality = Nationality,
-                        NationalId = NationalId,
-                        
-                        CreatedAt = DateTime.UtcNow,
-                        UpdatedAt = DateTime.UtcNow
-                    };
+                    var customer = new Customer();
+                    UpdateCustomerProperties(customer);
+                    customer.CreatedAt = DateTime.UtcNow;
+                    customer.UpdatedAt = DateTime.UtcNow;
 
                     context.Customers.Add(customer);
                     await context.SaveChangesAsync();
@@ -363,12 +355,103 @@ namespace PrimeAppBooks.ViewModels.Pages
             }
         }
 
+        private void UpdateCustomerProperties(Customer customer)
+        {
+            // Basic Information - Use null-coalescing for non-nullable DB fields that are "optional" in UI
+            customer.CustomerName = CustomerName;
+            customer.CustomerCode = CustomerCode;
+            customer.ContactPerson = ContactPerson;
+            customer.Email = Email;
+            customer.Phone = Phone;
+            
+            customer.TaxId = TaxId ?? string.Empty;
+            customer.BillingAddress = BillingAddress ?? string.Empty;
+            customer.ShippingAddress = ShippingAddress ?? string.Empty;
+            customer.Notes = Notes ?? string.Empty;
+            
+            customer.DefaultRevenueAccountId = SelectedRevenueAccount?.AccountId;
+
+            // Auto-Invoice Configuration
+            customer.IsAutoInvoiceEnabled = IsAutoInvoiceEnabled;
+            customer.AutoInvoiceFrequency = IsAutoInvoiceEnabled ? SelectedFrequency : null;
+            customer.AutoInvoiceInterval = IsAutoInvoiceEnabled ? Interval : 1;
+            customer.AutoInvoiceAmount = IsAutoInvoiceEnabled ? AutoInvoiceAmount : 0;
+            customer.NextAutoInvoiceDate = IsAutoInvoiceEnabled ? DateTime.SpecifyKind(NextInvoiceDate, DateTimeKind.Utc) : null;
+
+            // Student/Personal Information
+            customer.DateOfBirth = DateOfBirth.HasValue ? DateTime.SpecifyKind(DateOfBirth.Value, DateTimeKind.Utc) : null;
+            customer.Gender = Gender;
+            customer.StudentId = StudentId;
+            customer.GradeLevel = GradeLevel;
+            customer.GuardianName = GuardianName;
+            customer.GuardianPhone = GuardianPhone;
+            customer.GuardianEmail = GuardianEmail;
+            customer.Nationality = Nationality;
+            customer.NationalId = NationalId;
+        }
+
         public void Initialize(int customerId)
         {
-            IsEditMode = true;
-            EditingCustomerId = customerId;
-            PageTitle = "Edit Customer Details";
-            _ = LoadCustomerData(customerId);
+            if (customerId <= 0)
+            {
+                InitializeNewCustomer();
+            }
+            else
+            {
+                IsEditMode = true;
+                EditingCustomerId = customerId;
+                PageTitle = "Edit Customer Details";
+                _ = LoadCustomerData(customerId);
+            }
+        }
+
+        private void InitializeNewCustomer()
+        {
+            IsEditMode = false;
+            EditingCustomerId = null;
+            PageTitle = "Customer Registration";
+            
+            // Generate Code
+            GenerateNewCustomerCode();
+            
+            // Clear or Set Defaults
+            CustomerName = string.Empty;
+            ContactPerson = string.Empty;
+            Email = string.Empty;
+            Phone = string.Empty;
+            BillingAddress = string.Empty;
+            ShippingAddress = string.Empty;
+            TaxId = string.Empty;
+            Notes = string.Empty;
+            
+            IsAutoInvoiceEnabled = false;
+            SelectedFrequency = "Monthly";
+            Interval = 1;
+            AutoInvoiceAmount = 0;
+            NextInvoiceDate = DateTime.Today.AddMonths(1);
+            
+            DateOfBirth = null;
+            Gender = null;
+            StudentId = string.Empty;
+            GradeLevel = null;
+            GuardianName = string.Empty;
+            GuardianPhone = string.Empty;
+            GuardianEmail = string.Empty;
+            Nationality = string.Empty;
+            NationalId = string.Empty;
+            
+            SelectedRevenueAccount = null;
+        }
+
+        private void GenerateNewCustomerCode()
+        {
+             // Generate a unique code (e.g., C-yyyyMMdd-XXXX)
+             // Using a random part to minimize collision probability without a DB call for Max ID
+             // Format: C-231222-1234
+             var random = new Random();
+             var datePart = DateTime.Now.ToString("yyMMdd");
+             var randomPart = random.Next(1000, 9999);
+             CustomerCode = $"C-{datePart}-{randomPart}";
         }
 
         private async Task LoadCustomerData(int id)
@@ -407,7 +490,6 @@ namespace PrimeAppBooks.ViewModels.Pages
                     Nationality = customer.Nationality;
                     NationalId = customer.NationalId;
 
-                    // Ensure accounts are loaded and match the selection
                     if (RevenueAccounts.Count == 0) await LoadAccounts();
                     SelectedRevenueAccount = RevenueAccounts.FirstOrDefault(a => a.AccountId == customer.DefaultRevenueAccountId);
                 }

@@ -46,6 +46,14 @@ namespace PrimeAppBooks.ViewModels.Pages
             get => _isEmpty;
             set => SetProperty(ref _isEmpty, value);
         }
+
+        private Customer _selectedCustomer;
+        public Customer SelectedCustomer
+        {
+            get => _selectedCustomer;
+            set => SetProperty(ref _selectedCustomer, value);
+        }
+
         public ObservableCollection<Customer> Customers { get; } = new();
 
         public CustomersPageViewModel(INavigationService navigationService, IServiceProvider serviceProvider)
@@ -95,7 +103,7 @@ namespace PrimeAppBooks.ViewModels.Pages
         [RelayCommand]
         private void AddCustomer()
         {
-            _navigationService.NavigateTo<AddCustomerPage>();
+            _navigationService.NavigateTo<AddCustomerPage>(0);
         }
 
         [RelayCommand]

@@ -148,13 +148,13 @@ namespace PrimeAppBooks.ViewModels.Pages
         {
             ValidationErrors.Clear();
             if (SelectedVendor == null) ValidationErrors.Add("• Vendor must be selected.");
-            
+
             int invalidLines = BillLines.Count(l => !l.IsValid);
             if (invalidLines > 0) ValidationErrors.Add($"• There are {invalidLines} invalid line(s). Check Account and Quantity.");
-            
+
             // Allow zero amount or keep it flexible
             // if (TotalAmount <= 0) ValidationErrors.Add("• Total invoice amount must be greater than zero.");
-            
+
             OnPropertyChanged(nameof(HasValidationErrors));
         }
 
@@ -208,8 +208,8 @@ namespace PrimeAppBooks.ViewModels.Pages
                     {
                         Description = l.Description ?? "No Description",
                         AccountId = l.SelectedAccount.AccountId,
-                        Quantity = l.Quantity,
-                        UnitPrice = l.UnitPrice,
+                        Quantity = (decimal)l.Quantity,
+                        UnitPrice = (decimal)l.UnitPrice,
                         Amount = l.Amount
                     }).ToList()
                 };

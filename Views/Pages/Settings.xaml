@@ -1,8 +1,8 @@
 ﻿<base:BaseAnimatedPage
     x:Class="PrimeAppBooks.Views.Pages.Settings"
-        xmlns:base="clr-namespace:PrimeAppBooks.Views.Pages"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:base="clr-namespace:PrimeAppBooks.Views.Pages"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:hc="https://handyorg.github.io/handycontrol"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -203,18 +203,18 @@
                                             Style="{StaticResource ModernTextBoxStyle}"
                                             Text="{Binding CompanyLegalName}" />
                                     </Grid>
- 
-                                     <Grid Style="{StaticResource SettingsRowStyle}">
-                                         <Grid.ColumnDefinitions>
-                                             <ColumnDefinition Width="180" />
-                                             <ColumnDefinition Width="*" />
+
+                                    <Grid Style="{StaticResource SettingsRowStyle}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="180" />
+                                            <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="20" />
                                             <ColumnDefinition Width="180" />
                                             <ColumnDefinition Width="*" />
-                                         </Grid.ColumnDefinitions>
-                                         <TextBlock
-                                             Grid.Column="0"
-                                             Style="{StaticResource SettingsLabelStyle}"
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock
+                                            Grid.Column="0"
+                                            Style="{StaticResource SettingsLabelStyle}"
                                             Text="Company Email:" />
                                         <hc:TextBox
                                             Grid.Column="1"
@@ -230,7 +230,7 @@
                                             hc:InfoElement.Placeholder="Phone number"
                                             Style="{StaticResource ModernTextBoxStyle}"
                                             Text="{Binding CompanyPhone}" />
-                                     </Grid>
+                                    </Grid>
 
                                     <Grid Style="{StaticResource SettingsRowStyle}">
                                         <Grid.ColumnDefinitions>
@@ -303,9 +303,9 @@
                                             Text="Base Currency:" />
                                         <ComboBox
                                             Grid.Column="1"
+                                            DisplayMemberPath="CurrencyCode"
                                             ItemsSource="{Binding Currencies}"
                                             SelectedItem="{Binding SelectedBaseCurrency}"
-                                            DisplayMemberPath="CurrencyCode"
                                             Style="{StaticResource ModernComboBox}" />
                                         <TextBlock
                                             Grid.Column="3"

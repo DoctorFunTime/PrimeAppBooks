@@ -12,6 +12,12 @@ namespace PrimeAppBooks.Views.Pages
         {
             InitializeComponent();
             DataContext = viewModel;
+            viewModel.Initialize(null); // Default new
+        }
+
+        public AddSalesInvoicePage(AddSalesInvoicePageViewModel viewModel, int invoiceId) : this(viewModel)
+        {
+            viewModel.Initialize(invoiceId);
         }
     }
 }

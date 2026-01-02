@@ -174,27 +174,61 @@ namespace PrimeAppBooks.Services
                 }
             }
 
+            // Calculate Net Income for previous years (which should be in Retained Earnings)
+            // If books haven't been closed, we need to calculate this manually
+            var fiscalYearStart = GetFiscalYearStart(asOfDate);
+            var historicalNetIncome = await CalculateNetIncomeAsync(new DateTime(1900, 1, 1), fiscalYearStart.AddDays(-1));
+            
+            bool retainedEarningsAdded = false;
+
             // Retained Earnings
             foreach (var account in equity.Where(a => a.AccountSubtype == "RETAINED_EARNINGS"))
             {
-                if (accountBalances.TryGetValue(account.AccountId, out var data) && Math.Abs(data.Balance) > 0.01m)
+                if (accountBalances.TryGetValue(account.AccountId, out var data))
                 {
-                    report.Equity.Add(new AccountLineItem
+                    // Even if balance is 0, we might need to show it if we have historical net income to add
+                    decimal finalAmount = data.Balance;
+                    
+                    if (!retainedEarningsAdded)
                     {
-                        AccountId = account.AccountId,
-                        AccountNumber = account.AccountNumber,
-                        AccountName = account.AccountName,
-                        AccountType = account.AccountType,
-                        AccountSubtype = account.AccountSubtype,
-                        NormalBalance = account.NormalBalance,
-                        Amount = data.Balance
-                    });
-                    report.TotalEquity += data.Balance;
+                        finalAmount += historicalNetIncome;
+                        retainedEarningsAdded = true;
+                    }
+
+                    if (Math.Abs(finalAmount) > 0.01m)
+                    {
+                        report.Equity.Add(new AccountLineItem
+                        {
+                            AccountId = account.AccountId,
+                            AccountNumber = account.AccountNumber,
+                            AccountName = account.AccountName,
+                            AccountType = account.AccountType,
+                            AccountSubtype = account.AccountSubtype,
+                            NormalBalance = account.NormalBalance,
+                            Amount = finalAmount
+                        });
+                        report.TotalEquity += finalAmount;
+                    }
                 }
             }
 
+            // If we have historical net income but no Retained Earnings account was found (or added), add a line for it
+            if (!retainedEarningsAdded && Math.Abs(historicalNetIncome) > 0.01m)
+            {
+                report.Equity.Add(new AccountLineItem
+                {
+                    AccountNumber = "", 
+                    AccountName = "Retained Earnings (Calculated)",
+                    AccountType = "EQUITY",
+                    AccountSubtype = "RETAINED_EARNINGS",
+                    NormalBalance = "CREDIT",
+                    Amount = historicalNetIncome
+                });
+                report.TotalEquity += historicalNetIncome;
+            }
+
             // Calculate Net Income for current fiscal year
-            var fiscalYearStart = GetFiscalYearStart(asOfDate);
+            // fiscalYearStart is already calculated above
             var netIncome = await CalculateNetIncomeAsync(fiscalYearStart, asOfDate);
 
             if (Math.Abs(netIncome) > 0.01m)

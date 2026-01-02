@@ -25,7 +25,7 @@ namespace PrimeAppBooks.Services.DbServices
             {
                 invoice.CreatedAt = DateTime.UtcNow;
                 invoice.UpdatedAt = DateTime.UtcNow;
-                
+
                 if (invoice.InvoiceDate.Kind != DateTimeKind.Utc)
                     invoice.InvoiceDate = DateTime.SpecifyKind(invoice.InvoiceDate, DateTimeKind.Utc);
                 if (invoice.DueDate.Kind != DateTimeKind.Utc)
@@ -38,10 +38,76 @@ namespace PrimeAppBooks.Services.DbServices
                 if (invoice.Status == "POSTED")
                 {
                     await PostToJournalInternalAsync(invoice);
+                    await _context.SaveChangesAsync(); // Save journal entries
                 }
-                
+
                 await transaction.CommitAsync();
                 return invoice;
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+
+        public async Task<SalesInvoice> UpdateInvoiceAsync(SalesInvoice invoice)
+        {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                var existing = await _context.SalesInvoices
+                    .Include(i => i.Lines)
+                    .FirstOrDefaultAsync(i => i.SalesInvoiceId == invoice.SalesInvoiceId);
+
+                if (existing == null)
+                    throw new Exception("Invoice not found");
+
+                if (existing.Status == "POSTED")
+                    throw new Exception("Posted invoices cannot be edited");
+
+                // Update invoice properties
+                existing.InvoiceNumber = invoice.InvoiceNumber;
+                existing.CustomerId = invoice.CustomerId;
+                existing.InvoiceDate = DateTime.SpecifyKind(invoice.InvoiceDate, DateTimeKind.Utc);
+                existing.DueDate = DateTime.SpecifyKind(invoice.DueDate, DateTimeKind.Utc);
+                existing.TotalAmount = invoice.TotalAmount;
+                existing.NetAmount = invoice.NetAmount;
+                existing.Balance = invoice.Balance;
+                existing.CurrencyId = invoice.CurrencyId;
+                existing.ExchangeRate = invoice.ExchangeRate;
+                existing.Status = invoice.Status;
+                existing.Terms = invoice.Terms;
+                existing.Notes = invoice.Notes;
+                existing.UpdatedAt = DateTime.UtcNow;
+
+                // Remove old lines
+                _context.SalesInvoiceLines.RemoveRange(existing.Lines);
+
+                // Add new lines
+                foreach (var line in invoice.Lines)
+                {
+                    existing.Lines.Add(new SalesInvoiceLine
+                    {
+                        Description = line.Description,
+                        AccountId = line.AccountId,
+                        Quantity = line.Quantity,
+                        UnitPrice = line.UnitPrice,
+                        Amount = line.Amount
+                    });
+                }
+
+                await _context.SaveChangesAsync();
+
+                // Post to journal if status changed to POSTED
+                if (invoice.Status == "POSTED")
+                {
+                    await PostToJournalInternalAsync(existing);
+                    await _context.SaveChangesAsync();
+                }
+
+                await transaction.CommitAsync();
+                return existing;
             }
             catch
             {
@@ -65,7 +131,7 @@ namespace PrimeAppBooks.Services.DbServices
                 invoice.UpdatedAt = DateTime.UtcNow;
 
                 await PostToJournalInternalAsync(invoice);
-                
+
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
                 return true;
@@ -93,6 +159,10 @@ namespace PrimeAppBooks.Services.DbServices
                 throw new Exception("Core account 'Accounts Receivable' (1100) not found in Chart of Accounts. Please run database setup.");
             }
 
+            // Get current accounting period
+            var currentPeriod = await _context.AccountingPeriods
+                .FirstOrDefaultAsync(p => p.StartDate <= invoice.InvoiceDate && p.EndDate >= invoice.InvoiceDate);
+
             // Generate Journal Number
             var journalNumber = await GenerateJournalNumberAsync();
 
@@ -107,6 +177,10 @@ namespace PrimeAppBooks.Services.DbServices
                 Amount = invoice.TotalAmount,
                 CurrencyId = invoice.CurrencyId,
                 ExchangeRate = invoice.ExchangeRate,
+                PeriodId = currentPeriod?.PeriodId,
+                CreatedBy = invoice.CreatedBy,
+                PostedBy = invoice.CreatedBy,
+                PostedAt = DateTime.UtcNow,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
                 JournalLines = new List<JournalLine>()

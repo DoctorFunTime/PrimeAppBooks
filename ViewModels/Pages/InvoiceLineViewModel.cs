@@ -10,8 +10,8 @@ namespace PrimeAppBooks.ViewModels.Pages
         private int _lineNumber;
         private ChartOfAccount _selectedAccount;
         private string _description;
-        private decimal _quantity = 1;
-        private decimal _unitPrice;
+        private decimal? _quantity = 1;
+        private decimal? _unitPrice;
         private decimal _amount;
 
         public int LineNumber
@@ -35,10 +35,16 @@ namespace PrimeAppBooks.ViewModels.Pages
         public string Description
         {
             get => _description;
-            set => SetProperty(ref _description, value);
+            set
+            {
+                if (SetProperty(ref _description, value))
+                {
+                    OnPropertyChanged(nameof(IsValid));
+                }
+            }
         }
 
-        public decimal Quantity
+        public decimal? Quantity
         {
             get => _quantity;
             set
@@ -51,7 +57,7 @@ namespace PrimeAppBooks.ViewModels.Pages
             }
         }
 
-        public decimal UnitPrice
+        public decimal? UnitPrice
         {
             get => _unitPrice;
             set
@@ -70,11 +76,14 @@ namespace PrimeAppBooks.ViewModels.Pages
             set => SetProperty(ref _amount, value);
         }
 
-        public bool IsValid => SelectedAccount != null && Quantity > 0 && UnitPrice >= 0;
+        public bool IsValid => SelectedAccount != null && 
+                             !string.IsNullOrWhiteSpace(Description) && 
+                             (Quantity ?? 0) > 0 && 
+                             (UnitPrice ?? 0) >= 0;
 
         private void UpdateAmount()
         {
-            Amount = Quantity * UnitPrice;
+            Amount = (Quantity ?? 0) * (UnitPrice ?? 0);
         }
 
         protected override void OnPropertyChanged(PropertyChangedEventArgs e)

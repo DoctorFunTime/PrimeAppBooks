@@ -19,8 +19,11 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!-- Header Section -->
-        <Border Grid.Row="0" Margin="0,0,0,20" Style="{StaticResource ModernCardStyle}">
+        <!--  Header Section  -->
+        <Border
+            Grid.Row="0"
+            Margin="0,0,0,20"
+            Style="{StaticResource ModernCardStyle}">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -32,7 +35,10 @@
                     <TextBlock Style="{StaticResource WelcomeSubtitleText}" Text="Manage your clinical and commercial client relationships" />
                 </StackPanel>
 
-                <StackPanel Grid.Column="1" VerticalAlignment="Center" Orientation="Horizontal">
+                <StackPanel
+                    Grid.Column="1"
+                    VerticalAlignment="Center"
+                    Orientation="Horizontal">
                     <hc:SearchBar
                         Width="250"
                         Margin="0,0,15,0"
@@ -47,94 +53,411 @@
             </Grid>
         </Border>
 
-        <!-- Customers List -->
-        <Border Grid.Row="1" Style="{StaticResource ModernCardStyle}">
-            <Grid>
-                <DataGrid
-                    AutoGenerateColumns="False"
-                    Background="Transparent"
-                    BorderThickness="0"
-                    CanUserAddRows="False"
-                    HeadersVisibility="Column"
-                    ItemsSource="{Binding Customers}"
-                    RowHeight="50"
-                    Style="{StaticResource ModernDataGridStyle}">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn
-                            Width="100"
-                            Binding="{Binding CustomerCode}"
-                            Header="CODE" />
-                        <DataGridTemplateColumn Width="*" Header="CUSTOMER NAME">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <StackPanel VerticalAlignment="Center">
-                                        <TextBlock FontWeight="SemiBold" Text="{Binding CustomerName}" Foreground="White" />
-                                        <TextBlock FontSize="11" Text="{Binding ContactPerson}" Foreground="#90FFFFFF" />
-                                    </StackPanel>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        <DataGridTextColumn
-                            Width="150"
-                            Binding="{Binding Email}"
-                            Header="EMAIL" />
-                        <DataGridTextColumn
-                            Width="120"
-                            Binding="{Binding Phone}"
-                            Header="PHONE" />
-                        <DataGridTemplateColumn Width="150" Header="AUTO-BILLING">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <StackPanel VerticalAlignment="Center">
-                                        <TextBlock Visibility="{Binding IsAutoInvoiceEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                            <Run Text="Every " />
-                                            <Run Text="{Binding AutoInvoiceInterval}" />
-                                            <Run Text=" " />
-                                            <Run Text="{Binding AutoInvoiceFrequency}" />
-                                        </TextBlock>
-                                        <TextBlock Text="Disabled" FontStyle="Italic" Foreground="#60FFFFFF" Visibility="{Binding IsAutoInvoiceEnabled, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
-                                    </StackPanel>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        <DataGridTemplateColumn Width="120" Header="ACTIONS">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <StackPanel Orientation="Horizontal">
-                                        <Button
-                                            Margin="0,0,5,0"
-                                            Padding="8,4"
-                                            Command="{Binding DataContext.EditCustomerCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                            CommandParameter="{Binding}"
-                                            Content="Edit"
-                                            Style="{StaticResource ModernSecondaryButton}" />
-                                    </StackPanel>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                    </DataGrid.Columns>
-                </DataGrid>
+        <!--  Customers List  -->
+        <Grid Grid.Row="1" Margin="0,0,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Border Grid.Row="1" Style="{StaticResource ModernCardStyle}">
+                <Grid>
+                    <DataGrid
+                        GridLinesVisibility="None"
+                        ItemsSource="{Binding Customers}"
+                        SelectedItem="{Binding SelectedCustomer}"
+                        SelectionMode="Single"
+                        Style="{StaticResource ModernDataGridStyle}">
 
-                <!-- No Data State -->
-                <StackPanel
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    Visibility="{Binding IsEmpty, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <TextBlock
-                        FontSize="16"
-                        Foreground="#60FFFFFF"
-                        Text="No customers found." />
-                </StackPanel>
+                        <!--  Set row height and vertical alignment with enhanced selection state  -->
+                        <DataGrid.RowStyle>
+                            <Style BasedOn="{StaticResource MaterialDesignDataGridRow}" TargetType="DataGridRow">
+                                <Setter Property="Height" Value="40" />
+                                <Setter Property="BorderThickness" Value="0" />
+                                <Setter Property="VerticalAlignment" Value="Center" />
+                                <Setter Property="VerticalContentAlignment" Value="Center" />
+                                <Setter Property="Foreground" Value="White" />
+                                <Setter Property="Background" Value="Transparent" />
+                                <Style.Triggers>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter Property="Background" Value="#2A4A7B" />
+                                        <!--  Selected background color  -->
+                                        <Setter Property="BorderBrush" Value="#4472C4" />
+                                        <Setter Property="BorderThickness" Value="1" />
+                                        <Setter Property="Foreground" Value="White" />
+                                    </Trigger>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#1E3A5F" />
+                                        <!--  Hover color  -->
+                                        <Setter Property="Foreground" Value="White" />
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.RowStyle>
 
-                <!-- Loading Overlay -->
-                <Border Background="#80000000" Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <!--  Enhanced cell styling with selection state  -->
+                        <DataGrid.CellStyle>
+                            <Style BasedOn="{StaticResource MaterialDesignDataGridCell}" TargetType="DataGridCell">
+                                <Setter Property="VerticalAlignment" Value="Center" />
+                                <Setter Property="VerticalContentAlignment" Value="Center" />
+                                <Setter Property="BorderThickness" Value="0" />
+                                <Setter Property="Background" Value="Transparent" />
+                                <Style.Triggers>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter Property="Background" Value="Transparent" />
+                                        <!--  Let row handle background  -->
+                                        <Setter Property="BorderBrush" Value="Transparent" />
+                                        <Setter Property="Foreground" Value="White" />
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.CellStyle>
+
+                        <!--  Update column header style  -->
+                        <DataGrid.ColumnHeaderStyle>
+                            <Style BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}" TargetType="DataGridColumnHeader">
+                                <Setter Property="Foreground" Value="#FF4472C4" />
+                                <Setter Property="FontWeight" Value="Bold" />
+                                <Setter Property="FontFamily" Value="Segoe UI" />
+                                <Setter Property="FontSize" Value="12" />
+                                <Setter Property="VerticalContentAlignment" Value="Center" />
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                <Setter Property="Height" Value="35" />
+                                <Setter Property="Background" Value="#1E1E1E" />
+                                <Setter Property="BorderBrush" Value="#3A3A3A" />
+                                <Setter Property="BorderThickness" Value="0,0,0,1" />
+                            </Style>
+                        </DataGrid.ColumnHeaderStyle>
+
+                        <DataGrid.Columns>
+                            <DataGridTextColumn
+                                Width="100"
+                                Binding="{Binding CustomerCode}"
+                                Header="CODE" />
+
+                            <DataGridTemplateColumn Width="*" Header="CUSTOMER NAME">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock
+                                                FontWeight="SemiBold"
+                                                Foreground="White"
+                                                Text="{Binding CustomerName}" />
+                                            <TextBlock
+                                                FontSize="11"
+                                                Foreground="#90FFFFFF"
+                                                Text="{Binding ContactPerson}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn
+                                Width="150"
+                                Binding="{Binding Email}"
+                                Header="EMAIL" />
+                            <DataGridTextColumn
+                                Width="120"
+                                Binding="{Binding Phone}"
+                                Header="PHONE" />
+                            <DataGridTemplateColumn Width="150" Header="AUTO-BILLING">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Visibility="{Binding IsAutoInvoiceEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                <Run Text="Every " />
+                                                <Run Text="{Binding AutoInvoiceInterval}" />
+                                                <Run Text=" " />
+                                                <Run Text="{Binding AutoInvoiceFrequency}" />
+                                            </TextBlock>
+                                            <TextBlock
+                                                FontStyle="Italic"
+                                                Foreground="#60FFFFFF"
+                                                Text="Disabled"
+                                                Visibility="{Binding IsAutoInvoiceEnabled, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Width="120" Header="ACTIONS">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Button
+                                                Margin="0,0,5,0"
+                                                Padding="8,4"
+                                                Command="{Binding DataContext.EditCustomerCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                CommandParameter="{Binding}"
+                                                Content="Edit"
+                                                Style="{StaticResource ModernSecondaryButton}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <!--  No Data State  -->
+                    <StackPanel
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Visibility="{Binding IsEmpty, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <TextBlock
+                            FontSize="16"
+                            Foreground="#60FFFFFF"
+                            Text="No customers found." />
+                    </StackPanel>
+
+                    <!--  Loading Overlay  -->
+                    <!--<Border Background="#80000000" Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <ProgressBar
                         Width="50"
                         Height="50"
                         IsIndeterminate="True"
                         Style="{StaticResource MaterialDesignCircularProgressBar}" />
-                </Border>
-            </Grid>
-        </Border>
+                </Border>-->
+                </Grid>
+            </Border>
+            <!--  Right Panel - Customer Details  -->
+            <Border
+                Grid.Column="1"
+                MaxWidth="400"
+                Margin="10,0,0,0"
+                Style="{StaticResource ModernCardStyle}">
+                <Grid>
+
+                    <!--  Details Content  -->
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Visibility="{Binding SelectedCustomer, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Inverse}">
+                        <StackPanel DataContext="{Binding SelectedCustomer}">
+                            <TextBlock
+                                Margin="0,0,0,15"
+                                Style="{StaticResource SectionHeaderText}"
+                                Text="📋 Customer Details" />
+
+                            <!--  Header Info  -->
+                            <Border Margin="0,0,0,15" Style="{StaticResource DetailInfoBorder}">
+                                <StackPanel>
+                                    <TextBlock
+                                        FontSize="18"
+                                        FontWeight="Bold"
+                                        Foreground="White"
+                                        Text="{Binding CustomerName}"
+                                        TextWrapping="Wrap" />
+                                    <TextBlock
+                                        Margin="0,2,0,0"
+                                        FontSize="12"
+                                        Foreground="#AAAAAA"
+                                        Text="{Binding CustomerCode, StringFormat='{}Code: {0}'}" />
+                                    <Grid Margin="0,10,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock
+                                            Grid.Column="0"
+                                            Foreground="#AAAAAA"
+                                            Text="Contact: " />
+                                        <TextBlock
+                                            Grid.Column="1"
+                                            Foreground="White"
+                                            Text="{Binding ContactPerson}"
+                                            TextWrapping="Wrap" />
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+
+                            <!--  Student/Personal Info  -->
+                            <Border Margin="0,0,0,15" Style="{StaticResource DetailInfoBorder}">
+                                <StackPanel>
+                                    <TextBlock Style="{StaticResource DetailLabelText}" Text="🎓 Student Information" />
+
+                                    <Grid Margin="0,5,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+
+                                        <!--  Student ID  -->
+                                        <TextBlock
+                                            Grid.Row="0"
+                                            Grid.Column="0"
+                                            Margin="0,0,10,2"
+                                            Foreground="#AAAAAA"
+                                            Text="ID:" />
+                                        <TextBlock
+                                            Grid.Row="0"
+                                            Grid.Column="1"
+                                            Margin="0,0,0,2"
+                                            Foreground="White"
+                                            Text="{Binding StudentId}" />
+
+                                        <!--  Grade  -->
+                                        <TextBlock
+                                            Grid.Row="1"
+                                            Grid.Column="0"
+                                            Margin="0,0,10,2"
+                                            Foreground="#AAAAAA"
+                                            Text="Grade:" />
+                                        <TextBlock
+                                            Grid.Row="1"
+                                            Grid.Column="1"
+                                            Margin="0,0,0,2"
+                                            Foreground="White"
+                                            Text="{Binding GradeLevel}" />
+
+                                        <!--  DOB  -->
+                                        <TextBlock
+                                            Grid.Row="2"
+                                            Grid.Column="0"
+                                            Margin="0,0,10,2"
+                                            Foreground="#AAAAAA"
+                                            Text="DOB:" />
+                                        <TextBlock
+                                            Grid.Row="2"
+                                            Grid.Column="1"
+                                            Margin="0,0,0,2"
+                                            Foreground="White"
+                                            Text="{Binding DateOfBirth, StringFormat='{}{0:d}'}" />
+
+                                        <!--  Gender  -->
+                                        <TextBlock
+                                            Grid.Row="3"
+                                            Grid.Column="0"
+                                            Margin="0,0,10,2"
+                                            Foreground="#AAAAAA"
+                                            Text="Gender:" />
+                                        <TextBlock
+                                            Grid.Row="3"
+                                            Grid.Column="1"
+                                            Margin="0,0,0,2"
+                                            Foreground="White"
+                                            Text="{Binding Gender}" />
+
+                                        <!--  Nationality  -->
+                                        <TextBlock
+                                            Grid.Row="4"
+                                            Grid.Column="0"
+                                            Margin="0,0,10,2"
+                                            Foreground="#AAAAAA"
+                                            Text="Nation:" />
+                                        <TextBlock
+                                            Grid.Row="4"
+                                            Grid.Column="1"
+                                            Margin="0,0,0,2"
+                                            Foreground="White"
+                                            Text="{Binding Nationality}" />
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+
+                            <!--  Guardian Info  -->
+                            <Border Margin="0,0,0,15" Style="{StaticResource DetailInfoBorder}">
+                                <StackPanel>
+                                    <TextBlock Style="{StaticResource DetailLabelText}" Text="👨‍👩‍👧 Guardian Details" />
+
+                                    <TextBlock
+                                        Margin="0,5,0,2"
+                                        Foreground="White"
+                                        Text="{Binding GuardianName}"
+                                        TextWrapping="Wrap" />
+
+                                    <StackPanel Margin="0,2,0,0" Orientation="Horizontal">
+                                        <TextBlock
+                                            Margin="0,0,5,0"
+                                            Foreground="#AAAAAA"
+                                            Text="📧" />
+                                        <TextBlock Foreground="White" Text="{Binding GuardianEmail}" />
+                                    </StackPanel>
+
+                                    <StackPanel Margin="0,2,0,0" Orientation="Horizontal">
+                                        <TextBlock
+                                            Margin="0,0,5,0"
+                                            Foreground="#AAAAAA"
+                                            Text="📞" />
+                                        <TextBlock Foreground="White" Text="{Binding GuardianPhone}" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <!--  Addresses  -->
+                            <Border Margin="0,0,0,15" Style="{StaticResource DetailInfoBorder}">
+                                <StackPanel>
+                                    <TextBlock Style="{StaticResource DetailLabelText}" Text="📍 Addresses" />
+
+                                    <TextBlock
+                                        Margin="0,5,0,0"
+                                        Foreground="#AAAAAA"
+                                        Text="Billing:" />
+                                    <TextBlock
+                                        Margin="5,0,0,5"
+                                        Foreground="White"
+                                        Text="{Binding BillingAddress}"
+                                        TextWrapping="Wrap" />
+
+                                    <TextBlock
+                                        Margin="0,5,0,0"
+                                        Foreground="#AAAAAA"
+                                        Text="Shipping:" />
+                                    <TextBlock
+                                        Margin="5,0,0,0"
+                                        Foreground="White"
+                                        Text="{Binding ShippingAddress}"
+                                        TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Border>
+
+                            <!--  Auto-Invoice  -->
+                            <Border Margin="0,0,0,15" Style="{StaticResource DetailInfoBorder}">
+                                <StackPanel>
+                                    <TextBlock Style="{StaticResource DetailLabelText}" Text="⚙️ Auto-Invoice" />
+
+                                    <StackPanel Visibility="{Binding IsAutoInvoiceEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <TextBlock
+                                            Margin="0,5,0,2"
+                                            Foreground="White">
+                                            <Run Text="{Binding AutoInvoiceFrequency}" />
+                                            <Run Text=" (Every " />
+                                            <Run Text="{Binding AutoInvoiceInterval}" />
+                                            <Run Text=")" />
+                                        </TextBlock>
+                                        <TextBlock
+                                            Margin="0,0,0,2"
+                                            Foreground="#3498DB"
+                                            Text="{Binding AutoInvoiceAmount, StringFormat='Amount: {0:C}'}" />
+                                        <TextBlock
+                                            Foreground="#AAAAAA"
+                                            Text="{Binding NextAutoInvoiceDate, StringFormat='Next: {0:d}'}" />
+                                    </StackPanel>
+
+                                    <TextBlock
+                                        Margin="0,5,0,0"
+                                        FontStyle="Italic"
+                                        Foreground="#AAAAAA"
+                                        Text="Auto-invoicing is disabled"
+                                        Visibility="{Binding IsAutoInvoiceEnabled, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                                </StackPanel>
+                            </Border>
+
+                            <!--  Notes  -->
+                            <Border Margin="0,0,0,0" Style="{StaticResource DetailInfoBorder}">
+                                <StackPanel>
+                                    <TextBlock Style="{StaticResource DetailLabelText}" Text="📝 Notes" />
+                                    <TextBlock
+                                        Margin="0,5,0,0"
+                                        Foreground="White"
+                                        Text="{Binding Notes}"
+                                        TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+        </Grid>
     </Grid>
 </base:BaseAnimatedPage>

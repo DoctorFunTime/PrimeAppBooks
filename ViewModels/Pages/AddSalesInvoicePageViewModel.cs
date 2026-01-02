@@ -50,9 +50,17 @@ namespace PrimeAppBooks.ViewModels.Pages
         [ObservableProperty]
         private decimal _exchangeRate = 1.0m;
 
+        [ObservableProperty]
+        private PaymentTerm _selectedPaymentTerm;
+
+        private ChartOfAccount _currentDefaultRevenueAccount;
+        private int? _existingInvoiceId;
+        private string _existingInvoiceStatus;
+
         public ObservableCollection<Customer> Customers { get; } = new();
         public ObservableCollection<ChartOfAccount> Accounts { get; } = new();
         public ObservableCollection<Currency> Currencies { get; } = new();
+        public ObservableCollection<PaymentTerm> PaymentTerms { get; } = new(); // New Collection
         public ObservableCollection<InvoiceLineViewModel> BillLines { get; } = new();
         public ObservableCollection<string> ValidationErrors { get; } = new();
 
@@ -60,14 +68,81 @@ namespace PrimeAppBooks.ViewModels.Pages
         {
             _navigationService = navigationService;
             _serviceProvider = serviceProvider;
-
-            _ = LoadInitialData();
-
-            // Add initial empty line
-            AddLine();
         }
 
-        private async Task LoadInitialData()
+        protected override void OnPropertyChanged(System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            base.OnPropertyChanged(e);
+
+            if (e.PropertyName == nameof(SelectedPaymentTerm) && SelectedPaymentTerm != null)
+            {
+                DueDate = InvoiceDate.AddDays(SelectedPaymentTerm.Days);
+            }
+            else if (e.PropertyName == nameof(InvoiceDate) && SelectedPaymentTerm != null)
+            {
+                DueDate = InvoiceDate.AddDays(SelectedPaymentTerm.Days);
+            }
+            else if (e.PropertyName == nameof(SelectedCustomer))
+            {
+                if (SelectedCustomer?.DefaultRevenueAccountId != null)
+                {
+                    _currentDefaultRevenueAccount = Accounts.FirstOrDefault(a => a.AccountId == SelectedCustomer.DefaultRevenueAccountId);
+                }
+                else
+                {
+                    _currentDefaultRevenueAccount = null;
+                }
+
+                // Auto-update any lines that haven't been assigned an account yet
+                foreach (var line in BillLines)
+                {
+                    if (line.SelectedAccount == null && _currentDefaultRevenueAccount != null)
+                    {
+                        line.SelectedAccount = _currentDefaultRevenueAccount;
+                    }
+                }
+            }
+        }
+
+        [RelayCommand]
+        private async Task AddPaymentTerm()
+        {
+            // Use existing Input Box
+            string termName = _messageBoxService.ShowInputMessage("Enter name for new term (e.g. 'Net 60')", "Add Payment Term", "ClockOutline");
+
+            if (!string.IsNullOrWhiteSpace(termName))
+            {
+                string daysStr = _messageBoxService.ShowInputMessage("Enter number of days (e.g. 60)", "Term Days", "CalendarClock");
+                if (int.TryParse(daysStr, out int days))
+                {
+                    try
+                    {
+                        using var scope = _serviceProvider.CreateScope();
+                        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+                        var newTerm = new PaymentTerm { TermName = termName, Days = days, IsActive = true };
+                        context.PaymentTerms.Add(newTerm);
+                        await context.SaveChangesAsync();
+
+                        PaymentTerms.Add(newTerm);
+                        SelectedPaymentTerm = newTerm;
+                    }
+                    catch (Exception ex)
+                    {
+                        _messageBoxService.ShowMessage($"Error saving term: {ex.Message}", "Error", "Error");
+                    }
+                }
+            }
+        }
+
+
+
+        public void Initialize(int? invoiceId = null)
+        {
+            _ = LoadInitialData(invoiceId);
+        }
+
+        private async Task LoadInitialData(int? invoiceId)
         {
             try
             {
@@ -78,9 +153,27 @@ namespace PrimeAppBooks.ViewModels.Pages
                 var customers = await context.Customers.OrderBy(c => c.CustomerName).ToListAsync();
                 var accounts = await context.ChartOfAccounts.Where(a => a.IsActive).OrderBy(a => a.AccountNumber).ToListAsync();
                 var currencies = await context.Currencies.OrderBy(c => c.CurrencyCode).ToListAsync();
-                
+                var paymentTerms = await context.PaymentTerms.Where(t => t.IsActive).OrderBy(t => t.Days).ToListAsync();
+
+                // Ensure default terms exist if empty
+                if (!paymentTerms.Any())
+                {
+                    var defaultTerm = new PaymentTerm { TermName = "Net 30", Days = 30 };
+                    context.PaymentTerms.Add(defaultTerm);
+                    await context.SaveChangesAsync();
+                    paymentTerms.Add(defaultTerm);
+                }
+
                 var settingsService = scope.ServiceProvider.GetRequiredService<SettingsService>();
                 var baseCurrencyId = await settingsService.GetBaseCurrencyIdAsync();
+
+                SalesInvoice existingInvoice = null;
+                if (invoiceId.HasValue)
+                {
+                    existingInvoice = await context.SalesInvoices
+                        .Include(i => i.Lines)
+                        .FirstOrDefaultAsync(i => i.SalesInvoiceId == invoiceId.Value);
+                }
 
                 await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
                 {
@@ -93,10 +186,71 @@ namespace PrimeAppBooks.ViewModels.Pages
                     Currencies.Clear();
                     foreach (var cur in currencies) Currencies.Add(cur);
 
-                    SelectedCurrency = Currencies.FirstOrDefault(c => c.CurrencyId == baseCurrencyId);
-                    ExchangeRate = 1.0m;
+                    PaymentTerms.Clear();
+                    foreach (var t in paymentTerms) PaymentTerms.Add(t);
 
-                    InvoiceNumber = $"INV-{DateTime.Now:yyyyMMddHHmmss}";
+                    if (existingInvoice != null)
+                    {
+                        // Store existing invoice info
+                        _existingInvoiceId = existingInvoice.SalesInvoiceId;
+                        _existingInvoiceStatus = existingInvoice.Status;
+                        
+                        // Block editing of posted invoices
+                        if (existingInvoice.Status == "POSTED")
+                        {
+                            _messageBoxService.ShowMessage("Posted invoices cannot be edited. Only draft invoices can be modified.", "Cannot Edit", "Warning");
+                            _navigationService.GoBack();
+                            return;
+                        }
+                        
+                        // Load existing
+                        InvoiceNumber = existingInvoice.InvoiceNumber;
+                        InvoiceDate = existingInvoice.InvoiceDate;
+                        DueDate = existingInvoice.DueDate;
+                        Notes = existingInvoice.Notes;
+
+                        // Note: Setting SelectedCustomer triggers OnSelectedCustomerChanged, which sets _currentDefaultRevenueAccount
+                        SelectedCustomer = Customers.FirstOrDefault(c => c.CustomerId == existingInvoice.CustomerId);
+
+                        SelectedCurrency = Currencies.FirstOrDefault(c => c.CurrencyId == existingInvoice.CurrencyId);
+                        ExchangeRate = existingInvoice.ExchangeRate;
+
+                        // Match Term by Name
+                        SelectedPaymentTerm = PaymentTerms.FirstOrDefault(t => t.TermName == existingInvoice.Terms)
+                                              ?? PaymentTerms.FirstOrDefault(t => t.Days == 30); // Fallback to Net 30
+
+                        BillLines.Clear();
+                        foreach (var line in existingInvoice.Lines)
+                        {
+                            var lineVm = new InvoiceLineViewModel
+                            {
+                                SelectedAccount = Accounts.FirstOrDefault(a => a.AccountId == line.AccountId),
+                                Description = line.Description,
+                                Quantity = line.Quantity,
+                                UnitPrice = line.UnitPrice,
+                                Amount = line.Amount
+                            };
+                            lineVm.PropertyChanged += (s, e) => CalculateTotals();
+                            BillLines.Add(lineVm);
+                        }
+                    }
+                    else
+                    {
+                        // New invoice - clear tracking fields
+                        _existingInvoiceId = null;
+                        _existingInvoiceStatus = null;
+                        
+                        // New Invoice Defaults
+                        SelectedCurrency = Currencies.FirstOrDefault(c => c.CurrencyId == baseCurrencyId);
+                        ExchangeRate = 1.0m;
+                        InvoiceNumber = $"INV-{DateTime.Now:yyyyMMddHHmmss}";
+                        SelectedPaymentTerm = PaymentTerms.FirstOrDefault(t => t.Days == 30); // Default to Net 30
+                        BillLines.Clear();
+                        AddLine();
+                    }
+
+                    UpdateLineNumbers();
+                    CalculateTotals();
                 });
             }
             catch (Exception ex)
@@ -113,6 +267,10 @@ namespace PrimeAppBooks.ViewModels.Pages
         private void AddLine()
         {
             var newLine = new InvoiceLineViewModel();
+            if (_currentDefaultRevenueAccount != null)
+            {
+                newLine.SelectedAccount = _currentDefaultRevenueAccount;
+            }
             newLine.PropertyChanged += (s, e) => CalculateTotals();
             BillLines.Add(newLine);
             UpdateLineNumbers();
@@ -163,7 +321,7 @@ namespace PrimeAppBooks.ViewModels.Pages
         [RelayCommand]
         private void AddCustomer()
         {
-            _navigationService.NavigateTo<AddCustomerPage>();
+            _navigationService.NavigateTo<AddCustomerPage>(0);
         }
 
         [RelayCommand]
@@ -186,9 +344,9 @@ namespace PrimeAppBooks.ViewModels.Pages
                 return;
             }
 
-            if (!BillLines.Any(l => l.SelectedAccount != null && l.Amount > 0))
+            if (!BillLines.Any(l => l.SelectedAccount != null && !string.IsNullOrWhiteSpace(l.Description)))
             {
-                _messageBoxService.ShowMessage("Please add at least one valid line item.", "Validation Error", "Warning");
+                _messageBoxService.ShowMessage("Please add at least one valid line item with a description.", "Validation Error", "Warning");
                 return;
             }
 
@@ -198,42 +356,88 @@ namespace PrimeAppBooks.ViewModels.Pages
                 using var scope = _serviceProvider.CreateScope();
                 var salesService = scope.ServiceProvider.GetRequiredService<SalesServices>();
 
-                var invoice = new SalesInvoice
+                if (_existingInvoiceId.HasValue)
                 {
-                    InvoiceNumber = InvoiceNumber,
-                    CustomerId = SelectedCustomer.CustomerId,
-                    InvoiceDate = DateTime.SpecifyKind(InvoiceDate, DateTimeKind.Utc),
-                    DueDate = DateTime.SpecifyKind(DueDate, DateTimeKind.Utc),
-                    TotalAmount = TotalAmount,
-                    NetAmount = TotalAmount,
-                    Balance = TotalAmount,
-                    CurrencyId = SelectedCurrency?.CurrencyId,
-                    ExchangeRate = ExchangeRate,
-                    Status = status,
-                    Notes = Notes,
-                    CreatedBy = 1,
-                    Lines = BillLines.Where(l => l.SelectedAccount != null && l.Amount > 0).Select(l => new SalesInvoiceLine
+                    // Update existing invoice
+                    var invoice = new SalesInvoice
                     {
-                        Description = l.Description ?? "No Description",
-                        AccountId = l.SelectedAccount.AccountId,
-                        Quantity = l.Quantity,
-                        UnitPrice = l.UnitPrice,
-                        Amount = l.Amount
-                    }).ToList()
-                };
+                        SalesInvoiceId = _existingInvoiceId.Value,
+                        InvoiceNumber = InvoiceNumber,
+                        CustomerId = SelectedCustomer.CustomerId,
+                        InvoiceDate = DateTime.SpecifyKind(InvoiceDate, DateTimeKind.Utc),
+                        DueDate = DateTime.SpecifyKind(DueDate, DateTimeKind.Utc),
+                        TotalAmount = TotalAmount,
+                        NetAmount = TotalAmount,
+                        Balance = TotalAmount,
+                        CurrencyId = SelectedCurrency?.CurrencyId,
+                        ExchangeRate = ExchangeRate,
+                        Status = status,
+                        Terms = SelectedPaymentTerm?.TermName ?? "Net 30",
+                        Notes = Notes ?? string.Empty,
+                        CreatedBy = 1,
+                        Lines = BillLines.Where(l => l.SelectedAccount != null && !string.IsNullOrWhiteSpace(l.Description)).Select(l => new SalesInvoiceLine
+                        {
+                            Description = l.Description ?? "No Description",
+                            AccountId = l.SelectedAccount.AccountId,
+                            Quantity = l.Quantity ?? 0,
+                            UnitPrice = l.UnitPrice ?? 0,
+                            Amount = l.Amount
+                        }).ToList()
+                    };
 
-                await salesService.CreateInvoiceAsync(invoice);
+                    await salesService.UpdateInvoiceAsync(invoice);
+                }
+                else
+                {
+                    // Create new invoice
+                    var invoice = new SalesInvoice
+                    {
+                        InvoiceNumber = InvoiceNumber,
+                        CustomerId = SelectedCustomer.CustomerId,
+                        InvoiceDate = DateTime.SpecifyKind(InvoiceDate, DateTimeKind.Utc),
+                        DueDate = DateTime.SpecifyKind(DueDate, DateTimeKind.Utc),
+                        TotalAmount = TotalAmount,
+                        NetAmount = TotalAmount,
+                        Balance = TotalAmount,
+                        CurrencyId = SelectedCurrency?.CurrencyId,
+                        ExchangeRate = ExchangeRate,
+                        Status = status,
+                        Terms = SelectedPaymentTerm?.TermName ?? "Net 30",
+                        Notes = Notes ?? string.Empty,
+                        CreatedBy = 1,
+                        Lines = BillLines.Where(l => l.SelectedAccount != null && !string.IsNullOrWhiteSpace(l.Description)).Select(l => new SalesInvoiceLine
+                        {
+                            Description = l.Description ?? "No Description",
+                            AccountId = l.SelectedAccount.AccountId,
+                            Quantity = l.Quantity ?? 0,
+                            UnitPrice = l.UnitPrice ?? 0,
+                            Amount = l.Amount
+                        }).ToList()
+                    };
 
-                string successMsg = status == "POSTED"
-                    ? "Invoice created and posted to journal successfully!"
-                    : "Invoice saved as draft successfully!";
+                    await salesService.CreateInvoiceAsync(invoice);
+                }
+
+                string successMsg = _existingInvoiceId.HasValue
+                    ? (status == "POSTED" ? "Invoice updated and posted successfully!" : "Invoice updated successfully!")
+                    : (status == "POSTED" ? "Invoice created and posted to journal successfully!" : "Invoice saved as draft successfully!");
 
                 _messageBoxService.ShowMessage(successMsg, "Success", "CheckCircleOutline");
                 _navigationService.GoBack();
             }
             catch (Exception ex)
             {
-                _messageBoxService.ShowMessage($"Error saving invoice: {ex.Message}", "Error", "ErrorOutline");
+                var sb = new System.Text.StringBuilder();
+                sb.AppendLine(ex.Message);
+
+                var inner = ex.InnerException;
+                while (inner != null)
+                {
+                    sb.AppendLine($" --> {inner.Message}");
+                    inner = inner.InnerException;
+                }
+
+                _messageBoxService.ShowMessage($"Error saving invoice: {sb}", "Error", "ErrorOutline");
             }
             finally
             {

@@ -33,6 +33,7 @@ namespace PrimeAppBooks.Data
         public DbSet<TaxRate> TaxRates { get; set; }
         public DbSet<AccountingPeriod> AccountingPeriods { get; set; }
         public DbSet<AccountingSetting> AccountingSettings { get; set; }
+        public DbSet<PaymentTerm> PaymentTerms { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {

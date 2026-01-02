@@ -545,6 +545,16 @@ namespace PrimeAppBooks.ViewModels.Pages
         {
             if (entry == null) return;
 
+            // Block editing of posted journal entries
+            if (entry.Status == "POSTED")
+            {
+                await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    _messageBoxService.ShowMessage("Posted journal entries cannot be edited. Only draft entries can be modified.", "Cannot Edit", "Warning");
+                });
+                return;
+            }
+
             try
             {
                 // Navigate to JournalPage with the selected entry for editing
