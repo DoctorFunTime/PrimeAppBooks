@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using PrimeAppBooks.Interfaces;
 using PrimeAppBooks.Services;
 using PrimeAppBooks.Views.Pages;
+using PrimeAppBooks.Views.Pages.SubTransactionsPage;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Navigation;
@@ -27,6 +28,18 @@ namespace PrimeAppBooks.ViewModels.Windows
 
         [ObservableProperty]
         private bool _isTransactionsSelected;
+
+        [ObservableProperty]
+        private bool _isGeneralLedgerSelected;
+
+        [ObservableProperty]
+        private bool _isJournalEntriesSelected;
+
+        [ObservableProperty]
+        private bool _isAccountTransactionsSelected;
+
+        [ObservableProperty]
+        private bool _isBankReconciliationSelected;
 
         [ObservableProperty]
         private bool _isReportsSelected;
@@ -58,13 +71,72 @@ namespace PrimeAppBooks.ViewModels.Windows
         [ObservableProperty]
         private bool _isVendorsSelected;
 
+        [ObservableProperty]
+        private bool _isReceivablesSelected;
+
+        [ObservableProperty]
+        private bool _isBadDebtsSelected;
+
+        [ObservableProperty]
+        private bool _isCreditNotesSelected;
+
+        [ObservableProperty]
+        private bool _isPayablesSelected;
+
+        [ObservableProperty]
+        private bool _isDebitNotesSelected;
+
+        // Expansion state properties
+        private bool _isSalesExpanded = false;
+        public bool IsSalesExpanded
+        {
+            get => _isSalesExpanded;
+            set
+            {
+                if (SetProperty(ref _isSalesExpanded, value))
+                {
+                    OnPropertyChanged(nameof(SalesExpandedVisibility));
+                }
+            }
+        }
+
+        private bool _isPurchasesExpanded = false;
+        public bool IsPurchasesExpanded
+        {
+            get => _isPurchasesExpanded;
+            set
+            {
+                if (SetProperty(ref _isPurchasesExpanded, value))
+                {
+                    OnPropertyChanged(nameof(PurchasesExpandedVisibility));
+                }
+            }
+        }
+
+        private bool _isTransactionsExpanded = false;
+        public bool IsTransactionsExpanded
+        {
+            get => _isTransactionsExpanded;
+            set
+            {
+                if (SetProperty(ref _isTransactionsExpanded, value))
+                {
+                    OnPropertyChanged(nameof(TransactionsExpandedVisibility));
+                }
+            }
+        }
+
+        public Visibility SalesExpandedVisibility => IsSalesExpanded ? Visibility.Visible : Visibility.Collapsed;
+        public Visibility PurchasesExpandedVisibility => IsPurchasesExpanded ? Visibility.Visible : Visibility.Collapsed;
+        public Visibility TransactionsExpandedVisibility => IsTransactionsExpanded ? Visibility.Visible : Visibility.Collapsed;
+
         // ==========================================================
 
         [ObservableProperty]
         private bool _isSidebarExpanded = true;
 
         [ObservableProperty]
-        private GridLength _sidebarWidth = new(230);
+        private GridLength _sidebarWidth = new(260);
 
         [ObservableProperty]
         private GridLength _sidebarMargin = new(20);
@@ -91,12 +163,11 @@ namespace PrimeAppBooks.ViewModels.Windows
             _splashscreenInitialisations.TestConnectionToDatabase();
         }
 
-
         [RelayCommand]
         private void ToggleSidebar()
         {
             IsSidebarExpanded = !IsSidebarExpanded;
-            SidebarWidth = IsSidebarExpanded ? new GridLength(230) : new GridLength(64);
+            SidebarWidth = IsSidebarExpanded ? new GridLength(260) : new GridLength(80);
             SidebarMargin = IsSidebarExpanded ? new GridLength(20) : new GridLength(12);
             OnPropertyChanged(nameof(SidebarContentVisibility));
             OnPropertyChanged(nameof(CollapsedContentVisibility));
@@ -118,6 +189,30 @@ namespace PrimeAppBooks.ViewModels.Windows
         private void NavigateToTransactions()
         {
             _navigationService.NavigateTo<TransactionsPage>();
+        }
+
+        [RelayCommand]
+        private void NavigateToGeneralLedger()
+        {
+            _navigationService.NavigateTo<GeneralLedgerPage>();
+        }
+
+        [RelayCommand]
+        private void NavigateToJournalEntries()
+        {
+            _navigationService.NavigateTo<JournalPage>();
+        }
+
+        [RelayCommand]
+        private void NavigateToAccountTransactions()
+        {
+            _navigationService.NavigateTo<AccountTransactionsPage>();
+        }
+
+        [RelayCommand]
+        private void NavigateToBankReconciliation()
+        {
+            _navigationService.NavigateTo<BankReconciliationPage>();
         }
 
         [RelayCommand]
@@ -159,7 +254,37 @@ namespace PrimeAppBooks.ViewModels.Windows
         [RelayCommand]
         private void NavigateToVendors()
         {
-            // _navigationService.NavigateTo<VendorsPage>(); 
+            // _navigationService.NavigateTo<VendorsPage>();
+        }
+
+        [RelayCommand]
+        private void NavigateToReceivables()
+        {
+            _navigationService.NavigateTo<ReceivablesPage>();
+        }
+
+        [RelayCommand]
+        private void NavigateToBadDebts()
+        {
+            _navigationService.NavigateTo<BadDebtsPage>();
+        }
+
+        [RelayCommand]
+        private void NavigateToCreditNotes()
+        {
+            _navigationService.NavigateTo<CreditNotesPage>();
+        }
+
+        [RelayCommand]
+        private void NavigateToPayables()
+        {
+            _navigationService.NavigateTo<PayablesPage>();
+        }
+
+        [RelayCommand]
+        private void NavigateToDebitNotes()
+        {
+            _navigationService.NavigateTo<DebitNotesPage>();
         }
 
         private void SetAllNavigationToFalse()
@@ -167,6 +292,10 @@ namespace PrimeAppBooks.ViewModels.Windows
             IsDashboardSelected = false;
             IsChartOfAccountsSelected = false;
             IsTransactionsSelected = false;
+            IsGeneralLedgerSelected = false;
+            IsJournalEntriesSelected = false;
+            IsAccountTransactionsSelected = false;
+            IsBankReconciliationSelected = false;
             IsReportsSelected = false;
             IsAuditTrailsSelected = false;
             IsSettingsSelected = false;
@@ -177,6 +306,11 @@ namespace PrimeAppBooks.ViewModels.Windows
             IsPurchasesSelected = false;
             IsCustomersSelected = false;
             IsVendorsSelected = false;
+            IsReceivablesSelected = false;
+            IsBadDebtsSelected = false;
+            IsCreditNotesSelected = false;
+            IsPayablesSelected = false;
+            IsDebitNotesSelected = false;
         }
 
         private void OnPageNavigated(object sender, Page page)
@@ -198,6 +332,30 @@ namespace PrimeAppBooks.ViewModels.Windows
                     IsTransactionsSelected = true;
                     break;
 
+                case GeneralLedgerPage:
+                    IsGeneralLedgerSelected = true;
+                    IsTransactionsExpanded = true;
+                    OnPropertyChanged(nameof(TransactionsExpandedVisibility));
+                    break;
+
+                case JournalPage:
+                    IsJournalEntriesSelected = true;
+                    IsTransactionsExpanded = true;
+                    OnPropertyChanged(nameof(TransactionsExpandedVisibility));
+                    break;
+
+                case AccountTransactionsPage:
+                    IsAccountTransactionsSelected = true;
+                    IsTransactionsExpanded = true;
+                    OnPropertyChanged(nameof(TransactionsExpandedVisibility));
+                    break;
+
+                case BankReconciliationPage:
+                    IsBankReconciliationSelected = true;
+                    IsTransactionsExpanded = true;
+                    OnPropertyChanged(nameof(TransactionsExpandedVisibility));
+                    break;
+
                 case ReportsPage:
                     IsReportsSelected = true;
                     break;
@@ -217,9 +375,39 @@ namespace PrimeAppBooks.ViewModels.Windows
                 case PurchaseInvoicesPage:
                     IsPurchasesSelected = true;
                     break;
-                
+
                 case CustomersPage:
                     IsCustomersSelected = true;
+                    break;
+
+                case ReceivablesPage:
+                    IsReceivablesSelected = true;
+                    IsSalesExpanded = true;
+                    OnPropertyChanged(nameof(SalesExpandedVisibility));
+                    break;
+
+                case BadDebtsPage:
+                    IsBadDebtsSelected = true;
+                    IsSalesExpanded = true;
+                    OnPropertyChanged(nameof(SalesExpandedVisibility));
+                    break;
+
+                case CreditNotesPage:
+                    IsCreditNotesSelected = true;
+                    IsSalesExpanded = true;
+                    OnPropertyChanged(nameof(SalesExpandedVisibility));
+                    break;
+
+                case PayablesPage:
+                    IsPayablesSelected = true;
+                    IsPurchasesExpanded = true;
+                    OnPropertyChanged(nameof(PurchasesExpandedVisibility));
+                    break;
+
+                case DebitNotesPage:
+                    IsDebitNotesSelected = true;
+                    IsPurchasesExpanded = true;
+                    OnPropertyChanged(nameof(PurchasesExpandedVisibility));
                     break;
             }
         }

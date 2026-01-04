@@ -19,7 +19,16 @@ namespace PrimeAppBooks.Views.Pages
             _viewModel = viewModel;
             DataContext = viewModel;
             
-            System.Diagnostics.Debug.WriteLine("AccountTransactionsPage constructor called");
+            Loaded += OnPageLoaded;
+        }
+
+        private async void OnPageLoaded(object sender, RoutedEventArgs e)
+        {
+            // If no account is selected (e.g. navigation from sidebar), initialize without an account
+            if (_viewModel.SelectedAccount == null)
+            {
+                await _viewModel.Initialize();
+            }
         }
     }
 }

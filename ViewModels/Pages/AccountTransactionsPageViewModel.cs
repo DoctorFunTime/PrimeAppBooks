@@ -39,6 +39,31 @@ namespace PrimeAppBooks.ViewModels.Pages
         [ObservableProperty]
         private decimal _netChange;
 
+        [RelayCommand]
+        public async Task LoadAccountsAsync()
+        {
+            try
+            {
+                using var scope = _serviceProvider.CreateScope();
+                var coaServices = scope.ServiceProvider.GetRequiredService<ChartOfAccountsServices>();
+                var accounts = await coaServices.GetAllAccountsAsync();
+
+                await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    AvailableAccounts.Clear();
+                    foreach (var account in accounts)
+                    {
+                        AvailableAccounts.Add(account);
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                // Silent error or simple notification
+            }
+        }
+
+        public ObservableCollection<ChartOfAccount> AvailableAccounts { get; } = new();
         public ObservableCollection<JournalLine> Transactions { get; } = new();
 
         public AccountTransactionsPageViewModel(INavigationService navigationService, IServiceProvider serviceProvider)
@@ -51,10 +76,23 @@ namespace PrimeAppBooks.ViewModels.Pages
             EndDate = null;
         }
 
-        public async Task Initialize(ChartOfAccount account)
+        public async Task Initialize(ChartOfAccount account = null)
         {
-            SelectedAccount = account;
-            await LoadTransactionsAsync();
+            if (AvailableAccounts.Count == 0)
+            {
+                await LoadAccountsAsync();
+            }
+
+            if (account != null)
+            {
+                // Find matching account in AvailableAccounts if possible to maintain reference
+                SelectedAccount = AvailableAccounts.FirstOrDefault(a => a.AccountId == account.AccountId) ?? account;
+            }
+            
+            if (SelectedAccount != null)
+            {
+                await LoadTransactionsAsync();
+            }
         }
 
         [RelayCommand]
@@ -120,9 +158,9 @@ namespace PrimeAppBooks.ViewModels.Pages
         {
             base.OnPropertyChanged(e);
 
-            if (e.PropertyName == nameof(StartDate) || e.PropertyName == nameof(EndDate))
+            if (e.PropertyName == nameof(StartDate) || e.PropertyName == nameof(EndDate) || e.PropertyName == nameof(SelectedAccount))
             {
-                if (SelectedAccount != null)
+                if (SelectedAccount != null && !IsLoading)
                 {
                     LoadTransactionsAsync().ConfigureAwait(false);
                 }

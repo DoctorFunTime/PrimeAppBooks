@@ -504,6 +504,7 @@ namespace PrimeAppBooks.Services.DbServices
             return await query
                 .Include(l => l.JournalEntry)
                 .Include(l => l.ChartOfAccount)
+                .Include(l => l.Currency)
                 .ToListAsync();
         }
 

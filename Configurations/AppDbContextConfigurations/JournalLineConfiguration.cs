@@ -56,6 +56,8 @@ namespace PrimeAppBooks.Configurations.AppDbContextConfigurations
             builder.Property(l => l.ExchangeRate).HasColumnName("exchange_rate").HasPrecision(18, 6).HasDefaultValue(1);
             builder.Property(l => l.ForeignDebitAmount).HasColumnName("foreign_debit_amount").HasPrecision(18, 2).HasDefaultValue(0);
             builder.Property(l => l.ForeignCreditAmount).HasColumnName("foreign_credit_amount").HasPrecision(18, 2).HasDefaultValue(0);
+            builder.Property(l => l.IsCleared).HasColumnName("is_cleared").HasDefaultValue(false);
+            builder.Property(l => l.ReconciliationId).HasColumnName("reconciliation_id");
 
             builder.Property(l => l.CreatedBy)
                    .HasColumnName("created_by")
@@ -83,6 +85,11 @@ namespace PrimeAppBooks.Configurations.AppDbContextConfigurations
                     .WithMany(c => c.JournalLines)
                     .HasForeignKey(l => l.CurrencyId)
                     .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne(l => l.BankReconciliation)
+                   .WithMany(r => r.ReconciledLines)
+                   .HasForeignKey(l => l.ReconciliationId)
+                   .OnDelete(DeleteBehavior.SetNull);
 
             // Indexes
             builder.HasIndex(l => new { l.AccountId, l.LineDate }).HasDatabaseName("idx_journal_lines_account_date");

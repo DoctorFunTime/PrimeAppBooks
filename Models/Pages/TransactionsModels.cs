@@ -96,12 +96,33 @@ namespace PrimeAppBooks.Models.Pages
             public decimal ExchangeRate { get; set; } = 1;
             public decimal ForeignDebitAmount { get; set; } = 0;
             public decimal ForeignCreditAmount { get; set; } = 0;
+            public bool IsCleared { get; set; } = false;
+            public int? ReconciliationId { get; set; }
             public int CreatedBy { get; set; } = 1;
             public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
             public JournalEntry JournalEntry { get; set; }
             public ChartOfAccount ChartOfAccount { get; set; }
             public Currency Currency { get; set; }
+            public BankReconciliation BankReconciliation { get; set; }
+        }
+
+        public class BankReconciliation
+        {
+            [System.ComponentModel.DataAnnotations.Key]
+            public int ReconciliationId { get; set; }
+            public int AccountId { get; set; }
+            public DateTime StatementDate { get; set; }
+            public decimal StatementStartingBalance { get; set; }
+            public decimal StatementEndingBalance { get; set; }
+            public decimal ClearedDifference { get; set; }
+            public string Status { get; set; } = "DRAFT"; // DRAFT, COMPLETED
+            public int CreatedBy { get; set; } = 1;
+            public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+            public DateTime? CompletedAt { get; set; }
+
+            public ChartOfAccount Account { get; set; }
+            public ICollection<JournalLine> ReconciledLines { get; set; } = new List<JournalLine>();
         }
 
         public class ChartOfAccount

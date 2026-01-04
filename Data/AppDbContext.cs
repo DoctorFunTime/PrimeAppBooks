@@ -18,6 +18,7 @@ namespace PrimeAppBooks.Data
         public DbSet<JournalLine> JournalLines { get; set; }
         public DbSet<ChartOfAccount> ChartOfAccounts { get; set; }
         public DbSet<JournalTemplate> JournalTemplates { get; set; }
+        public DbSet<BankReconciliation> BankReconciliations { get; set; }
 
         public DbSet<SalesInvoice> SalesInvoices { get; set; }
         public DbSet<SalesInvoiceLine> SalesInvoiceLines { get; set; }

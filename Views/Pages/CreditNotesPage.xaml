@@ -1,0 +1,75 @@
+<Page
+    x:Class="PrimeAppBooks.Views.Pages.CreditNotesPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="Credit Notes"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    Background="Transparent"
+    mc:Ignorable="d">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!--  Page Header  -->
+        <Border
+            Grid.Row="0"
+            Margin="0,0,0,20"
+            Padding="20"
+            Background="#20FFFFFF"
+            CornerRadius="12">
+            <StackPanel>
+                <TextBlock
+                    FontSize="24"
+                    FontWeight="Bold"
+                    Foreground="White"
+                    Text="📋 Credit Notes" />
+                <TextBlock
+                    Margin="0,5,0,0"
+                    FontSize="13"
+                    Foreground="#D0FFFFFF"
+                    Text="Manage customer credit notes and refunds" />
+            </StackPanel>
+        </Border>
+
+        <!--  Content Area  -->
+        <Border
+            Grid.Row="1"
+            Padding="30"
+            Background="#15FFFFFF"
+            CornerRadius="12">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextBlock
+                    FontSize="48"
+                    Foreground="#40FFFFFF"
+                    Text="📋"
+                    TextAlignment="Center" />
+                <TextBlock
+                    Margin="0,20,0,0"
+                    FontSize="18"
+                    FontWeight="SemiBold"
+                    Foreground="White"
+                    Text="Credit Notes Management"
+                    TextAlignment="Center" />
+                <TextBlock
+                    Margin="0,10,0,0"
+                    FontSize="13"
+                    Foreground="#B0FFFFFF"
+                    Text="This page will allow you to create and manage credit notes for customer returns and adjustments."
+                    TextAlignment="Center"
+                    TextWrapping="Wrap" />
+                <TextBlock
+                    Margin="0,5,0,0"
+                    FontSize="12"
+                    Foreground="#80FFFFFF"
+                    Text="Coming Soon"
+                    TextAlignment="Center" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</Page>

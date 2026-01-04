@@ -39,6 +39,7 @@ namespace PrimeAppBooks
             services.AddScoped<TransactionsServices>();
             services.AddScoped<JournalServices>();  // Changed from Singleton to Scoped
             services.AddScoped<ChartOfAccountsServices>();  // Add Chart of Accounts service
+            services.AddSingleton<BankServices>(); // Register Bank Services
             services.AddSingleton<IJournalNavigationService, JournalNavigationService>();
             services.AddSingleton<SplashscreenInitialisations>();
             services.AddTransient<DatabaseSetup>();
@@ -58,6 +59,8 @@ namespace PrimeAppBooks
             services.AddTransient<ChartOfAccountsPageViewModel>();
             services.AddTransient<AddAccountPageViewModel>();
             services.AddTransient<AccountTransactionsPageViewModel>();
+            services.AddTransient<GeneralLedgerPageViewModel>();
+            services.AddTransient<BankReconciliationViewModel>();
             services.AddTransient<ReportsPageViewModel>();
             services.AddTransient<AuditPageViewModel>();
             services.AddTransient<SettingsPageViewModel>();
@@ -92,6 +95,19 @@ namespace PrimeAppBooks
             services.AddTransient<AddPurchaseInvoicePage>();
             services.AddTransient<AddCustomerPage>();
             services.AddTransient<CustomersPage>();
+
+            // Sales & Receivables Sub-Pages
+            services.AddTransient<ReceivablesPage>();
+            services.AddTransient<BadDebtsPage>();
+            services.AddTransient<CreditNotesPage>();
+
+            // Purchases & Payables Sub-Pages
+            services.AddTransient<PayablesPage>();
+            services.AddTransient<DebitNotesPage>();
+
+            // Transactions Sub-Pages
+            services.AddTransient<GeneralLedgerPage>(provider => new GeneralLedgerPage(provider.GetRequiredService<GeneralLedgerPageViewModel>()));
+            services.AddTransient<BankReconciliationPage>();
 
             //Sub pages
             services.AddTransient<JournalPage>();
@@ -187,6 +203,19 @@ namespace PrimeAppBooks
             navigationService.RegisterPageAnimation<AddPurchaseInvoicePage>(AnimationDirection.FromRight);
             navigationService.RegisterPageAnimation<AddCustomerPage>(AnimationDirection.FromRight);
             navigationService.RegisterPageAnimation<CustomersPage>(AnimationDirection.FromRight);
+
+            // Sales & Receivables Sub-Pages
+            navigationService.RegisterPageAnimation<ReceivablesPage>(AnimationDirection.FromBottom);
+            navigationService.RegisterPageAnimation<BadDebtsPage>(AnimationDirection.FromBottom);
+            navigationService.RegisterPageAnimation<CreditNotesPage>(AnimationDirection.FromBottom);
+
+            // Purchases & Payables Sub-Pages
+            navigationService.RegisterPageAnimation<PayablesPage>(AnimationDirection.FromBottom);
+            navigationService.RegisterPageAnimation<DebitNotesPage>(AnimationDirection.FromBottom);
+
+            // Transactions Sub-Pages
+            navigationService.RegisterPageAnimation<GeneralLedgerPage>(AnimationDirection.FromBottom);
+            navigationService.RegisterPageAnimation<BankReconciliationPage>(AnimationDirection.FromBottom);
         }
     }
 }
