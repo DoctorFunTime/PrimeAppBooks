@@ -43,7 +43,7 @@ namespace PrimeAppBooks
             services.AddSingleton<IJournalNavigationService, JournalNavigationService>();
             services.AddSingleton<SplashscreenInitialisations>();
             services.AddTransient<DatabaseSetup>();
-            
+
             // Register Report Services
             services.AddScoped<ReportGenerationService>();
             services.AddScoped<ReportPrintingService>();
@@ -51,6 +51,7 @@ namespace PrimeAppBooks
             // Register Sales and Purchase Services
             services.AddScoped<SalesServices>();
             services.AddScoped<PurchaseServices>();
+            services.AddScoped<CustomerAnalyticsService>();
 
             // Register ALL ViewModels
             services.AddTransient<MainWindowViewModel>();
@@ -73,6 +74,8 @@ namespace PrimeAppBooks
             services.AddTransient<AddPurchaseInvoicePageViewModel>();
             services.AddTransient<AddCustomerPageViewModel>();
             services.AddTransient<CustomersPageViewModel>();
+            services.AddTransient<CustomerAnalyticsViewModel>();
+            services.AddTransient<CollectionManagementViewModel>();
 
             //Subpages
             services.AddTransient<JournalPageViewModel>();
@@ -95,6 +98,8 @@ namespace PrimeAppBooks
             services.AddTransient<AddPurchaseInvoicePage>();
             services.AddTransient<AddCustomerPage>();
             services.AddTransient<CustomersPage>();
+            services.AddTransient<CustomerAnalyticsPage>();
+            services.AddTransient<CollectionManagementPage>();
 
             // Sales & Receivables Sub-Pages
             services.AddTransient<ReceivablesPage>();
@@ -143,7 +148,6 @@ namespace PrimeAppBooks
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Database migration failed: {ex.Message}");
-                // Optionally show error to user or log it
                 MessageBox.Show($"Database initialization error: {ex.Message}", "Error", MessageBoxButton.OK);
             }
             // === END MIGRATION CODE ===
@@ -203,6 +207,8 @@ namespace PrimeAppBooks
             navigationService.RegisterPageAnimation<AddPurchaseInvoicePage>(AnimationDirection.FromRight);
             navigationService.RegisterPageAnimation<AddCustomerPage>(AnimationDirection.FromRight);
             navigationService.RegisterPageAnimation<CustomersPage>(AnimationDirection.FromRight);
+            navigationService.RegisterPageAnimation<CustomerAnalyticsPage>(AnimationDirection.FromBottom);
+            navigationService.RegisterPageAnimation<CollectionManagementPage>(AnimationDirection.FromRight);
 
             // Sales & Receivables Sub-Pages
             navigationService.RegisterPageAnimation<ReceivablesPage>(AnimationDirection.FromBottom);

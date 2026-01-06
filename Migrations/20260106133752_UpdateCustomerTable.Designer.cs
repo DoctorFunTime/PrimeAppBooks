@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PrimeAppBooks.Data;
@@ -11,9 +12,11 @@ using PrimeAppBooks.Data;
 namespace PrimeAppBooks.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260106133752_UpdateCustomerTable")]
+    partial class UpdateCustomerTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -102,49 +105,6 @@ namespace PrimeAppBooks.Migrations
                     b.HasKey("SettingId");
 
                     b.ToTable("accounting_settings", (string)null);
-                });
-
-            modelBuilder.Entity("PrimeAppBooks.Models.CollectionFollowup", b =>
-                {
-                    b.Property<int>("CollectionFollowupId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("CollectionFollowupId"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("CustomerId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("FollowupDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Method")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("NextFollowupDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Notes")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Outcome")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("CollectionFollowupId");
-
-                    b.HasIndex("CustomerId");
-
-                    b.ToTable("CollectionFollowups");
                 });
 
             modelBuilder.Entity("PrimeAppBooks.Models.Currency", b =>
@@ -1348,62 +1308,6 @@ namespace PrimeAppBooks.Migrations
                     b.ToTable("payment_methods", (string)null);
                 });
 
-            modelBuilder.Entity("PrimeAppBooks.Models.PaymentPlan", b =>
-                {
-                    b.Property<int>("PaymentPlanId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("PaymentPlanId"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("CustomerId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<decimal>("MonthlyInstallment")
-                        .HasColumnType("numeric");
-
-                    b.Property<string>("Notes")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("NumberOfInstallments")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("PlanName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int?>("SalesInvoiceId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<decimal>("TotalAmount")
-                        .HasColumnType("numeric");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("PaymentPlanId");
-
-                    b.HasIndex("CustomerId");
-
-                    b.HasIndex("SalesInvoiceId");
-
-                    b.ToTable("PaymentPlans");
-                });
-
             modelBuilder.Entity("PrimeAppBooks.Models.PaymentTerm", b =>
                 {
                     b.Property<int>("PaymentTermId")
@@ -1559,17 +1463,6 @@ namespace PrimeAppBooks.Migrations
                     b.ToTable("vendors", (string)null);
                 });
 
-            modelBuilder.Entity("PrimeAppBooks.Models.CollectionFollowup", b =>
-                {
-                    b.HasOne("PrimeAppBooks.Models.Customer", "Customer")
-                        .WithMany()
-                        .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Customer");
-                });
-
             modelBuilder.Entity("PrimeAppBooks.Models.Pages.TransactionsModels+BankReconciliation", b =>
                 {
                     b.HasOne("PrimeAppBooks.Models.Pages.TransactionsModels+ChartOfAccount", "Account")
@@ -1710,23 +1603,6 @@ namespace PrimeAppBooks.Migrations
                         .IsRequired();
 
                     b.Navigation("Account");
-
-                    b.Navigation("SalesInvoice");
-                });
-
-            modelBuilder.Entity("PrimeAppBooks.Models.PaymentPlan", b =>
-                {
-                    b.HasOne("PrimeAppBooks.Models.Customer", "Customer")
-                        .WithMany()
-                        .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("PrimeAppBooks.Models.Pages.TransactionsModels+SalesInvoice", "SalesInvoice")
-                        .WithMany()
-                        .HasForeignKey("SalesInvoiceId");
-
-                    b.Navigation("Customer");
 
                     b.Navigation("SalesInvoice");
                 });

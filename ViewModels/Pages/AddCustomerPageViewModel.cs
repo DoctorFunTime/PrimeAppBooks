@@ -299,9 +299,9 @@ namespace PrimeAppBooks.ViewModels.Pages
         private async Task SaveCustomer()
         {
             // Validate required fields
-            if (string.IsNullOrWhiteSpace(CustomerName) || 
+            if (string.IsNullOrWhiteSpace(CustomerName) ||
                 string.IsNullOrWhiteSpace(CustomerCode) ||
-                string.IsNullOrWhiteSpace(ContactPerson) || 
+                string.IsNullOrWhiteSpace(ContactPerson) ||
                 string.IsNullOrWhiteSpace(Phone))
             {
                 _messageBoxService.ShowMessage("Please fill in all required fields (marked with *).", "Validation Error", "Warning");
@@ -363,13 +363,13 @@ namespace PrimeAppBooks.ViewModels.Pages
             customer.ContactPerson = ContactPerson;
             customer.Email = Email;
             customer.Phone = Phone;
-            
+
             customer.TaxId = TaxId ?? string.Empty;
             customer.BillingAddress = BillingAddress ?? string.Empty;
             customer.ShippingAddress = ShippingAddress ?? string.Empty;
             customer.Notes = Notes ?? string.Empty;
-            
-            customer.DefaultRevenueAccountId = SelectedRevenueAccount?.AccountId;
+
+            customer.DefaultRevenueAccountId = SelectedRevenueAccount.AccountId;
 
             // Auto-Invoice Configuration
             customer.IsAutoInvoiceEnabled = IsAutoInvoiceEnabled;
@@ -410,10 +410,10 @@ namespace PrimeAppBooks.ViewModels.Pages
             IsEditMode = false;
             EditingCustomerId = null;
             PageTitle = "Customer Registration";
-            
+
             // Generate Code
             GenerateNewCustomerCode();
-            
+
             // Clear or Set Defaults
             CustomerName = string.Empty;
             ContactPerson = string.Empty;
@@ -423,13 +423,13 @@ namespace PrimeAppBooks.ViewModels.Pages
             ShippingAddress = string.Empty;
             TaxId = string.Empty;
             Notes = string.Empty;
-            
+
             IsAutoInvoiceEnabled = false;
             SelectedFrequency = "Monthly";
             Interval = 1;
             AutoInvoiceAmount = 0;
             NextInvoiceDate = DateTime.Today.AddMonths(1);
-            
+
             DateOfBirth = null;
             Gender = null;
             StudentId = string.Empty;
@@ -439,19 +439,19 @@ namespace PrimeAppBooks.ViewModels.Pages
             GuardianEmail = string.Empty;
             Nationality = string.Empty;
             NationalId = string.Empty;
-            
+
             SelectedRevenueAccount = null;
         }
 
         private void GenerateNewCustomerCode()
         {
-             // Generate a unique code (e.g., C-yyyyMMdd-XXXX)
-             // Using a random part to minimize collision probability without a DB call for Max ID
-             // Format: C-231222-1234
-             var random = new Random();
-             var datePart = DateTime.Now.ToString("yyMMdd");
-             var randomPart = random.Next(1000, 9999);
-             CustomerCode = $"C-{datePart}-{randomPart}";
+            // Generate a unique code (e.g., C-yyyyMMdd-XXXX)
+            // Using a random part to minimize collision probability without a DB call for Max ID
+            // Format: C-231222-1234
+            var random = new Random();
+            var datePart = DateTime.Now.ToString("yyMMdd");
+            var randomPart = random.Next(1000, 9999);
+            CustomerCode = $"C-{datePart}-{randomPart}";
         }
 
         private async Task LoadCustomerData(int id)
@@ -491,7 +491,16 @@ namespace PrimeAppBooks.ViewModels.Pages
                     NationalId = customer.NationalId;
 
                     if (RevenueAccounts.Count == 0) await LoadAccounts();
+                    
+                    // Try to match by AccountId first
                     SelectedRevenueAccount = RevenueAccounts.FirstOrDefault(a => a.AccountId == customer.DefaultRevenueAccountId);
+                    
+                    // Fallback: If no match and the value looks like an account number (e.g. 4000), try to match by AccountNumber
+                    if (SelectedRevenueAccount == null && customer.DefaultRevenueAccountId > 0)
+                    {
+                        var accountCodeStr = customer.DefaultRevenueAccountId.ToString();
+                        SelectedRevenueAccount = RevenueAccounts.FirstOrDefault(a => a.AccountNumber == accountCodeStr);
+                    }
                 }
             }
             catch (Exception ex)

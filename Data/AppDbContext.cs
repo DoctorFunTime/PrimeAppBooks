@@ -35,6 +35,8 @@ namespace PrimeAppBooks.Data
         public DbSet<AccountingPeriod> AccountingPeriods { get; set; }
         public DbSet<AccountingSetting> AccountingSettings { get; set; }
         public DbSet<PaymentTerm> PaymentTerms { get; set; }
+        public DbSet<PaymentPlan> PaymentPlans { get; set; }
+        public DbSet<CollectionFollowup> CollectionFollowups { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {

@@ -11,7 +11,7 @@ namespace PrimeAppBooks.Configurations
     public class AppConfig
     {
         private static readonly IConfigurationRoot Configuration;
-        private static string _currentConnectionName = "DefaultConnection";
+        private static string _currentConnectionName = "DeployedDebugConn";
 
         static AppConfig()
         {
@@ -31,5 +31,8 @@ namespace PrimeAppBooks.Configurations
 
         // Optional: Add properties to get specific connections directly
         public static string DefaultConnection => Configuration.GetConnectionString("DefaultConnection") ?? string.Empty;
+
+        public static string DeployedDebugConn => Configuration.GetConnectionString("DeployedDebugConn") ?? string.Empty;
+        public static string SecondaryDatabase => Configuration.GetConnectionString("SecondaryDatabase") ?? string.Empty;
     }
 }

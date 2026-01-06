@@ -29,20 +29,20 @@ namespace PrimeAppBooks.Models
         public string ContactPerson { get; set; }
         public string Email { get; set; }
         public string Phone { get; set; }
-        public string BillingAddress { get; set; }
-        public string ShippingAddress { get; set; }
-        public string TaxId { get; set; }
-        public int? DefaultRevenueAccountId { get; set; }
-        public int? DefaultPaymentTermsId { get; set; }
-        public string Notes { get; set; } = string.Empty;
+        public string? BillingAddress { get; set; }
+        public string? ShippingAddress { get; set; }
+        public string? TaxId { get; set; }
+        public int DefaultRevenueAccountId { get; set; } = 4000;
+        public int DefaultPaymentTermsId { get; set; } = 0;
+        public string? Notes { get; set; } = string.Empty;
         public bool IsActive { get; set; } = true;
 
         // Auto-Invoice Configuration
         public bool IsAutoInvoiceEnabled { get; set; } = false;
 
-        public string AutoInvoiceFrequency { get; set; } // Monthly, Weekly, Daily
+        public string? AutoInvoiceFrequency { get; set; } // Monthly, Weekly, Daily
         public int AutoInvoiceInterval { get; set; } = 1;
-        public decimal AutoInvoiceAmount { get; set; }
+        public decimal AutoInvoiceAmount { get; set; } = 0.1m;
         public DateTime? NextAutoInvoiceDate { get; set; }
 
         // Student/Detailed Information

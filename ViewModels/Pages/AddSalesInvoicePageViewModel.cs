@@ -86,7 +86,15 @@ namespace PrimeAppBooks.ViewModels.Pages
             {
                 if (SelectedCustomer?.DefaultRevenueAccountId != null)
                 {
+                    // Try to match by AccountId first
                     _currentDefaultRevenueAccount = Accounts.FirstOrDefault(a => a.AccountId == SelectedCustomer.DefaultRevenueAccountId);
+
+                    // Fallback: If no match and the value looks like an account number (e.g. 4000), try to match by AccountNumber
+                    if (_currentDefaultRevenueAccount == null && SelectedCustomer.DefaultRevenueAccountId > 0)
+                    {
+                        var accountCodeStr = SelectedCustomer.DefaultRevenueAccountId.ToString();
+                        _currentDefaultRevenueAccount = Accounts.FirstOrDefault(a => a.AccountNumber == accountCodeStr);
+                    }
                 }
                 else
                 {
@@ -134,8 +142,6 @@ namespace PrimeAppBooks.ViewModels.Pages
                 }
             }
         }
-
-
 
         public void Initialize(int? invoiceId = null)
         {
@@ -194,7 +200,7 @@ namespace PrimeAppBooks.ViewModels.Pages
                         // Store existing invoice info
                         _existingInvoiceId = existingInvoice.SalesInvoiceId;
                         _existingInvoiceStatus = existingInvoice.Status;
-                        
+
                         // Block editing of posted invoices
                         if (existingInvoice.Status == "POSTED")
                         {
@@ -202,7 +208,7 @@ namespace PrimeAppBooks.ViewModels.Pages
                             _navigationService.GoBack();
                             return;
                         }
-                        
+
                         // Load existing
                         InvoiceNumber = existingInvoice.InvoiceNumber;
                         InvoiceDate = existingInvoice.InvoiceDate;
@@ -239,7 +245,7 @@ namespace PrimeAppBooks.ViewModels.Pages
                         // New invoice - clear tracking fields
                         _existingInvoiceId = null;
                         _existingInvoiceStatus = null;
-                        
+
                         // New Invoice Defaults
                         SelectedCurrency = Currencies.FirstOrDefault(c => c.CurrencyId == baseCurrencyId);
                         ExchangeRate = 1.0m;
@@ -271,6 +277,7 @@ namespace PrimeAppBooks.ViewModels.Pages
             {
                 newLine.SelectedAccount = _currentDefaultRevenueAccount;
             }
+
             newLine.PropertyChanged += (s, e) => CalculateTotals();
             BillLines.Add(newLine);
             UpdateLineNumbers();
@@ -344,7 +351,8 @@ namespace PrimeAppBooks.ViewModels.Pages
                 return;
             }
 
-            if (!BillLines.Any(l => l.SelectedAccount != null && !string.IsNullOrWhiteSpace(l.Description)))
+            //if (!BillLines.Any(l => l.SelectedAccount != null && !string.IsNullOrWhiteSpace(l.Description)))
+            if (BillLines.Any(l => l.SelectedAccount == null && string.IsNullOrWhiteSpace(l.Description)))
             {
                 _messageBoxService.ShowMessage("Please add at least one valid line item with a description.", "Validation Error", "Warning");
                 return;

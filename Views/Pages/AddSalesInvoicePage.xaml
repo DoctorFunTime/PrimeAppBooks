@@ -254,7 +254,8 @@
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
 
-                                <DataGridTemplateColumn Header="Account" Width="Auto" Visibility="Collapsed">
+                                <!-- Account Selection -->
+                                <DataGridTemplateColumn Header="Account" Width="180">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <ComboBox
@@ -265,7 +266,8 @@
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTextColumn Header="Description" Binding="{Binding Description, UpdateSourceTrigger=PropertyChanged}" Width="300" />
+
+                                <DataGridTextColumn Header="Description" Binding="{Binding Description, UpdateSourceTrigger=PropertyChanged}" Width="Auto" />
                                 <DataGridTextColumn Header="Qty" Binding="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}" Width="70" />
                                 <DataGridTextColumn Header="Unit Price" Binding="{Binding UnitPrice, UpdateSourceTrigger=PropertyChanged, StringFormat=N2}" Width="100" />
                                 <DataGridTextColumn Header="Amount" Binding="{Binding Amount, StringFormat=N2}" IsReadOnly="True" Width="Auto" />
@@ -379,7 +381,7 @@
             </Grid>
 
             <!-- Loading Overlay -->
-            <Border
+            <!--<Border
                 Grid.RowSpan="2"
                 Background="#80000000"
                 Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
@@ -395,7 +397,7 @@
                         Style="{StaticResource DetailValueText}"
                         Text="Posting Invoice..." />
                 </StackPanel>
-            </Border>
+            </Border> -->
         </Grid>
     </ScrollViewer>
 </base:BaseAnimatedPage>

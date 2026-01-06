@@ -39,12 +39,49 @@
                     Grid.Column="1"
                     VerticalAlignment="Center"
                     Orientation="Horizontal">
+
+                    <!-- Name Filter -->
                     <hc:SearchBar
-                        Width="250"
-                        Margin="0,0,15,0"
-                        hc:InfoElement.Placeholder="Search by name or code..."
+                        Width="180"
+                        Margin="0,0,10,0"
+                        hc:InfoElement.Placeholder="Name / Code..."
                         Style="{StaticResource SearchBarPlus}"
                         Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+
+                    <!-- Student ID Filter -->
+                    <hc:SearchBar
+                        Width="140"
+                        Margin="0,0,10,0"
+                        hc:InfoElement.Placeholder="Student ID..."
+                        Style="{StaticResource SearchBarPlus}"
+                        Text="{Binding SearchStudentId, UpdateSourceTrigger=PropertyChanged}" />
+
+                    <!-- Grade Level Filter -->
+                    <ComboBox
+                        Width="130"
+                        Margin="0,0,10,0"
+                        ItemsSource="{Binding GradeLevels}"
+                        SelectedItem="{Binding SelectedGrade}"
+                        Style="{StaticResource ModernComboBox}"
+                        ToolTip="Filter by Grade" />
+
+                    <!-- Clear Filter -->
+                    <!-- Clear Filters Button -->
+                    <Button
+                        Margin="0,0,10,0"
+                        Command="{Binding ClearFiltersCommand}"
+                        Content="↺"
+                        FontSize="16"
+                        Style="{StaticResource ModernMiniButton}"
+                        ToolTip="Clear all filters" />
+
+                    <!-- Analytics Button -->
+                    <Button
+                        Command="{Binding NavigateToAnalyticsCommand}"
+                        Content="📈 Analytics"
+                        Style="{StaticResource ModernSecondaryButton}"
+                        ToolTip="View customer analytics and aging reports" />
+
                     <Button
                         Command="{Binding AddCustomerCommand}"
                         Content="➕ Add Customer"
@@ -130,11 +167,11 @@
 
                         <DataGrid.Columns>
                             <DataGridTextColumn
-                                Width="100"
+                                Width="80"
                                 Binding="{Binding CustomerCode}"
                                 Header="CODE" />
 
-                            <DataGridTemplateColumn Width="*" Header="CUSTOMER NAME">
+                            <DataGridTemplateColumn Width="200" Header="CUSTOMER NAME">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel VerticalAlignment="Center">
@@ -150,10 +187,6 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTextColumn
-                                Width="150"
-                                Binding="{Binding Email}"
-                                Header="EMAIL" />
                             <DataGridTextColumn
                                 Width="120"
                                 Binding="{Binding Phone}"

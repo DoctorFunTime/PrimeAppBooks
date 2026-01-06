@@ -293,6 +293,12 @@
                                                             GroupName="Navigation"
                                                             IsChecked="{Binding IsCreditNotesSelected}"
                                                             Style="{StaticResource ModernExpandedRadioButtonStyle}" />
+                                                <RadioButton
+                                                            Command="{Binding NavigateToCustomerAnalyticsCommand}"
+                                                            Content="     📈  Customer Analytics"
+                                                            GroupName="Navigation"
+                                                            IsChecked="{Binding IsCustomerAnalyticsSelected}"
+                                                            Style="{StaticResource ModernExpandedRadioButtonStyle}" />
                                             </StackPanel>
 
                                             <!--  Purchases & Payables Expandable Section  -->
@@ -494,6 +500,13 @@
                                                             IsChecked="{Binding IsCreditNotesSelected}"
                                                             Style="{StaticResource CollapsedRadioButtonStyle}"
                                                             ToolTip="Credit Notes" />
+                                                <RadioButton
+                                                            Command="{Binding NavigateToCustomerAnalyticsCommand}"
+                                                            Content="📈"
+                                                            GroupName="CollapsedNavigation"
+                                                            IsChecked="{Binding IsCustomerAnalyticsSelected}"
+                                                            Style="{StaticResource CollapsedRadioButtonStyle}"
+                                                            ToolTip="Customer Analytics" />
                                             </StackPanel>
                                             
                                             <ToggleButton

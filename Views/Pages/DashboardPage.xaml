@@ -27,6 +27,12 @@
                         <StackPanel Grid.Column="0">
                             <TextBlock Style="{StaticResource WelcomeTitleText}" Text="Welcome back, Sarah!" />
                             <TextBlock Style="{StaticResource WelcomeSubtitleText}" Text="Here's your comprehensive financial overview" />
+                            <Button
+                            Margin="5,0"
+                            Command="{Binding ImportStudentDataCommand}"
+                            Content="📤 Import Students"
+                            HorizontalAlignment="Right"
+                            Style="{StaticResource ModernSecondaryButton}" />
                         </StackPanel>
                     </Grid>
                 </Border>
@@ -38,7 +44,7 @@
                         <StackPanel Style="{StaticResource CardContentContainer}">
                             <TextBlock Style="{StaticResource CashHeaderText}" Text="💰 Cash Balance" />
                             <TextBlock Style="{StaticResource CardValueText}" Text="{Binding CashBalance, StringFormat=C}" />
-                            <TextBlock Style="{StaticResource CardSubText}" Text="+2.8% from last month" />
+                            <TextBlock Style="{StaticResource CardSubText}" Text="{Binding CashBalanceTag}" />
                         </StackPanel>
                     </Border>
 
@@ -47,7 +53,7 @@
                         <StackPanel Style="{StaticResource CardContentContainer}">
                             <TextBlock Style="{StaticResource ReceivablesHeaderText}" Text="📥 Receivables" />
                             <TextBlock Style="{StaticResource CardValueText}" Text="{Binding Receivables, StringFormat=C}" />
-                            <TextBlock Style="{StaticResource CardSubText}" Text="12 outstanding" />
+                            <TextBlock Style="{StaticResource CardSubText}" Text="{Binding ReceivablesTag}" />
                         </StackPanel>
                     </Border>
 
@@ -56,7 +62,7 @@
                         <StackPanel Style="{StaticResource CardContentContainer}">
                             <TextBlock Style="{StaticResource PayablesHeaderText}" Text="📤 Payables" />
                             <TextBlock Style="{StaticResource CardValueText}" Text="{Binding Payables, StringFormat=C}" />
-                            <TextBlock Style="{StaticResource CardSubText}" Text="Due in 30 days" />
+                            <TextBlock Style="{StaticResource CardSubText}" Text="{Binding PayablesTag}" />
                         </StackPanel>
                     </Border>
 
@@ -65,7 +71,7 @@
                         <StackPanel Style="{StaticResource CardContentContainer}">
                             <TextBlock Style="{StaticResource IncomeHeaderText}" Text="📊 Net Income" />
                             <TextBlock Style="{StaticResource CardValueText}" Text="{Binding NetIncome, StringFormat=C}" />
-                            <TextBlock Style="{StaticResource CardSubText}" Text="YTD 2024" />
+                            <TextBlock Style="{StaticResource CardSubText}" Text="{Binding NetIncomeTag}" />
                         </StackPanel>
                     </Border>
                 </UniformGrid>
@@ -77,7 +83,7 @@
                         <StackPanel Style="{StaticResource CardContentContainer}">
                             <TextBlock Style="{StaticResource RevenueHeaderText}" Text="📈 Monthly Revenue" />
                             <TextBlock Style="{StaticResource CardValueText}" Text="{Binding MonthlyRevenue, StringFormat=C}" />
-                            <TextBlock Style="{StaticResource CardSubText}" Text="+12.5% vs last month" />
+                            <TextBlock Style="{StaticResource CardSubText}" Text="{Binding MonthlyRevenueTag}" />
                         </StackPanel>
                     </Border>
 
@@ -86,7 +92,7 @@
                         <StackPanel Style="{StaticResource CardContentContainer}">
                             <TextBlock Style="{StaticResource ExpensesHeaderText}" Text="📉 Monthly Expenses" />
                             <TextBlock Style="{StaticResource CardValueText}" Text="{Binding MonthlyExpenses, StringFormat=C}" />
-                            <TextBlock Style="{StaticResource CardSubText}" Text="-3.2% vs last month" />
+                            <TextBlock Style="{StaticResource CardSubText}" Text="{Binding MonthlyExpensesTag}" />
                         </StackPanel>
                     </Border>
 
@@ -95,7 +101,7 @@
                         <StackPanel Style="{StaticResource CardContentContainer}">
                             <TextBlock Style="{StaticResource ProfitHeaderText}" Text="💎 Profit Margin" />
                             <TextBlock Style="{StaticResource CardValueText}" Text="{Binding ProfitMargin}" />
-                            <TextBlock Style="{StaticResource CardSubText}" Text="Above target (30%)" />
+                            <TextBlock Style="{StaticResource CardSubText}" Text="{Binding ProfitMarginTag}" />
                         </StackPanel>
                     </Border>
                 </UniformGrid>
@@ -235,12 +241,12 @@
                                     HorizontalAlignment="Left"
                                     VerticalAlignment="Center"
                                     Style="{StaticResource AlertHeaderText}"
-                                    Text="⚠️ Overdue Items" />
+                                    Text="⚠️ Overdue Invoices" />
                                 <TextBlock
                                     HorizontalAlignment="Right"
                                     VerticalAlignment="Center"
                                     Style="{StaticResource AlertCountText}"
-                                    Text="3 items" />
+                                    Text="{Binding OverdueItems.Count, StringFormat='{}{0} items'}" />
                             </Grid>
 
                             <ItemsControl Margin="0,10,0,0" ItemsSource="{Binding OverdueItems}">
@@ -279,12 +285,12 @@
                                     HorizontalAlignment="Left"
                                     VerticalAlignment="Center"
                                     Style="{StaticResource DueHeaderText}"
-                                    Text="📅 Due This Week" />
+                                    Text="📅 Bills Due Soon" />
                                 <TextBlock
                                     HorizontalAlignment="Right"
                                     VerticalAlignment="Center"
                                     Style="{StaticResource DueCountText}"
-                                    Text="7 items" />
+                                    Text="{Binding UpcomingDueItems.Count, StringFormat='{}{0} items'}" />
                             </Grid>
 
                             <ItemsControl Margin="0,10,0,0" ItemsSource="{Binding UpcomingDueItems}">
@@ -367,7 +373,10 @@
                     </ScrollViewer>
 
                     <!--  View All Activities Button  -->
-                    <Button Content="View All Activities" Style="{StaticResource ModernCenterButtonStyle}" />
+                    <Button
+                        Command="{Binding NavigateToTransactionsPageCommand}"
+                        Content="View All Activities"
+                        Style="{StaticResource ModernCenterButtonStyle}" />
                 </StackPanel>
             </Border>
         </Grid>

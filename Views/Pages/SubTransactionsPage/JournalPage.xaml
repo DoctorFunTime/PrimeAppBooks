@@ -20,6 +20,7 @@
     <base:BaseAnimatedPage.Resources>
         <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+        <converters:ComparisonToVisibilityConverter x:Key="ComparisonToVisibilityConverter" />
     </base:BaseAnimatedPage.Resources>
 
     <ScrollViewer Style="{StaticResource ModernScrollViewer}">
@@ -323,6 +324,17 @@
                                         </Style>
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
+                                <!--  Line Date  -->
+                                <DataGridTemplateColumn Width="120" Header="Date">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <DatePicker
+                                                VerticalAlignment="Center"
+                                                SelectedDate="{Binding LineDate, UpdateSourceTrigger=PropertyChanged}"
+                                                Style="{StaticResource CompactDatePickerStyle}" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
 
                                 <!--  Account Selection  -->
                                 <DataGridTemplateColumn Width="200" Header="Account *">
@@ -335,6 +347,52 @@
                                                 SelectedValue="{Binding AccountId, UpdateSourceTrigger=PropertyChanged}"
                                                 SelectedValuePath="AccountId"
                                                 Style="{StaticResource ModernComboBox}" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+
+                                <!-- Contact Type Selection -->
+                                <DataGridTemplateColumn Width="100" Header="Contact Type">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <ComboBox
+                                                VerticalAlignment="Center"
+                                                SelectedValue="{Binding ContactType, UpdateSourceTrigger=PropertyChanged}"
+                                                SelectedValuePath="Content"
+                                                Style="{StaticResource ModernComboBox}">
+                                                <ComboBoxItem Content=""/>
+                                                <ComboBoxItem Content="Customer"/>
+                                                <ComboBoxItem Content="Vendor"/>
+                                            </ComboBox>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+
+                                <!-- Contact Selection -->
+                                <DataGridTemplateColumn Width="200" Header="Contact">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Grid>
+                                                <!-- Customer selection -->
+                                                <ComboBox
+                                                    VerticalAlignment="Center"
+                                                    DisplayMemberPath="CustomerName"
+                                                    ItemsSource="{Binding DataContext.AvailableCustomers, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                    SelectedValue="{Binding ContactId, UpdateSourceTrigger=PropertyChanged}"
+                                                    SelectedValuePath="CustomerId"
+                                                    Style="{StaticResource ModernComboBox}"
+                                                    Visibility="{Binding ContactType, Converter={StaticResource ComparisonToVisibilityConverter}, ConverterParameter='Customer'}" />
+                                                
+                                                <!-- Vendor selection -->
+                                                <ComboBox
+                                                    VerticalAlignment="Center"
+                                                    DisplayMemberPath="VendorName"
+                                                    ItemsSource="{Binding DataContext.AvailableVendors, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                    SelectedValue="{Binding ContactId, UpdateSourceTrigger=PropertyChanged}"
+                                                    SelectedValuePath="VendorId"
+                                                    Style="{StaticResource ModernComboBox}"
+                                                    Visibility="{Binding ContactType, Converter={StaticResource ComparisonToVisibilityConverter}, ConverterParameter='Vendor'}" />
+                                            </Grid>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>

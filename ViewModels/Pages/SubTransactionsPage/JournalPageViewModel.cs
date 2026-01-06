@@ -59,6 +59,7 @@ namespace PrimeAppBooks.ViewModels.Pages.SubTransactionsPage
                 await LoadAccountsAsync();
                 await LoadTemplatesAsync();
                 await LoadCurrenciesAsync();
+                await LoadContactsAsync();
 
                 var baseCurrencyId = await _settingsService.GetBaseCurrencyIdAsync();
 
@@ -267,13 +268,10 @@ namespace PrimeAppBooks.ViewModels.Pages.SubTransactionsPage
             set => SetProperty(ref _selectedRecentAccount, value);
         }
 
-        private ObservableCollection<string> _validationErrors = new();
+        public ObservableCollection<string> ValidationErrors { get; } = new();
 
-        public ObservableCollection<string> ValidationErrors
-        {
-            get => _validationErrors;
-            set => SetProperty(ref _validationErrors, value);
-        }
+        public ObservableCollection<Customer> AvailableCustomers { get; } = new();
+        public ObservableCollection<Vendor> AvailableVendors { get; } = new();
 
         private string _descriptionValidationError = string.Empty;
 
@@ -515,6 +513,8 @@ namespace PrimeAppBooks.ViewModels.Pages.SubTransactionsPage
                             Reference = l.Reference,
                             CostCenterId = l.CostCenterId,
                             ProjectId = l.ProjectId,
+                            ContactId = l.ContactId,
+                            ContactType = l.ContactType,
                             CreatedBy = l.CreatedBy
                         }).ToList()
                 };
@@ -602,6 +602,8 @@ namespace PrimeAppBooks.ViewModels.Pages.SubTransactionsPage
                             Reference = l.Reference,
                             CostCenterId = l.CostCenterId,
                             ProjectId = l.ProjectId,
+                            ContactId = l.ContactId,
+                            ContactType = l.ContactType,
                             CreatedBy = l.CreatedBy
                         }).ToList()
                 };
@@ -902,6 +904,28 @@ namespace PrimeAppBooks.ViewModels.Pages.SubTransactionsPage
             }
         }
 
+        private async Task LoadContactsAsync()
+        {
+            try
+            {
+                var customers = await _context.Customers.Where(c => c.IsActive).OrderBy(c => c.CustomerName).ToListAsync();
+                var vendors = await _context.Vendors.Where(v => v.IsActive).OrderBy(v => v.VendorName).ToListAsync();
+
+                await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    AvailableCustomers.Clear();
+                    foreach (var c in customers) AvailableCustomers.Add(c);
+
+                    AvailableVendors.Clear();
+                    foreach (var v in vendors) AvailableVendors.Add(v);
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error loading contacts: {ex.Message}");
+            }
+        }
+
         private void RenumberLines()
         {
             for (int i = 0; i < JournalLines.Count; i++)
@@ -1166,6 +1190,8 @@ namespace PrimeAppBooks.ViewModels.Pages.SubTransactionsPage
                         Reference = line.Reference,
                         CostCenterId = line.CostCenterId,
                         ProjectId = line.ProjectId,
+                        ContactId = line.ContactId,
+                        ContactType = line.ContactType,
                         CreatedBy = line.CreatedBy
                     };
 
@@ -1214,6 +1240,11 @@ namespace PrimeAppBooks.ViewModels.Pages.SubTransactionsPage
 
         private void OnEntryDateChanged(DateTime value)
         {
+            // Sync all line dates with the main entry date by default
+            foreach (var line in JournalLines)
+            {
+                line.LineDate = value;
+            }
             UpdateCalculations();
         }
 
@@ -1370,6 +1401,20 @@ namespace PrimeAppBooks.ViewModels.Pages.SubTransactionsPage
         {
             get => _projectId;
             set => SetProperty(ref _projectId, value);
+        }
+
+        private int? _contactId;
+        public int? ContactId
+        {
+            get => _contactId;
+            set => SetProperty(ref _contactId, value);
+        }
+
+        private string? _contactType;
+        public string? ContactType
+        {
+            get => _contactType;
+            set => SetProperty(ref _contactType, value);
         }
 
         private int _createdBy;

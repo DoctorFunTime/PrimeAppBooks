@@ -86,6 +86,9 @@ namespace PrimeAppBooks.ViewModels.Windows
         [ObservableProperty]
         private bool _isDebitNotesSelected;
 
+        [ObservableProperty]
+        private bool _isCustomerAnalyticsSelected;
+
         // Expansion state properties
         private bool _isSalesExpanded = false;
         public bool IsSalesExpanded
@@ -95,6 +98,11 @@ namespace PrimeAppBooks.ViewModels.Windows
             {
                 if (SetProperty(ref _isSalesExpanded, value))
                 {
+                    if (value)
+                    {
+                        IsPurchasesExpanded = false;
+                        IsTransactionsExpanded = false;
+                    }
                     OnPropertyChanged(nameof(SalesExpandedVisibility));
                 }
             }
@@ -108,6 +116,11 @@ namespace PrimeAppBooks.ViewModels.Windows
             {
                 if (SetProperty(ref _isPurchasesExpanded, value))
                 {
+                    if (value)
+                    {
+                        IsSalesExpanded = false;
+                        IsTransactionsExpanded = false;
+                    }
                     OnPropertyChanged(nameof(PurchasesExpandedVisibility));
                 }
             }
@@ -121,6 +134,11 @@ namespace PrimeAppBooks.ViewModels.Windows
             {
                 if (SetProperty(ref _isTransactionsExpanded, value))
                 {
+                    if (value)
+                    {
+                        IsSalesExpanded = false;
+                        IsPurchasesExpanded = false;
+                    }
                     OnPropertyChanged(nameof(TransactionsExpandedVisibility));
                 }
             }
@@ -200,7 +218,7 @@ namespace PrimeAppBooks.ViewModels.Windows
         [RelayCommand]
         private void NavigateToJournalEntries()
         {
-            _navigationService.NavigateTo<JournalPage>();
+            _navigationService.NavigateTo<TransactionsPage>();
         }
 
         [RelayCommand]
@@ -249,6 +267,12 @@ namespace PrimeAppBooks.ViewModels.Windows
         private void NavigateToCustomers()
         {
             _navigationService.NavigateTo<CustomersPage>();
+        }
+
+        [RelayCommand]
+        private void NavigateToCustomerAnalytics()
+        {
+            _navigationService.NavigateTo<CustomerAnalyticsPage>();
         }
 
         [RelayCommand]
@@ -311,6 +335,7 @@ namespace PrimeAppBooks.ViewModels.Windows
             IsCreditNotesSelected = false;
             IsPayablesSelected = false;
             IsDebitNotesSelected = false;
+            IsCustomerAnalyticsSelected = false;
         }
 
         private void OnPageNavigated(object sender, Page page)
@@ -378,6 +403,12 @@ namespace PrimeAppBooks.ViewModels.Windows
 
                 case CustomersPage:
                     IsCustomersSelected = true;
+                    break;
+
+                case CustomerAnalyticsPage:
+                    IsCustomerAnalyticsSelected = true;
+                    IsSalesExpanded = true;
+                    OnPropertyChanged(nameof(SalesExpandedVisibility));
                     break;
 
                 case ReceivablesPage:

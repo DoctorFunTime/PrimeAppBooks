@@ -34,13 +34,13 @@
         <Setter Property="Foreground" Value="#CCCCCC" />
         <Setter Property="FontSize" Value="11" />
         <Setter Property="FontWeight" Value="Medium" />
-        <Setter Property="Background" Value="#444857" />
-        <Setter Property="BorderBrush" Value="LightBlue" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="Padding" Value="15,12" />
-        <Setter Property="Margin" Value="2" />
+        <Setter Property="Padding" Value="15,8" />
+        <Setter Property="Margin" Value="2,1" />
         <Setter Property="Cursor" Value="Hand" />
-
+ 
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="RadioButton">
@@ -51,18 +51,18 @@
                         Background="{TemplateBinding Background}"
                         BorderBrush="{TemplateBinding BorderBrush}"
                         BorderThickness="{TemplateBinding BorderThickness}"
-                        CornerRadius="8"
+                        CornerRadius="6"
                         Cursor="{TemplateBinding Cursor}">
                         <Grid>
                             <Rectangle
                                 x:Name="SelectionIndicator"
-                                Width="4"
+                                Width="3"
                                 Margin="-12,0,0,0"
                                 HorizontalAlignment="Left"
                                 Fill="#007ACC"
                                 Opacity="0"
-                                RadiusX="2"
-                                RadiusY="2" />
+                                RadiusX="1.5"
+                                RadiusY="1.5" />
                             <ContentPresenter
                                 x:Name="ContentPresenter"
                                 Margin="14,0,0,0"
@@ -75,29 +75,29 @@
                     <ControlTemplate.Triggers>
                         <!--  Simple Hover Effect - Just change background color  -->
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="MainBorder" Property="Background" Value="#1A1A1A" />
+                            <Setter TargetName="MainBorder" Property="Background" Value="#25FFFFFF" />
                         </Trigger>
-
+ 
                         <!--  Checked State  -->
                         <Trigger Property="IsChecked" Value="True">
-                            <Setter TargetName="MainBorder" Property="Background" Value="#1E3A5F" />
-                            <Setter TargetName="MainBorder" Property="BorderBrush" Value="#007ACC" />
+                            <Setter TargetName="MainBorder" Property="Background" Value="#304472C4" />
+                            <Setter TargetName="MainBorder" Property="BorderBrush" Value="#4472C4" />
                             <Setter TargetName="SelectionIndicator" Property="Opacity" Value="1" />
                             <Setter TargetName="ContentPresenter" Property="TextElement.Foreground" Value="#FFFFFF" />
                         </Trigger>
-
+ 
                         <!--  Pressed State  -->
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="MainBorder" Property="Background" Value="#0F2A44" />
+                            <Setter TargetName="MainBorder" Property="Background" Value="#404472C4" />
                         </Trigger>
-
+ 
                         <!--  Checked + Hover State  -->
                         <MultiTrigger>
                             <MultiTrigger.Conditions>
                                 <Condition Property="IsChecked" Value="True" />
                                 <Condition Property="IsMouseOver" Value="True" />
                             </MultiTrigger.Conditions>
-                            <Setter TargetName="MainBorder" Property="Background" Value="#2A4A6F" />
+                            <Setter TargetName="MainBorder" Property="Background" Value="#504472C4" />
                         </MultiTrigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
