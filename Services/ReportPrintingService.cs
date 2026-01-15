@@ -18,7 +18,6 @@ namespace PrimeAppBooks.Services
     {
         public ReportPrintingService()
         {
-            QuestPDF.Settings.License = LicenseType.Community;
         }
 
         #region FlowDocument Generation (for WPF Printing)

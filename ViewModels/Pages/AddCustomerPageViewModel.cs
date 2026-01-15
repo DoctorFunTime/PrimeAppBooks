@@ -254,14 +254,7 @@ namespace PrimeAppBooks.ViewModels.Pages
         public ObservableCollection<string> Frequencies { get; } = new() { "Daily", "Weekly", "Monthly", "Quarterly", "Yearly" };
         public ObservableCollection<string> Genders { get; } = new() { "Male", "Female", "Other", "Prefer not to say" };
 
-        public ObservableCollection<string> GradeLevels { get; } = new()
-        {
-            "Pre-K", "Kindergarten",
-            "Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6",
-            "Grade 7", "Grade 8", "Grade 9", "Grade 10", "Grade 11", "Grade 12", "Form 1",
-            "Form 2", "Form 3", "Form 4", "Form 5", "Form 6",
-            "Undergraduate", "Graduate", "Postgraduate"
-        };
+        public ObservableCollection<string> GradeLevels { get; } = new();
 
         public AddCustomerPageViewModel(INavigationService navigationService, IServiceProvider serviceProvider)
         {
@@ -269,6 +262,7 @@ namespace PrimeAppBooks.ViewModels.Pages
             _serviceProvider = serviceProvider;
             SelectedFrequency = "Monthly";
             _ = LoadAccounts();
+            _ = LoadGradeLevels();
         }
 
         private async Task LoadAccounts()
@@ -289,6 +283,81 @@ namespace PrimeAppBooks.ViewModels.Pages
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error loading accounts: {ex.Message}");
+            }
+        }
+
+
+        private async Task LoadGradeLevels()
+        {
+            try
+            {
+                using var scope = _serviceProvider.CreateScope();
+                var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+                // --- Sync Logic Start ---
+                try 
+                {
+                    // 1. Get all currently defined grades (normalized to lower case for comparison)
+                    var definedGrades = await Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync(
+                        System.Linq.Queryable.Select(context.StudentGrades, g => g.GradeName.ToLower()));
+                    
+                    // 2. Get all distinct grades currently used by customers
+                    var usedGrades = await Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync(
+                        System.Linq.Queryable.Distinct(
+                            System.Linq.Queryable.Select(
+                                System.Linq.Queryable.Where(context.Customers, c => c.GradeLevel != null && c.GradeLevel != ""), 
+                                c => c.GradeLevel)));
+
+                    // 3. Identify missing grades
+                    var missingGrades = new System.Collections.Generic.List<StudentGrade>();
+                    foreach (var gradeName in usedGrades)
+                    {
+                        if (!definedGrades.Contains(gradeName.ToLower()))
+                        {
+                            missingGrades.Add(new StudentGrade 
+                            { 
+                                GradeName = gradeName, 
+                                Description = "Imported from Customer Records", 
+                                SortOrder = 100, // Default sort order for imported grades
+                                IsActive = true 
+                            });
+                            // Add to local list to prevent duplicates if 'usedGrades' had case-variation duplicates
+                            definedGrades.Add(gradeName.ToLower());
+                        }
+                    }
+
+                    // 4. Insert missing grades
+                    if (missingGrades.Count > 0)
+                    {
+                        await context.StudentGrades.AddRangeAsync(missingGrades);
+                        await context.SaveChangesAsync();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Error syncing grades: {ex.Message}");
+                    // Continue to load what we have even if sync fails
+                }
+                // --- Sync Logic End ---
+
+                // Fetch active grades ordered by SortOrder
+                var grades = await Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync(
+                    System.Linq.Queryable.OrderBy(
+                        System.Linq.Queryable.Where(context.StudentGrades, g => g.IsActive),
+                        g => g.SortOrder));
+
+                await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    GradeLevels.Clear();
+                    foreach (var grade in grades)
+                    {
+                        GradeLevels.Add(grade.GradeName);
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error loading grades: {ex.Message}");
             }
         }
 

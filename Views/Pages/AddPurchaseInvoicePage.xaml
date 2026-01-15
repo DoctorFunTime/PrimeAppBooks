@@ -34,8 +34,8 @@
                     </Grid.ColumnDefinitions>
 
                     <StackPanel Grid.Column="0">
-                        <TextBlock Style="{StaticResource WelcomeTitleText}" Text="New Purchase Bill" />
-                        <TextBlock Style="{StaticResource WelcomeSubtitleText}" Text="Record and post a new bill from your vendor" />
+                        <TextBlock Style="{StaticResource WelcomeTitleText}" Text="{Binding PageTitle}" />
+                        <TextBlock Style="{StaticResource WelcomeSubtitleText}" Text="Record and post a bill from your vendor to your ledger" />
                     </StackPanel>
 
                     <StackPanel Grid.Column="1" Orientation="Horizontal">
@@ -142,7 +142,6 @@
                             ScrollViewer.VerticalScrollBarVisibility="Auto"
                             Style="{StaticResource ModernDataGridStyle}">
 
-                            <!--  Set row height and vertical alignment with enhanced selection state  -->
                             <DataGrid.RowStyle>
                                 <Style BasedOn="{StaticResource MaterialDesignDataGridRow}" TargetType="DataGridRow">
                                     <Setter Property="Height" Value="50" />
@@ -155,7 +154,6 @@
                             </DataGrid.RowStyle>
 
                             <DataGrid.Columns>
-                                <!-- Line Number -->
                                 <DataGridTextColumn
                                     Width="Auto"
                                     Binding="{Binding LineNumber}"
@@ -309,7 +307,7 @@
                         Margin="0,15,0,0"
                         HorizontalAlignment="Center"
                         Style="{StaticResource DetailValueText}"
-                        Text="Posting Bill..." />
+                        Text="Processing..." />
                 </StackPanel>
             </Border>
         </Grid>

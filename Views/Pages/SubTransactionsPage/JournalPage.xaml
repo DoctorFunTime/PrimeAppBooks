@@ -30,12 +30,13 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
             <!--  Header Section with Title and Actions  -->
             <Border
                 Grid.Row="0"
-                Margin="0,0,0,20"
+                Margin="5"
                 Style="{StaticResource ModernCardStyle}">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -62,7 +63,7 @@
                     <StackPanel Grid.Column="1">
                         <TextBlock>
                             <TextBlock.Style>
-                                <Style TargetType="TextBlock" BasedOn="{StaticResource WelcomeTitleText}">
+                                <Style BasedOn="{StaticResource WelcomeTitleText}" TargetType="TextBlock">
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding IsEditing}" Value="True">
                                             <Setter Property="Text" Value="Edit Journal Entry" />
@@ -76,7 +77,7 @@
                         </TextBlock>
                         <TextBlock>
                             <TextBlock.Style>
-                                <Style TargetType="TextBlock" BasedOn="{StaticResource WelcomeSubtitleText}">
+                                <Style BasedOn="{StaticResource WelcomeSubtitleText}" TargetType="TextBlock">
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding IsEditing}" Value="True">
                                             <Setter Property="Text" Value="Modify existing journal entry - save as draft to update" />
@@ -114,7 +115,7 @@
             <!--  Entry Header Information  -->
             <Border
                 Grid.Row="1"
-                Margin="0,0,0,20"
+                Margin="5,10"
                 Style="{StaticResource ModernCardStyle}">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -168,9 +169,9 @@
                             Visibility="{Binding HasDescriptionError, Converter={StaticResource BooleanToVisibilityConverter}}" />
                     </StackPanel>
 
-                    <!-- Multi-Currency Selection -->
+                    <!--  Multi-Currency Selection  -->
                     <StackPanel Grid.Column="3" Orientation="Horizontal">
-                        <StackPanel Margin="0,0,10,0" Width="120">
+                        <StackPanel Width="120" Margin="0,0,10,0">
                             <TextBlock Style="{StaticResource FilterLabelText}" Text="Currency" />
                             <ComboBox
                                 Margin="0,5,0,0"
@@ -182,8 +183,8 @@
                         <StackPanel Width="80">
                             <TextBlock Style="{StaticResource FilterLabelText}" Text="Ex. Rate" />
                             <hc:TextBox
-                                Margin="0,5,0,0"
                                 Width="120"
+                                Margin="0,5,0,0"
                                 hc:InfoElement.Placeholder="1.00"
                                 Style="{StaticResource ModernTextBoxStyle}"
                                 Text="{Binding ExchangeRate, StringFormat=N4, UpdateSourceTrigger=PropertyChanged}" />
@@ -193,16 +194,12 @@
             </Border>
 
             <!--  Main Content Area - Journal Lines  -->
-            <Grid Grid.Row="2" Margin="0,0,0,20">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="3*" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
+            <Grid Grid.Row="2" Margin="5">
 
                 <!--  Journal Lines Grid  -->
                 <Border
                     Grid.Column="0"
-                    Margin="0,0,10,0"
+                    Margin="5,0"
                     Style="{StaticResource ModernCardStyle}">
                     <StackPanel>
                         <!--  Lines Header  -->
@@ -325,7 +322,7 @@
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
                                 <!--  Line Date  -->
-                                <DataGridTemplateColumn Width="120" Header="Date">
+                                <DataGridTemplateColumn Width="100" Header="Date">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <DatePicker
@@ -337,7 +334,7 @@
                                 </DataGridTemplateColumn>
 
                                 <!--  Account Selection  -->
-                                <DataGridTemplateColumn Width="200" Header="Account *">
+                                <DataGridTemplateColumn Width="120" Header="Account *">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <ComboBox
@@ -351,8 +348,8 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
-                                <!-- Contact Type Selection -->
-                                <DataGridTemplateColumn Width="100" Header="Contact Type">
+                                <!--  Contact Type Selection  -->
+                                <DataGridTemplateColumn Width="80" Header="Contact Type">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <ComboBox
@@ -360,20 +357,20 @@
                                                 SelectedValue="{Binding ContactType, UpdateSourceTrigger=PropertyChanged}"
                                                 SelectedValuePath="Content"
                                                 Style="{StaticResource ModernComboBox}">
-                                                <ComboBoxItem Content=""/>
-                                                <ComboBoxItem Content="Customer"/>
-                                                <ComboBoxItem Content="Vendor"/>
+                                                <ComboBoxItem Content="" />
+                                                <ComboBoxItem Content="Customer" />
+                                                <ComboBoxItem Content="Vendor" />
                                             </ComboBox>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
-                                <!-- Contact Selection -->
-                                <DataGridTemplateColumn Width="200" Header="Contact">
+                                <!--  Contact Selection  -->
+                                <DataGridTemplateColumn Width="80" Header="Contact">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <Grid>
-                                                <!-- Customer selection -->
+                                                <!--  Customer selection  -->
                                                 <ComboBox
                                                     VerticalAlignment="Center"
                                                     DisplayMemberPath="CustomerName"
@@ -382,8 +379,8 @@
                                                     SelectedValuePath="CustomerId"
                                                     Style="{StaticResource ModernComboBox}"
                                                     Visibility="{Binding ContactType, Converter={StaticResource ComparisonToVisibilityConverter}, ConverterParameter='Customer'}" />
-                                                
-                                                <!-- Vendor selection -->
+
+                                                <!--  Vendor selection  -->
                                                 <ComboBox
                                                     VerticalAlignment="Center"
                                                     DisplayMemberPath="VendorName"
@@ -410,7 +407,7 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
-                                <!-- Foreign Debit Amount -->
+                                <!--  Foreign Debit Amount  -->
                                 <DataGridTemplateColumn Width="Auto" Header="F.Debit">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
@@ -436,7 +433,7 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
-                                <!-- Foreign Credit Amount -->
+                                <!--  Foreign Credit Amount  -->
                                 <DataGridTemplateColumn Width="Auto" Header="F.Credit">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
@@ -562,84 +559,84 @@
                         </Border>
                     </StackPanel>
                 </Border>
+            </Grid>
 
-                <!--  Right Panel - Tools and Preview  -->
-                <Border
-                    Grid.Column="1"
-                    MaxWidth="300"
-                    Margin="10,0,0,0"
-                    Style="{StaticResource ModernCardStyle}">
-                    <StackPanel>
-                        <TextBlock Style="{StaticResource SectionHeaderText}" Text="📋 Entry Tools" />
+            <!--  Right Panel - Tools and Preview  -->
+            <Border
+                Grid.Row="3"
+                Margin="5,10"
+                Style="{StaticResource ModernCardStyle}">
+                <StackPanel>
+                    <TextBlock Style="{StaticResource SectionHeaderText}" Text="📋 Entry Tools" />
 
-                        <!--  Quick Account Search  -->
-                        <Border Margin="0,10,0,15" Style="{StaticResource DetailInfoBorder}">
-                            <StackPanel>
-                                <TextBlock Style="{StaticResource DetailLabelText}" Text="Quick Account Search" />
-                                <hc:TextBox
-                                    Margin="0,5,0,0"
-                                    Style="{StaticResource ModernTextBoxStyle}"
-                                    Text="{Binding AccountSearchText, UpdateSourceTrigger=PropertyChanged}" />
-                                <ListBox
-                                    MaxWidth="280"
-                                    MaxHeight="120"
-                                    Margin="0,5,0,0"
-                                    Background="#15FFFFFF"
-                                    BorderBrush="#40FFFFFF"
-                                    ItemsSource="{Binding FilteredAccounts}"
-                                    SelectedItem="{Binding SelectedQuickAccount}"
-                                    Visibility="{Binding HasAccountResults, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                    <ListBox.ItemTemplate>
-                                        <DataTemplate>
-                                            <Border Padding="5" Background="Transparent">
-                                                <Border.InputBindings>
-                                                    <MouseBinding Command="{Binding DataContext.SelectQuickAccountCommand, RelativeSource={RelativeSource AncestorType=Page}}" MouseAction="LeftClick" />
-                                                </Border.InputBindings>
-                                                <TextBlock FontSize="11" Text="{Binding FullName}" />
-                                            </Border>
-                                        </DataTemplate>
-                                    </ListBox.ItemTemplate>
-                                </ListBox>
+                    <!--  Quick Account Search  -->
+                    <Border Margin="0,10,0,15" Style="{StaticResource DetailInfoBorder}">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource DetailLabelText}" Text="Quick Account Search" />
+                            <hc:TextBox
+                                Margin="0,5,0,0"
+                                Style="{StaticResource ModernTextBoxStyle}"
+                                Text="{Binding AccountSearchText, UpdateSourceTrigger=PropertyChanged}" />
+                            <ListBox
+                                MaxWidth="280"
+                                MaxHeight="120"
+                                Margin="0,5,0,0"
+                                Background="#15FFFFFF"
+                                BorderBrush="#40FFFFFF"
+                                ItemsSource="{Binding FilteredAccounts}"
+                                SelectedItem="{Binding SelectedQuickAccount}"
+                                Visibility="{Binding HasAccountResults, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Padding="5" Background="Transparent">
+                                            <Border.InputBindings>
+                                                <MouseBinding Command="{Binding DataContext.SelectQuickAccountCommand, RelativeSource={RelativeSource AncestorType=Page}}" MouseAction="LeftClick" />
+                                            </Border.InputBindings>
+                                            <TextBlock FontSize="11" Text="{Binding FullName}" />
+                                        </Border>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                            <Button
+                                Margin="0,5,0,0"
+                                Command="{Binding SelectQuickAccountCommand}"
+                                Content="Select Account"
+                                IsEnabled="{Binding SelectedQuickAccount, Converter={StaticResource NullToVisibilityConverter}}"
+                                Style="{StaticResource ModernSecondaryButton}"
+                                Visibility="{Binding HasAccountResults, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                        </StackPanel>
+                    </Border>
+
+                    <!--  Common Templates  -->
+                    <Border Margin="0,0,0,15" Style="{StaticResource DetailInfoBorder}">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource DetailLabelText}" Text="Entry Templates" />
+                            <ComboBox
+                                Margin="0,5,0,0"
+                                DisplayMemberPath="Name"
+                                ItemsSource="{Binding EntryTemplates}"
+                                SelectedItem="{Binding SelectedTemplate}"
+                                Style="{StaticResource ModernComboBox}" />
+                            <StackPanel Margin="0,5,0,0" Orientation="Horizontal">
                                 <Button
-                                    Margin="0,5,0,0"
-                                    Command="{Binding SelectQuickAccountCommand}"
-                                    Content="Select Account"
-                                    IsEnabled="{Binding SelectedQuickAccount, Converter={StaticResource NullToVisibilityConverter}}"
+                                    Margin="0,0,5,0"
+                                    Command="{Binding ApplyTemplateCommand}"
+                                    Content="Apply Template"
+                                    IsEnabled="{Binding HasSelectedTemplate}"
+                                    Style="{StaticResource ModernSecondaryButton}" />
+                                <Button
+                                    Command="{Binding DeleteTemplateCommand}"
+                                    Content="🗑️ Delete"
+                                    IsEnabled="{Binding HasSelectedTemplate}"
                                     Style="{StaticResource ModernSecondaryButton}"
-                                    Visibility="{Binding HasAccountResults, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                    ToolTip="Delete selected template" />
                             </StackPanel>
-                        </Border>
+                        </StackPanel>
+                    </Border>
 
-                        <!--  Common Templates  -->
-                        <Border Margin="0,0,0,15" Style="{StaticResource DetailInfoBorder}">
-                            <StackPanel>
-                                <TextBlock Style="{StaticResource DetailLabelText}" Text="Entry Templates" />
-                                <ComboBox
-                                    Margin="0,5,0,0"
-                                    DisplayMemberPath="Name"
-                                    ItemsSource="{Binding EntryTemplates}"
-                                    SelectedItem="{Binding SelectedTemplate}"
-                                    Style="{StaticResource ModernComboBox}" />
-                                <StackPanel Margin="0,5,0,0" Orientation="Horizontal">
-                                    <Button
-                                        Margin="0,0,5,0"
-                                        Command="{Binding ApplyTemplateCommand}"
-                                        Content="Apply Template"
-                                        IsEnabled="{Binding HasSelectedTemplate}"
-                                        Style="{StaticResource ModernSecondaryButton}" />
-                                    <Button
-                                        Command="{Binding DeleteTemplateCommand}"
-                                        Content="🗑️ Delete"
-                                        IsEnabled="{Binding HasSelectedTemplate}"
-                                        Style="{StaticResource ModernSecondaryButton}"
-                                        ToolTip="Delete selected template" />
-                                </StackPanel>
-                            </StackPanel>
-                        </Border>
+                    <!--  Recent Accounts  -->
 
-                        <!--  Recent Accounts  -->
-
-                        <!--
+                    <!--
                         <Border Style="{StaticResource DetailInfoBorder}" Visibility="{Binding HasValidationErrors, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <StackPanel>
                                 <TextBlock
@@ -660,34 +657,32 @@
                                 </ItemsControl>
                             </StackPanel>
                         </Border>
-                        -->
+                    -->
 
-                        <!--  Entry Preview  -->
-                        <Border
-                            Margin="0,15,0,0"
-                            Style="{StaticResource DetailInfoBorder}"
-                            Visibility="{Binding HasValidLines, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <StackPanel>
-                                <TextBlock Style="{StaticResource DetailLabelText}" Text="📄 Entry Preview" />
-                                <ScrollViewer
-                                    MaxHeight="200"
-                                    Margin="0,5,0,0"
-                                    VerticalScrollBarVisibility="Auto">
-                                    <TextBlock
-                                        FontFamily="Consolas"
-                                        FontSize="10"
-                                        Foreground="White"
-                                        Text="{Binding EntryPreview}"
-                                        TextWrapping="Wrap" />
-                                </ScrollViewer>
-                            </StackPanel>
-                        </Border>
-                    </StackPanel>
-                </Border>
-            </Grid>
-
+                    <!--  Entry Preview  -->
+                    <Border
+                        Margin="0,15,0,0"
+                        Style="{StaticResource DetailInfoBorder}"
+                        Visibility="{Binding HasValidLines, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource DetailLabelText}" Text="📄 Entry Preview" />
+                            <ScrollViewer
+                                MaxHeight="200"
+                                Margin="0,5,0,0"
+                                VerticalScrollBarVisibility="Auto">
+                                <TextBlock
+                                    FontFamily="Consolas"
+                                    FontSize="10"
+                                    Foreground="White"
+                                    Text="{Binding EntryPreview}"
+                                    TextWrapping="Wrap" />
+                            </ScrollViewer>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Border>
             <!--  Footer Actions  -->
-            <Border Grid.Row="3" Style="{StaticResource ModernCardStyle}">
+            <Border Grid.Row="4" Style="{StaticResource ModernCardStyle}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />

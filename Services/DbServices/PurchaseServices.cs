@@ -38,10 +38,72 @@ namespace PrimeAppBooks.Services.DbServices
                 if (invoice.Status == "POSTED")
                 {
                     await PostToJournalInternalAsync(invoice);
+                    await _context.SaveChangesAsync();
                 }
 
                 await transaction.CommitAsync();
                 return invoice;
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+
+        public async Task<PurchaseInvoice> UpdateInvoiceAsync(PurchaseInvoice invoice)
+        {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                var existing = await _context.PurchaseInvoices
+                    .Include(i => i.Lines)
+                    .FirstOrDefaultAsync(i => i.PurchaseInvoiceId == invoice.PurchaseInvoiceId);
+
+                if (existing == null) throw new Exception("Invoice not found");
+                if (existing.Status == "POSTED") throw new Exception("Posted invoices cannot be modified.");
+
+                // Update Header
+                existing.InvoiceNumber = invoice.InvoiceNumber;
+                existing.VendorId = invoice.VendorId;
+                existing.InvoiceDate = DateTime.SpecifyKind(invoice.InvoiceDate, DateTimeKind.Utc);
+                existing.DueDate = DateTime.SpecifyKind(invoice.DueDate, DateTimeKind.Utc);
+                existing.TotalAmount = invoice.TotalAmount;
+                existing.NetAmount = invoice.NetAmount;
+                existing.Balance = invoice.Balance;
+                existing.CurrencyId = invoice.CurrencyId;
+                existing.ExchangeRate = invoice.ExchangeRate;
+                existing.Status = invoice.Status;
+                existing.Notes = invoice.Notes;
+                existing.UpdatedAt = DateTime.UtcNow;
+
+                // Remove old lines
+                _context.PurchaseInvoiceLines.RemoveRange(existing.Lines);
+
+                // Add new lines
+                foreach (var line in invoice.Lines)
+                {
+                    existing.Lines.Add(new PurchaseInvoiceLine
+                    {
+                        Description = line.Description,
+                        AccountId = line.AccountId,
+                        Quantity = line.Quantity,
+                        UnitPrice = line.UnitPrice,
+                        Amount = line.Amount
+                    });
+                }
+
+                await _context.SaveChangesAsync();
+
+                // Post to journal if status changed to POSTED
+                if (invoice.Status == "POSTED")
+                {
+                    await PostToJournalInternalAsync(existing);
+                    await _context.SaveChangesAsync();
+                }
+
+                await transaction.CommitAsync();
+                return existing;
             }
             catch
             {
@@ -77,21 +139,55 @@ namespace PrimeAppBooks.Services.DbServices
             }
         }
 
+        public async Task<List<PurchaseInvoice>> GetAllInvoicesAsync()
+        {
+            return await _context.PurchaseInvoices
+                .Include(i => i.Lines)
+                .Include(i => i.Vendor)
+                .OrderByDescending(i => i.InvoiceDate)
+                .ToListAsync();
+        }
+
+        public async Task<PurchaseInvoice> GetInvoiceByIdAsync(int id)
+        {
+            return await _context.PurchaseInvoices
+                .Include(i => i.Lines)
+                    .ThenInclude(l => l.Account)
+                .Include(i => i.Vendor)
+                .FirstOrDefaultAsync(i => i.PurchaseInvoiceId == id);
+        }
+
+        public async Task<bool> DeleteInvoiceAsync(int id)
+        {
+            var invoice = await _context.PurchaseInvoices.FindAsync(id);
+            if (invoice == null) return false;
+
+            if (invoice.Status == "POSTED") throw new Exception("Cannot delete a posted invoice.");
+
+            _context.PurchaseInvoices.Remove(invoice);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
         private async Task PostToJournalInternalAsync(PurchaseInvoice invoice)
         {
-            // Automated Journal Posting
+            // Identify AP Account
             var apAccount = await _context.ChartOfAccounts
                 .FirstOrDefaultAsync(a => a.AccountSubtype == "CURRENT_LIABILITY" && a.AccountName == "Accounts Payable");
 
             if (apAccount == null)
             {
-                apAccount = await _context.ChartOfAccounts.FirstOrDefaultAsync(a => a.AccountNumber == "2000");
+                apAccount = await _context.ChartOfAccounts.FirstOrDefaultAsync(a => a.AccountNumber == "2100");
             }
 
             if (apAccount == null)
             {
-                throw new Exception("Core account 'Accounts Payable' (2000) not found in Chart of Accounts. Please run database setup.");
+                throw new Exception("Core account 'Accounts Payable' (2100) not found in Chart of Accounts. Please run database setup.");
             }
+
+            // Get current accounting period
+            var currentPeriod = await _context.AccountingPeriods
+                .FirstOrDefaultAsync(p => p.StartDate <= invoice.InvoiceDate && p.EndDate >= invoice.InvoiceDate);
 
             // Generate Journal Number
             var journalNumber = await GenerateJournalNumberAsync();
@@ -102,11 +198,15 @@ namespace PrimeAppBooks.Services.DbServices
                 JournalDate = invoice.InvoiceDate,
                 Description = $"Purchase Invoice: {invoice.InvoiceNumber}",
                 Reference = invoice.InvoiceNumber,
-                JournalType = "PURCHASE",
+                JournalType = "PURCHASES",
                 Status = "POSTED",
                 Amount = invoice.TotalAmount,
                 CurrencyId = invoice.CurrencyId,
                 ExchangeRate = invoice.ExchangeRate,
+                PeriodId = currentPeriod?.PeriodId,
+                CreatedBy = invoice.CreatedBy,
+                PostedBy = invoice.CreatedBy,
+                PostedAt = DateTime.UtcNow,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
                 JournalLines = new List<JournalLine>()
@@ -150,32 +250,6 @@ namespace PrimeAppBooks.Services.DbServices
             });
 
             _context.JournalEntries.Add(journalEntry);
-        }
-
-        public async Task<List<PurchaseInvoice>> GetAllInvoicesAsync()
-        {
-            return await _context.PurchaseInvoices
-                .Include(i => i.Lines)
-                .OrderByDescending(i => i.InvoiceDate)
-                .ToListAsync();
-        }
-
-        public async Task<PurchaseInvoice> GetInvoiceByIdAsync(int id)
-        {
-            return await _context.PurchaseInvoices
-                .Include(i => i.Lines)
-                    .ThenInclude(l => l.Account)
-                .FirstOrDefaultAsync(i => i.PurchaseInvoiceId == id);
-        }
-
-        public async Task<bool> DeleteInvoiceAsync(int id)
-        {
-            var invoice = await _context.PurchaseInvoices.FindAsync(id);
-            if (invoice == null) return false;
-
-            _context.PurchaseInvoices.Remove(invoice);
-            await _context.SaveChangesAsync();
-            return true;
         }
 
         private async Task<string> GenerateJournalNumberAsync()

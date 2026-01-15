@@ -23,7 +23,7 @@
             <!--  Header  -->
             <Border
                 Grid.Row="0"
-                Margin="0,0,0,20"
+                Margin="5,10"
                 Style="{StaticResource ModernCardStyle}">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -53,9 +53,9 @@
             <!--  KPI Cards  -->
             <UniformGrid
                 Grid.Row="1"
-                Margin="10"
+                Margin="5,0"
                 Columns="3">
-                <Border Style="{StaticResource ModernCardStyle}">
+                <Border Margin="3,0" Style="{StaticResource ModernCardStyle}">
                     <StackPanel Style="{StaticResource CardContentContainer}">
                         <TextBlock
                             FontSize="14"
@@ -66,7 +66,7 @@
                     </StackPanel>
                 </Border>
 
-                <Border Style="{StaticResource ModernCardStyle}">
+                <Border Margin="3,0" Style="{StaticResource ModernCardStyle}">
                     <StackPanel Style="{StaticResource CardContentContainer}">
                         <TextBlock
                             FontSize="14"
@@ -80,7 +80,7 @@
                     </StackPanel>
                 </Border>
 
-                <Border Style="{StaticResource ModernCardStyle}">
+                <Border Margin="3,0" Style="{StaticResource ModernCardStyle}">
                     <StackPanel Style="{StaticResource CardContentContainer}">
                         <TextBlock
                             FontSize="14"
@@ -98,7 +98,7 @@
             <!--  Charts and Detailed List  -->
             <Grid Grid.Row="2">
                 <!--  Aging Chart  -->
-                <Border Style="{StaticResource ModernCardStyle}">
+                <Border Margin="5,10" Style="{StaticResource ModernCardStyle}">
                     <StackPanel>
                         <TextBlock
                             Margin="0,0,0,15"
@@ -122,7 +122,10 @@
             <!--  Detailed List  -->
             <Grid Grid.Row="3">
                 <!--  Debtor List  -->
-                <Border Grid.Column="1" Style="{StaticResource ModernCardStyle}">
+                <Border
+                    Grid.Column="1"
+                    Margin="5,0"
+                    Style="{StaticResource ModernCardStyle}">
                     <DockPanel>
                         <TextBlock
                             Margin="0,0,0,15"
@@ -211,6 +214,10 @@
                                     Header="Customer / Student" />
                                 <DataGridTextColumn
                                     Width="Auto"
+                                    Binding="{Binding CustomerPhone}"
+                                    Header="Phone" />
+                                <DataGridTextColumn
+                                    Width="Auto"
                                     Binding="{Binding TotalOutstanding, StringFormat=C}"
                                     Header="Outstanding" />
                                 <DataGridTextColumn
@@ -228,6 +235,47 @@
                                     Width="Auto"
                                     Binding="{Binding AvgDaysToPay, StringFormat={}{0:F0}d}"
                                     Header="DSO" />
+
+                                <DataGridTemplateColumn Width="Auto" Header="Plan">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Border
+                                                Padding="8,4"
+                                                Background="{Binding HasActivePaymentPlan, Converter={StaticResource BooleanToPaymentPlanBrushConverter}}"
+                                                CornerRadius="4">
+                                                <TextBlock
+                                                    FontSize="11"
+                                                    FontWeight="SemiBold"
+                                                    Foreground="White"
+                                                    Text="{Binding HasActivePaymentPlan, Converter={StaticResource BooleanToPaymentPlanTextConverter}}" />
+                                            </Border>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+
+                                <DataGridTemplateColumn Width="Auto" Header="Next Follow-up">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock
+                                                FontWeight="SemiBold"
+                                                Text="{Binding NextFollowupDate, StringFormat=d}">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="#CCCCCC" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding FollowupUrgency}" Value="Red">
+                                                                <Setter Property="Foreground" Value="#FF6B6B" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding FollowupUrgency}" Value="Orange">
+                                                                <Setter Property="Foreground" Value="#FFA502" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
                                 <DataGridTemplateColumn Width="Auto" Header="Action">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>

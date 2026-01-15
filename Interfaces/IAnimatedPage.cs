@@ -61,5 +61,11 @@ namespace PrimeAppBooks.Interfaces
         /// Custom animation parameters (for advanced usage)
         /// </summary>
         object CustomAnimationParameters { get; }
+
+        /// <summary>
+        /// Method called when navigation to the page is completed
+        /// </summary>
+        /// <param name="parameter">Navigation parameter</param>
+        void OnNavigatedTo(object parameter);
     }
 }

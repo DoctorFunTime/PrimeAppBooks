@@ -60,19 +60,34 @@ namespace PrimeAppBooks.Services
             ReportProgress("Populating reference data...");
 
             await PopulateChartOfAccountsAsync(context);
-            await PopulatePaymentMethodsAsync(context);
-            await PopulateCurrenciesAsync(context);
-            await PopulateTaxRatesAsync(context);
-            await PopulateAccountingPeriodsAsync(context);
-            await PopulateAccountingSettingsAsync(context);
-            
             await context.SaveChangesAsync();
+
+            await EnsureEssentialExpenseAccountsExist(context);
+            await context.SaveChangesAsync();
+
+            await PopulatePaymentMethodsAsync(context);
+            await context.SaveChangesAsync();
+
+            await PopulateCurrenciesAsync(context);
+            await context.SaveChangesAsync();
+
+            await PopulateTaxRatesAsync(context);
+            await context.SaveChangesAsync();
+
+            await PopulateAccountingPeriodsAsync(context);
+            await context.SaveChangesAsync();
+
+            await PopulateAccountingSettingsAsync(context);
+            await context.SaveChangesAsync();
+
+            await PopulateStudentGradesAsync(context);
+            await context.SaveChangesAsync();
+
+            await CreateAccountingTriggersAsync(context);
         }
 
         private async Task PopulateChartOfAccountsAsync(AppDbContext context)
         {
-            if (await context.ChartOfAccounts.AnyAsync()) return;
-
             var accounts = new List<ChartOfAccount>
             {
                 // Current Assets
@@ -143,6 +158,7 @@ namespace PrimeAppBooks.Services
                 new() { AccountNumber = "5100", AccountName = "Salaries and Wages", AccountType = "EXPENSE", AccountSubtype = "OPERATING_EXPENSE", NormalBalance = "DEBIT", IsSystemAccount = true },
                 new() { AccountNumber = "5110", AccountName = "Employee Benefits", AccountType = "EXPENSE", AccountSubtype = "OPERATING_EXPENSE", NormalBalance = "DEBIT", IsSystemAccount = true },
                 new() { AccountNumber = "5120", AccountName = "Payroll Taxes", AccountType = "EXPENSE", AccountSubtype = "OPERATING_EXPENSE", NormalBalance = "DEBIT", IsSystemAccount = true },
+                new() { AccountNumber = "5150", AccountName = "Bad Debts Expense", AccountType = "EXPENSE", AccountSubtype = "OPERATING_EXPENSE", NormalBalance = "DEBIT", IsSystemAccount = true },
                 new() { AccountNumber = "5200", AccountName = "Rent Expense", AccountType = "EXPENSE", AccountSubtype = "OPERATING_EXPENSE", NormalBalance = "DEBIT", IsSystemAccount = true },
                 new() { AccountNumber = "5300", AccountName = "Utilities Expense", AccountType = "EXPENSE", AccountSubtype = "OPERATING_EXPENSE", NormalBalance = "DEBIT", IsSystemAccount = true },
                 new() { AccountNumber = "5310", AccountName = "Telephone Expense", AccountType = "EXPENSE", AccountSubtype = "OPERATING_EXPENSE", NormalBalance = "DEBIT", IsSystemAccount = true },
@@ -161,7 +177,35 @@ namespace PrimeAppBooks.Services
                 new() { AccountNumber = "6200", AccountName = "Income Tax Expense", AccountType = "EXPENSE", AccountSubtype = "TAX_EXPENSE", NormalBalance = "DEBIT", IsSystemAccount = true }
             };
 
-            await context.ChartOfAccounts.AddRangeAsync(accounts);
+            foreach (var account in accounts)
+            {
+                if (!await context.ChartOfAccounts.AnyAsync(a => a.AccountNumber == account.AccountNumber))
+                {
+                    await context.ChartOfAccounts.AddAsync(account);
+                }
+            }
+        }
+
+        private async Task EnsureEssentialExpenseAccountsExist(AppDbContext context)
+        {
+            var expenseAccounts = new List<ChartOfAccount>
+            {
+                new() { AccountNumber = "5910", AccountName = "Bank Service Charges", AccountType = "EXPENSE", AccountSubtype = "OPERATING_EXPENSE", NormalBalance = "DEBIT", IsSystemAccount = true },
+                new() { AccountNumber = "5920", AccountName = "Travel Expense", AccountType = "EXPENSE", AccountSubtype = "OPERATING_EXPENSE", NormalBalance = "DEBIT", IsSystemAccount = true },
+                new() { AccountNumber = "5930", AccountName = "Meals and Entertainment", AccountType = "EXPENSE", AccountSubtype = "OPERATING_EXPENSE", NormalBalance = "DEBIT", IsSystemAccount = true },
+                new() { AccountNumber = "5940", AccountName = "Dues and Subscriptions", AccountType = "EXPENSE", AccountSubtype = "OPERATING_EXPENSE", NormalBalance = "DEBIT", IsSystemAccount = true },
+                new() { AccountNumber = "5950", AccountName = "Consulting Fees", AccountType = "EXPENSE", AccountSubtype = "OPERATING_EXPENSE", NormalBalance = "DEBIT", IsSystemAccount = true }
+            };
+
+            foreach (var account in expenseAccounts)
+            {
+                if (!await context.ChartOfAccounts.AnyAsync(a => a.AccountNumber == account.AccountNumber))
+                {
+                    await context.ChartOfAccounts.AddAsync(account);
+                    ReportProgress($"Added missing account: {account.AccountName}");
+                }
+            }
+            await context.SaveChangesAsync();
         }
 
         private async Task PopulatePaymentMethodsAsync(AppDbContext context)
@@ -278,6 +322,28 @@ namespace PrimeAppBooks.Services
             };
 
             await context.AccountingSettings.AddRangeAsync(settings);
+        }
+
+        private async Task PopulateStudentGradesAsync(AppDbContext context)
+        {
+            if (await context.StudentGrades.AnyAsync()) return;
+
+            var grades = new List<string>
+            {
+                "Pre-K", "Kindergarten", "Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6",
+                "Grade 7", "Grade 8", "Grade 9", "Grade 10", "Grade 11", "Grade 12", "Form 1",
+                "Form 2", "Form 3", "Form 4", "Form 5", "Form 6",
+                "Undergraduate", "Graduate", "Postgraduate"
+            };
+
+            var studentGrades = grades.Select((name, index) => new StudentGrade
+            {
+                GradeName = name,
+                SortOrder = index + 1,
+                IsActive = true
+            }).ToList();
+
+            await context.StudentGrades.AddRangeAsync(studentGrades);
         }
 
         private async Task CreateAccountingTriggersAsync(AppDbContext context)

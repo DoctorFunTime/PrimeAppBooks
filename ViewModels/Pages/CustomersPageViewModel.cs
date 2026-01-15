@@ -59,14 +59,20 @@ namespace PrimeAppBooks.ViewModels.Pages
             }
         }
 
-        public ObservableCollection<string> GradeLevels { get; } = new()
+        private bool _showInactive;
+        public bool ShowInactive
         {
-            "All Grades", "Pre-K", "Kindergarten",
-            "Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6",
-            "Grade 7", "Grade 8", "Grade 9", "Grade 10", "Grade 11", "Grade 12", "Form 1",
-            "Form 2", "Form 3", "Form 4", "Form 5", "Form 6",
-            "Undergraduate", "Graduate", "Postgraduate"
-        };
+            get => _showInactive;
+            set
+            {
+                if (SetProperty(ref _showInactive, value))
+                {
+                    _ = LoadCustomers();
+                }
+            }
+        }
+
+        public ObservableCollection<string> GradeLevels { get; } = new();
 
         private bool _isLoading;
         public bool IsLoading
@@ -97,7 +103,34 @@ namespace PrimeAppBooks.ViewModels.Pages
             _serviceProvider = serviceProvider;
             _selectedGrade = "All Grades";
 
+            _ = LoadGrades();
             _ = LoadCustomers();
+        }
+
+        private async Task LoadGrades()
+        {
+            try
+            {
+                using var scope = _serviceProvider.CreateScope();
+                var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+                var grades = await context.StudentGrades
+                    .Where(g => g.IsActive)
+                    .OrderBy(g => g.SortOrder)
+                    .Select(g => g.GradeName)
+                    .ToListAsync();
+
+                await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    GradeLevels.Clear();
+                    GradeLevels.Add("All Grades");
+                    foreach (var grade in grades)
+                    {
+                        GradeLevels.Add(grade);
+                    }
+                });
+            }
+            catch (Exception) { }
         }
 
         private async Task LoadCustomers()
@@ -131,6 +164,11 @@ namespace PrimeAppBooks.ViewModels.Pages
                     query = query.Where(c => c.GradeLevel == SelectedGrade);
                 }
 
+                if (!ShowInactive)
+                {
+                    query = query.Where(c => c.IsActive);
+                }
+
                 var list = await query.OrderBy(c => c.CustomerName).ToListAsync();
 
                 await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
@@ -156,6 +194,7 @@ namespace PrimeAppBooks.ViewModels.Pages
             SearchText = string.Empty;
             SearchStudentId = string.Empty;
             SelectedGrade = "All Grades";
+            ShowInactive = false;
             _ = LoadCustomers();
         }
 
@@ -175,6 +214,15 @@ namespace PrimeAppBooks.ViewModels.Pages
         private void EditCustomer(Customer customer)
         {
             _navigationService.NavigateTo<AddCustomerPage>(customer.CustomerId);
+        }
+
+        [RelayCommand]
+        private void ViewStatement(Customer customer)
+        {
+            if (customer != null)
+            {
+                _navigationService.NavigateTo<CustomerStatementPage>(customer.CustomerId);
+            }
         }
     }
 }

@@ -43,5 +43,10 @@ namespace PrimeAppBooks.Views.Pages
         {
             AnimateOut = animateOut;
         }
+
+        public virtual void OnNavigatedTo(object parameter)
+        {
+            // Optional: Implement common navigation logic in subclasses
+        }
     }
 }

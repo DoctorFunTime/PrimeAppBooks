@@ -30,5 +30,6 @@ namespace PrimeAppBooks.Models.Temp_Models
         public string Contacts { get; set; } = string.Empty;
         public string Address { get; set; } = string.Empty;
         public int DiscountAmount { get; set; } = 0;
+        public decimal OpeningBalance { get; set; } = 0;
     }
 }

@@ -118,7 +118,7 @@ namespace PrimeAppBooks.ViewModels.Windows
 
         public record LoadingStep(string Message, Func<Task> AsyncAction, double ProgressWeight);
 
-        private async Task ExecuteStepWithTimeout(Func<Task> asyncAction, string stepMessage, int delayAfterMs = 300)
+        private async Task<bool> ExecuteStepWithTimeout(Func<Task> asyncAction, string stepMessage, int delayAfterMs = 300)
         {
             try
             {
@@ -132,8 +132,8 @@ namespace PrimeAppBooks.ViewModels.Windows
                 if (completedTask == timeoutTask)
                 {
                     CurrentLoadingMessage = $"{stepMessage} (Timed out)";
-                    await Task.Delay(1000);
-                    return;
+                    await Task.Delay(3000);
+                    return false;
                 }
 
                 // Check for errors (even if completed before timeout)
@@ -142,6 +142,7 @@ namespace PrimeAppBooks.ViewModels.Windows
                 // Only show success if we get here - minimal delay
                 CurrentLoadingMessage = $"{stepMessage} ✓";
                 await Task.Delay(delayAfterMs);
+                return true;
             }
             catch (Exception ex)
             {
@@ -159,7 +160,8 @@ namespace PrimeAppBooks.ViewModels.Windows
                 string uniqueHeader = $"{stepMessage} [{Guid.NewGuid().ToString()[..8]}]";
                 //NotificationService.AddException(uniqueHeader, userFriendlyMessage);
 
-                await Task.Delay(800); // Reduced error display time
+                await Task.Delay(5000); // Increased error display time
+                return false;
             }
         }
 

@@ -21,6 +21,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Controls;
+using static PrimeAppBooks.Models.Pages.TransactionsModels;
 
 namespace PrimeAppBooks.ViewModels.Pages
 {
@@ -33,6 +34,13 @@ namespace PrimeAppBooks.ViewModels.Pages
         private readonly IServiceProvider _serviceProvider;
         private readonly ChartOfAccountsServices _coaService;
         private readonly JournalServices _journalService;
+        private static readonly System.Threading.SemaphoreSlim _dbLock = new(1, 1);
+
+        [ObservableProperty]
+        private bool _isLoading;
+
+        [ObservableProperty]
+        private string _loadingMessage;
 
         [ObservableProperty]
         private decimal _cashBalance;
@@ -101,7 +109,8 @@ namespace PrimeAppBooks.ViewModels.Pages
             _journalService = journalService;
             _context = context;
 
-            _ = InitializeDashboardAsync();
+            // Re-initialize dashboard asynchronously but safely
+            _ = Task.Run(async () => await InitializeDashboardAsync());
         }
 
         private async Task InitializeDashboardAsync()
@@ -109,49 +118,378 @@ namespace PrimeAppBooks.ViewModels.Pages
             await LoadDashboardDataAsync();
         }
 
+        private string Truncate(string value, int maxLength)
+        {
+            if (string.IsNullOrEmpty(value)) return value;
+            return value.Length <= maxLength ? value : value.Substring(0, maxLength);
+        }
+
         [RelayCommand]
         public async Task ImportStudentData()
         {
-            var random = new Random();
-            var datePart = DateTime.Now.ToString("yyMMdd");
-            var randomPart = random.Next(1000, 9999);
+            if (IsLoading) return;
 
-            List<StudentSelection> students = fetches.GetAllStudentsTable();
-            List<Customer> customerList = new();
-            int counter = 0;
-
-            foreach (StudentSelection student in students)
+            await _dbLock.WaitAsync();
+            IsLoading = true;
+            LoadingMessage = "Initializing import...";
+            try
             {
-                Customer StudentsToBeAdded = new();
+                // Re-fetch everything inside the lock to ensure we have fresh data
+                var students = fetches.GetAllStudentsTable();
+                var count = students.Count;
+                int current = 0;
 
-                StudentsToBeAdded.NationalId = student.IDNumber;
-                StudentsToBeAdded.CustomerCode = $"C-{datePart}-{randomPart}";
-                StudentsToBeAdded.Gender = student.Gender;
-                StudentsToBeAdded.Email = string.Empty;
-                StudentsToBeAdded.TaxId = string.Empty;
-                StudentsToBeAdded.ContactPerson = student.ContactDetails;
-                StudentsToBeAdded.BillingAddress = student.Address;
-                StudentsToBeAdded.CustomerName = $"{student.Name} {student.Surname}";
-                StudentsToBeAdded.ContactPerson = student.ContactDetails;
-                StudentsToBeAdded.Phone = student.ContactDetails;
-                StudentsToBeAdded.ShippingAddress = student.Address;
-                StudentsToBeAdded.DefaultRevenueAccountId = 4000;
-                StudentsToBeAdded.DateOfBirth = student.DOB.ToUniversalTime();
-                StudentsToBeAdded.Gender = student.Gender;
-                StudentsToBeAdded.StudentId = student.Id.ToString();
-                StudentsToBeAdded.GradeLevel = student.StudentClass;
-                StudentsToBeAdded.GuardianName = student.GuardianName;
-                StudentsToBeAdded.NationalId = student.IDNumber;
-                StudentsToBeAdded.CreatedAt = DateTime.UtcNow;
-                StudentsToBeAdded.UpdatedAt = DateTime.UtcNow;
+                // Get transactions starting from Jan 1, 2026
+                var detailedTransactions = fetches.GetStudentTransactions(new DateTime(2026, 1, 1));
 
-                _context.Customers.Add(StudentsToBeAdded);
-                await _context.SaveChangesAsync();
+                // Get necessary accounts
+                var arAccount = await _coaService.GetAccountByNumberAsync("1100"); // Accounts Receivable
+                var cashAccount = await _coaService.GetAccountByNumberAsync("1000"); // Cash
+                var bankAccount = await _coaService.GetAccountByNumberAsync("1020"); // Bank
+                var equityAccount = await _coaService.GetAccountByNumberAsync("3100"); // Retained Earnings
+                var salesAccount = await _coaService.GetAccountByNumberAsync("4000"); // Sales Revenue
+                var badDebtsAccount = await _coaService.GetAccountByNumberAsync("5150"); // Bad Debts Expense
+
+                if (arAccount == null || equityAccount == null || salesAccount == null)
+                {
+                    System.Windows.MessageBox.Show(
+                        "Required accounting accounts (1100, 3100, or 4000) not found in the Chart of Accounts.\n\n" +
+                        "Please restart the application to allow the system to automatically create these missing accounts.", 
+                        "Missing Configuration", 
+                        System.Windows.MessageBoxButton.OK, 
+                        System.Windows.MessageBoxImage.Warning);
+                    
+                    IsLoading = false;
+                    return;
+                }
+
+                // Get existing grades to avoid redundant DB checks
+                var existingGrades = await _context.StudentGrades.OrderBy(g => g.SortOrder).ToListAsync();
+                var gradeList = existingGrades.Select(g => g.GradeName).ToHashSet();
+
+                foreach (var student in students)
+                {
+                    current++;
+                    LoadingMessage = $"Importing student {current} of {count}: {student.FullName}";
+
+                    // Sync Grade/Class if it doesn't exist
+                    if (!string.IsNullOrWhiteSpace(student.StudentClass) && !gradeList.Contains(student.StudentClass))
+                    {
+                        var newGrade = new StudentGrade
+                        {
+                            GradeName = student.StudentClass,
+                            IsActive = true,
+                            SortOrder = gradeList.Count + 1
+                        };
+                        _context.StudentGrades.Add(newGrade);
+                        await _context.SaveChangesAsync();
+                        gradeList.Add(student.StudentClass);
+                    }
+
+                    Customer customerRecord;
+                    var existingCustomer = await _context.Customers.FirstOrDefaultAsync(c => c.StudentId == student.Id.ToString());
+
+                    if (existingCustomer != null)
+                    {
+                        customerRecord = existingCustomer;
+                    }
+                    else
+                    {
+                        var datePart = DateTime.Now.ToString("yyMMdd");
+                        var randomPart = new Random().Next(1000, 9999);
+
+                        customerRecord = new Customer();
+                        customerRecord.NationalId = Truncate(student.IDNumber, 50);
+                        customerRecord.CustomerCode = $"C-{datePart}-{randomPart}";
+                        customerRecord.Gender = Truncate(student.Gender, 10);
+                        customerRecord.Email = string.Empty;
+                        customerRecord.TaxId = string.Empty;
+                        customerRecord.ContactPerson = Truncate(student.ContactDetails, 255);
+                        customerRecord.BillingAddress = student.Address;
+                        customerRecord.CustomerName = Truncate($"{student.Name} {student.Surname}", 255);
+                        customerRecord.Phone = Truncate(student.ContactDetails, 50);
+                        customerRecord.ShippingAddress = student.Address;
+                        customerRecord.DefaultRevenueAccountId = 4000;
+                        if (student.DOB != DateTime.MinValue)
+                            customerRecord.DateOfBirth = student.DOB.ToUniversalTime();
+
+                        customerRecord.StudentId = Truncate(student.Id.ToString(), 50);
+                        customerRecord.GradeLevel = Truncate(student.StudentClass, 50);
+                        customerRecord.GuardianName = Truncate(student.GuardianName, 255);
+                        customerRecord.CreatedAt = DateTime.UtcNow;
+                        customerRecord.UpdatedAt = DateTime.UtcNow;
+
+                        _context.Customers.Add(customerRecord);
+                        await _context.SaveChangesAsync();
+
+                        // Create opening balance journal entry only for new customers (to avoid dupes)
+                        if (student.OpeningBalance != 0)
+                        {
+                            var journalEntry = new JournalEntry
+                            {
+                                JournalDate = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                                Description = $"Opening Balance Import - {student.FullName}",
+                                Reference = $"OB-{student.Id}",
+                                JournalType = "GENERAL",
+                                Status = "POSTED",
+                                Amount = Math.Abs(student.OpeningBalance),
+                                CreatedAt = DateTime.UtcNow,
+                                UpdatedAt = DateTime.UtcNow
+                            };
+
+                            journalEntry.JournalLines.Add(new JournalLine
+                            {
+                                AccountId = arAccount.AccountId,
+                                DebitAmount = student.OpeningBalance > 0 ? student.OpeningBalance : 0,
+                                CreditAmount = student.OpeningBalance < 0 ? Math.Abs(student.OpeningBalance) : 0,
+                                Description = $"Opening Balance for {student.FullName}",
+                                ContactId = customerRecord.CustomerId,
+                                ContactType = "Customer",
+                                LineDate = journalEntry.JournalDate,
+                                CreatedAt = DateTime.UtcNow
+                            });
+
+                            journalEntry.JournalLines.Add(new JournalLine
+                            {
+                                AccountId = equityAccount.AccountId,
+                                DebitAmount = student.OpeningBalance < 0 ? Math.Abs(student.OpeningBalance) : 0,
+                                CreditAmount = student.OpeningBalance > 0 ? student.OpeningBalance : 0,
+                                Description = "Opening Balance Offset",
+                                LineDate = journalEntry.JournalDate,
+                                CreatedAt = DateTime.UtcNow
+                            });
+
+                            await _journalService.CreateJournalEntryAsync(journalEntry);
+                        }
+                    }
+
+                    // Process Detailed Transactions for this student
+                    var studentTransactions = detailedTransactions.Where(t => t.StudentId == student.Id).ToList();
+                    foreach (var trans in studentTransactions)
+                    {
+                        // Check if transaction already exists by reference to avoid duplicates
+                        var refId = $"IMP-{student.Id}-{trans.TransactionDate:yyyyMMdd}-{trans.DocNumber ?? Math.Abs(trans.Amount).GetHashCode().ToString()}";
+                        if (await _context.JournalEntries.AnyAsync(j => j.Reference == refId)) continue;
+
+                        var transDateUtc = trans.TransactionDate.Kind == DateTimeKind.Utc ? trans.TransactionDate : trans.TransactionDate.ToUniversalTime();
+
+                        if (trans.DebitCredit == "DR") // Sales Invoice (Debit AR, Credit Revenue)
+                        {
+                            var invoiceJournal = new JournalEntry
+                            {
+                                JournalDate = transDateUtc,
+                                Description = string.IsNullOrWhiteSpace(trans.Description) ? $"Invoice for {student.FullName}" : trans.Description,
+                                Reference = refId,
+                                JournalType = "SALES_INVOICE",
+                                Status = "POSTED",
+                                Amount = trans.Amount,
+                                CreatedAt = DateTime.UtcNow,
+                                UpdatedAt = DateTime.UtcNow
+                            };
+
+                            // Debit AR
+                            invoiceJournal.JournalLines.Add(new JournalLine
+                            {
+                                AccountId = arAccount.AccountId,
+                                DebitAmount = trans.Amount,
+                                CreditAmount = 0,
+                                Description = invoiceJournal.Description,
+                                ContactId = customerRecord.CustomerId,
+                                ContactType = "Customer",
+                                LineDate = transDateUtc,
+                                CreatedAt = DateTime.UtcNow
+                            });
+
+                            // Credit Income
+                            invoiceJournal.JournalLines.Add(new JournalLine
+                            {
+                                AccountId = salesAccount.AccountId,
+                                DebitAmount = 0,
+                                CreditAmount = trans.Amount,
+                                Description = "Tuition/Services",
+                                ContactId = customerRecord.CustomerId, // Optional for income line
+                                ContactType = "Customer",
+                                LineDate = transDateUtc,
+                                CreatedAt = DateTime.UtcNow
+                            });
+
+                            await _journalService.CreateJournalEntryAsync(invoiceJournal);
+                        }
+                        else if (trans.DebitCredit == "CR") // Payment (Debit Cash, Credit AR)
+                        {
+                            var paymentJournal = new JournalEntry
+                            {
+                                JournalDate = transDateUtc,
+                                Description = string.IsNullOrWhiteSpace(trans.Description) ? $"Payment from {student.FullName}" : trans.Description,
+                                Reference = refId,
+                                JournalType = "PAYMENT",
+                                Status = "POSTED",
+                                Amount = trans.Amount,
+                                CreatedAt = DateTime.UtcNow,
+                                UpdatedAt = DateTime.UtcNow
+                            };
+
+                            // Debit Cash
+                            paymentJournal.JournalLines.Add(new JournalLine
+                            {
+                                AccountId = cashAccount.AccountId,
+                                DebitAmount = trans.Amount,
+                                CreditAmount = 0,
+                                Description = "Cash Receipt",
+                                LineDate = transDateUtc,
+                                CreatedAt = DateTime.UtcNow
+                            });
+
+                            // Credit AR
+                            paymentJournal.JournalLines.Add(new JournalLine
+                            {
+                                AccountId = arAccount.AccountId,
+                                DebitAmount = 0,
+                                CreditAmount = trans.Amount,
+                                Description = paymentJournal.Description,
+                                ContactId = customerRecord.CustomerId,
+                                ContactType = "Customer",
+                                LineDate = transDateUtc,
+                                CreatedAt = DateTime.UtcNow
+                            });
+
+                            await _journalService.CreateJournalEntryAsync(paymentJournal);
+                        }
+                    }
+
+                    // AUTOMATED WRITE-OFF FOR TRANSFERRED STUDENTS
+                    if (student.isTransferred && student.OpeningBalance > 0 && badDebtsAccount != null)
+                    {
+                        await _journalService.CreateBadDebtWriteOffJournalAsync(
+                            customerRecord.CustomerId,
+                            student.OpeningBalance,
+                            $"Automated Write-off: Transferred Student - {student.FullName}",
+                            arAccount.AccountId,
+                            badDebtsAccount.AccountId,
+                            customerRecord.CustomerCode
+                        );
+
+                        customerRecord.IsActive = false;
+                        _context.Customers.Update(customerRecord);
+                        await _context.SaveChangesAsync();
+                    }
+                }
+
+                // Import Cash Opening Balance
+                LoadingMessage = "Importing Cash Opening Balance...";
+                var cashBalance = fetches.GetCashOpeningBalance(new DateTime(2026, 1, 1));
+                if (cashBalance != 0 && cashAccount != null && equityAccount != null)
+                {
+                    var cashEntry = new JournalEntry
+                    {
+                        JournalDate = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                        Description = "Cash Opening Balance Import",
+                        Reference = "OB-CASH",
+                        JournalType = "GENERAL",
+                        Status = "POSTED",
+                        Amount = Math.Abs(cashBalance),
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow
+                    };
+
+                    cashEntry.JournalLines.Add(new JournalLine
+                    {
+                        AccountId = cashAccount.AccountId,
+                        DebitAmount = cashBalance > 0 ? cashBalance : 0,
+                        CreditAmount = cashBalance < 0 ? Math.Abs(cashBalance) : 0,
+                        Description = "Cash Opening Balance",
+                        LineDate = cashEntry.JournalDate,
+                        CreatedAt = DateTime.UtcNow
+                    });
+
+                    cashEntry.JournalLines.Add(new JournalLine
+                    {
+                        AccountId = equityAccount.AccountId,
+                        DebitAmount = cashBalance < 0 ? Math.Abs(cashBalance) : 0,
+                        CreditAmount = cashBalance > 0 ? cashBalance : 0,
+                        Description = "Cash Opening Balance Offset",
+                        LineDate = cashEntry.JournalDate,
+                        CreatedAt = DateTime.UtcNow
+                    });
+
+                    await _journalService.CreateJournalEntryAsync(cashEntry);
+                }
+
+                // Import Bank Opening Balance
+                LoadingMessage = "Importing Bank Opening Balance...";
+                var bankBalance = fetches.GetBankOpeningBalance(new DateTime(2026, 1, 1));
+                if (bankBalance != 0 && bankAccount != null && equityAccount != null)
+                {
+                    var bankEntry = new JournalEntry
+                    {
+                        JournalDate = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                        Description = "Bank Opening Balance Import",
+                        Reference = "OB-BANK",
+                        JournalType = "GENERAL",
+                        Status = "POSTED",
+                        Amount = Math.Abs(bankBalance),
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow
+                    };
+
+                    bankEntry.JournalLines.Add(new JournalLine
+                    {
+                        AccountId = bankAccount.AccountId,
+                        DebitAmount = bankBalance > 0 ? bankBalance : 0,
+                        CreditAmount = bankBalance < 0 ? Math.Abs(bankBalance) : 0,
+                        Description = "Bank Opening Balance",
+                        LineDate = bankEntry.JournalDate,
+                        CreatedAt = DateTime.UtcNow
+                    });
+
+                    bankEntry.JournalLines.Add(new JournalLine
+                    {
+                        AccountId = equityAccount.AccountId,
+                        DebitAmount = bankBalance < 0 ? Math.Abs(bankBalance) : 0,
+                        CreditAmount = bankBalance > 0 ? bankBalance : 0,
+                        Description = "Bank Opening Balance Offset",
+                        LineDate = bankEntry.JournalDate,
+                        CreatedAt = DateTime.UtcNow
+                    });
+
+                    await _journalService.CreateJournalEntryAsync(bankEntry);
+                }
+
+                LoadingMessage = "Finalizing dashboard data...";
+                await LoadDashboardDataInternalAsync();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Import failed: {ex}");
+                System.Windows.MessageBox.Show($"Import failed: {ex.Message}");
+            }
+            finally
+            {
+                IsLoading = false;
+                _dbLock.Release();
             }
         }
 
         [RelayCommand]
         public async Task LoadDashboardDataAsync()
+        {
+            if (IsLoading) return;
+            
+            await _dbLock.WaitAsync();
+            IsLoading = true;
+            LoadingMessage = "Updating dashboard...";
+            try
+            {
+                await LoadDashboardDataInternalAsync();
+            }
+            finally
+            {
+                IsLoading = false;
+                _dbLock.Release();
+            }
+        }
+
+        private async Task LoadDashboardDataInternalAsync()
         {
             try
             {

@@ -120,7 +120,14 @@ namespace PrimeAppBooks.Services
                 // Pass the navigation parameter to the page if it has an Initialize method
                 if (_pendingNavigationParameter != null)
                 {
-                    // Try to find and call an Initialize method on the page's DataContext (ViewModel)
+                    // 1. Pass to the page itself if it implements IAnimatedPage
+                    if (_currentPage is IAnimatedPage animPage)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Calling OnNavigatedTo on {animPage.GetType().Name}");
+                        animPage.OnNavigatedTo(_pendingNavigationParameter);
+                    }
+
+                    // 2. Try to find and call an Initialize method on the page's DataContext (ViewModel)
                     var dataContext = _currentPage.DataContext;
                     if (dataContext != null)
                     {

@@ -1,0 +1,151 @@
+<base:BaseAnimatedPage
+    x:Class="PrimeAppBooks.Views.Pages.VendorsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:base="clr-namespace:PrimeAppBooks.Views.Pages"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:hc="https://handyorg.github.io/handycontrol"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:pages="clr-namespace:PrimeAppBooks.ViewModels.Pages"
+    d:DataContext="{d:DesignInstance Type=pages:VendorsPageViewModel}"
+    d:DesignHeight="700"
+    d:DesignWidth="1200"
+    Background="Transparent"
+    mc:Ignorable="d">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Header Section -->
+        <Border Grid.Row="0" Margin="5,0" Style="{StaticResource ModernCardStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <TextBlock Style="{StaticResource WelcomeTitleText}" Text="Vendor Directory" />
+                    <TextBlock Style="{StaticResource WelcomeSubtitleText}" Text="Manage your suppliers and service providers" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Filters Section -->
+        <Border Grid.Row="1" Margin="5,10" Style="{StaticResource ModernCardStyle}">
+            <StackPanel Orientation="Horizontal">
+                <hc:SearchBar
+                    Width="250"
+                    Margin="0,0,20,0"
+                    hc:InfoElement.Placeholder="Search Name or Code..."
+                    Style="{StaticResource SearchBarPlus}"
+                    Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+
+                <CheckBox Margin="0,0,20,0" Content="Show Inactive" IsChecked="{Binding ShowInactive}" />
+
+                <Button Command="{Binding ClearFiltersCommand}" Content="↺" FontSize="16" Style="{StaticResource ModernMiniButton}" ToolTip="Clear Filters" Margin="0,0,20,0" />
+
+                <Button Command="{Binding AddVendorCommand}" Content="➕ Add Vendor" Style="{StaticResource ModernActionButton}" />
+            </StackPanel>
+        </Border>
+
+        <!-- Vendors List and Details -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- List -->
+            <Border Grid.Column="0" Margin="5,0" Style="{StaticResource ModernCardStyle}">
+                <Grid>
+                    <DataGrid
+                        ItemsSource="{Binding Vendors}"
+                        SelectedItem="{Binding SelectedVendor}"
+                        AutoGenerateColumns="False"
+                        IsReadOnly="True"
+                        Style="{StaticResource ModernDataGridStyle}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="CODE" Binding="{Binding VendorCode}" Width="100" />
+                            <DataGridTemplateColumn Header="VENDOR NAME" Width="*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding VendorName}" FontWeight="SemiBold" Foreground="White" />
+                                            <TextBlock Text="{Binding ContactPerson}" FontSize="11" Foreground="#90FFFFFF" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="PHONE" Binding="{Binding Phone}" Width="150" />
+                            <DataGridTemplateColumn Header="ACTIONS" Width="100">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Command="{Binding DataContext.EditVendorCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                CommandParameter="{Binding}"
+                                                Content="Edit"
+                                                Style="{StaticResource ModernMiniButton}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <!-- Loading Overlay -->
+                    <Border Background="#80000000" Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <ProgressBar Width="50" Height="50" IsIndeterminate="True" Style="{StaticResource MaterialDesignCircularProgressBar}" />
+                    </Border>
+
+                    <!-- Empty State -->
+                    <TextBlock Text="No vendors found." HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16" Foreground="#60FFFFFF"
+                               Visibility="{Binding IsEmpty, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                </Grid>
+            </Border>
+
+            <!-- Details Panel -->
+            <Border Grid.Column="1" Margin="5,0" Style="{StaticResource ModernCardStyle}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Visibility="{Binding SelectedVendor, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Inverse}">
+                    <StackPanel DataContext="{Binding SelectedVendor}">
+                        <TextBlock Style="{StaticResource SectionHeaderText}" Text="📋 Vendor Details" Margin="0,0,0,15" />
+
+                        <Border Style="{StaticResource DetailInfoBorder}" Margin="0,0,0,15">
+                            <StackPanel>
+                                <TextBlock Text="{Binding VendorName}" FontSize="18" FontWeight="Bold" Foreground="White" TextWrapping="Wrap" />
+                                <TextBlock Text="{Binding VendorCode, StringFormat='{}Code: {0}'}" FontSize="12" Foreground="#AAAAAA" Margin="0,2,0,0" />
+                                <TextBlock Text="{Binding ContactPerson, StringFormat='{}Contact: {0}'}" Foreground="White" Margin="0,10,0,0" />
+                            </StackPanel>
+                        </Border>
+
+                        <Border Style="{StaticResource DetailInfoBorder}" Margin="0,0,0,15">
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource DetailLabelText}" Text="📞 Communication" />
+                                <TextBlock Text="{Binding Email, StringFormat='{}Email: {0}'}" Foreground="White" Margin="0,5,0,2" />
+                                <TextBlock Text="{Binding Phone, StringFormat='{}Phone: {0}'}" Foreground="White" />
+                            </StackPanel>
+                        </Border>
+
+                        <Border Style="{StaticResource DetailInfoBorder}" Margin="0,0,0,15">
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource DetailLabelText}" Text="📍 Location and Tax" />
+                                <TextBlock Text="Address:" Foreground="#AAAAAA" Margin="0,5,0,0" />
+                                <TextBlock Text="{Binding Address}" Foreground="White" TextWrapping="Wrap" Margin="5,0,0,5" />
+                                <TextBlock Text="{Binding TaxId, StringFormat='{}Tax ID: {0}'}" Foreground="White" Margin="0,5,0,0" />
+                            </StackPanel>
+                        </Border>
+
+                        <Border Style="{StaticResource DetailInfoBorder}">
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource DetailLabelText}" Text="📝 Notes" />
+                                <TextBlock Text="{Binding Notes}" Foreground="White" TextWrapping="Wrap" Margin="0,5,0,0" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+    </Grid>
+</base:BaseAnimatedPage>

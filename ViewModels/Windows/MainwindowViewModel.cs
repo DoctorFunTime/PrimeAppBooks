@@ -278,7 +278,7 @@ namespace PrimeAppBooks.ViewModels.Windows
         [RelayCommand]
         private void NavigateToVendors()
         {
-            // _navigationService.NavigateTo<VendorsPage>();
+            _navigationService.NavigateTo<VendorsPage>();
         }
 
         [RelayCommand]
@@ -427,6 +427,12 @@ namespace PrimeAppBooks.ViewModels.Windows
                     IsCreditNotesSelected = true;
                     IsSalesExpanded = true;
                     OnPropertyChanged(nameof(SalesExpandedVisibility));
+                    break;
+                
+                case VendorsPage:
+                    IsVendorsSelected = true;
+                    IsPurchasesExpanded = true;
+                    OnPropertyChanged(nameof(PurchasesExpandedVisibility));
                     break;
 
                 case PayablesPage:

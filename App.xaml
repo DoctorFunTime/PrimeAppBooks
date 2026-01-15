@@ -50,6 +50,8 @@
             <converters:BooleanToIntConverter x:Key="BooleanToIntConverter" />
             <converters:WidthToVisibilityConverter x:Key="WidthToVisibilityConverter" />
             <converters:BalanceIndicatorConverter x:Key="BalanceIndicatorConverter" />
+            <converters:BooleanToPaymentPlanBrushConverter x:Key="BooleanToPaymentPlanBrushConverter" />
+            <converters:BooleanToPaymentPlanTextConverter x:Key="BooleanToPaymentPlanTextConverter" />
             <converters:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter" />
 
             <!--  System Converters  -->

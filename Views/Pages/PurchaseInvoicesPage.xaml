@@ -3,26 +3,34 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:base="clr-namespace:PrimeAppBooks.Views.Pages"
+    xmlns:converters="clr-namespace:PrimeAppBooks.Conveters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:hc="https://handyorg.github.io/handycontrol"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:pages="clr-namespace:PrimeAppBooks.ViewModels.Pages"
-    d:DataContext="{d:DesignInstance Type=pages:PurchaseInvoicesPageViewModel}"
-    d:DesignHeight="900"
-    d:DesignWidth="1280"
+    xmlns:vm="clr-namespace:PrimeAppBooks.ViewModels.Pages"
+    d:DataContext="{d:DesignInstance Type=vm:PurchaseInvoicesPageViewModel}"
+    d:DesignHeight="700"
+    d:DesignWidth="1100"
     Background="Transparent"
     mc:Ignorable="d">
+
+    <base:BaseAnimatedPage.Resources>
+        <converters:StatusToVisibilityConverter x:Key="StatusToVisibilityConverter" />
+        <converters:StatusIndicatorConverter x:Key="StatusIndicatorConverter" />
+        <converters:StatusColorConverter x:Key="StatusColorConverter" />
+        <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+    </base:BaseAnimatedPage.Resources>
 
     <ScrollViewer Style="{StaticResource ModernScrollViewer}">
         <Grid Margin="5">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
             <!-- Header Section -->
-            <Border Grid.Row="0" Margin="5,10" Style="{StaticResource ModernCardStyle}">
+            <Border Grid.Row="0" Margin="5,0" Style="{StaticResource ModernCardStyle}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -31,53 +39,254 @@
 
                     <StackPanel Grid.Column="0">
                         <TextBlock Style="{StaticResource WelcomeTitleText}" Text="Purchase Invoices" />
-                        <TextBlock Style="{StaticResource WelcomeSubtitleText}" Text="Manage your vendor invoices and payables" />
+                        <TextBlock Style="{StaticResource WelcomeSubtitleText}" Text="Manage supplier bills, purchase orders, and payable balances" />
                     </StackPanel>
 
                     <StackPanel Grid.Column="1" Orientation="Horizontal">
-                        <Button
-                            Margin="5,0"
-                            Command="{Binding CreateNewInvoiceCommand}"
-                            Content="📝 New Purchase Invoice"
-                            Style="{StaticResource ModernActionButton}" />
-                        <Button
-                            Margin="5,0"
-                            Command="{Binding LoadInvoicesCommand}"
-                            Content="🔄 Refresh"
-                            Style="{StaticResource ModernSecondaryButton}" />
+                        <Button Margin="5,0" Command="{Binding CreateNewInvoiceCommand}" Content="📝 New Invoice" Style="{StaticResource ModernActionButton}" />
+                        <Button Margin="5,0" Command="{Binding AddVendorCommand}" Content="🚚 New Vendor" Style="{StaticResource ModernSecondaryButton}" />
                     </StackPanel>
                 </Grid>
             </Border>
 
-            <!-- Search & Filters -->
-            <Border Grid.Row="1" Margin="5" Style="{StaticResource ModernCardStyle}">
+            <!-- Quick Stats -->
+            <Grid Grid.Row="1" Margin="5,10">
+                <UniformGrid Columns="4">
+                    <Border Style="{StaticResource ModernCardStyle}">
+                        <StackPanel Style="{StaticResource CardContentContainer}">
+                            <TextBlock Style="{StaticResource DraftHeaderText}" Text="📝 Draft Bills" />
+                            <TextBlock Style="{StaticResource CardValueText}" Text="{Binding DraftCount}" />
+                            <TextBlock Style="{StaticResource CardSubText}" Text="Awaiting confirmation" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource ModernCardStyle}">
+                        <StackPanel Style="{StaticResource CardContentContainer}">
+                            <TextBlock Style="{StaticResource PostedHeaderText}" Text="✅ Finalized (Week)" />
+                            <TextBlock Style="{StaticResource CardValueText}" Text="{Binding PostedThisWeekCount}" />
+                            <TextBlock Style="{StaticResource CardSubText}" Text="Bills posted" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource ModernCardStyle}">
+                        <StackPanel Style="{StaticResource CardContentContainer}">
+                            <TextBlock Style="{StaticResource MonthlyHeaderText}" Text="📉 Purchases (Month)" />
+                            <TextBlock Style="{StaticResource CardValueText}" Text="{Binding TotalPurchasesThisMonth, StringFormat=C0}" />
+                            <TextBlock Style="{StaticResource CardSubText}" Text="Total cost recorded" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource ModernCardStyle}">
+                        <StackPanel Style="{StaticResource CardContentContainer}">
+                            <TextBlock Style="{StaticResource BalanceHeaderText}" Text="⚠️ Pending Due" />
+                            <TextBlock Foreground="#E74C3C" Style="{StaticResource CardValueText}" Text="{Binding OverdueCount}" />
+                            <TextBlock Style="{StaticResource CardSubText}" Text="Bills past due date" />
+                        </StackPanel>
+                    </Border>
+                </UniformGrid>
+            </Grid>
+
+            <!-- Filters -->
+            <Border Grid.Row="2" Margin="5,0" Style="{StaticResource ModernCardStyle}">
                 <Grid>
-                    <StackPanel Orientation="Horizontal">
-                        <StackPanel Margin="0,0,15,0" Width="300">
-                            <TextBlock Style="{StaticResource FilterLabelText}" Text="Search Invoices" />
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <Grid Grid.Row="0" Margin="0,0,0,20">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" Style="{StaticResource SectionHeaderText}" Text="🔍 Search and Filter" />
+
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <TextBlock Margin="0,0,8,0" VerticalAlignment="Center" Style="{StaticResource FilterLabelText}" Text="Show:" />
+                            <RadioButton Content="All" IsChecked="{Binding ShowAllInvoices}" Style="{StaticResource FilterToggleButton}" />
+                            <RadioButton Margin="5,0" Content="Drafts" IsChecked="{Binding ShowDraftsOnly}" Style="{StaticResource FilterToggleButton}" />
+                            <RadioButton Content="Posted" IsChecked="{Binding ShowPostedOnly}" Style="{StaticResource FilterToggleButton}" />
+                            <Button Margin="5,0" Command="{Binding ClearFiltersCommand}" Content="Clear" Style="{StaticResource ModernSecondaryButton}" />
+                        </StackPanel>
+                    </Grid>
+
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="2*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Margin="0,0,15,0">
+                            <TextBlock Style="{StaticResource FilterLabelText}" Text="Search Bill # or Vendor" />
                             <TextBox Style="{StaticResource ModernTextBoxStyle}" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
                         </StackPanel>
-                    </StackPanel>
+
+                        <StackPanel Grid.Column="1" Margin="0,0,15,0">
+                            <TextBlock Style="{StaticResource FilterLabelText}" Text="From Date" />
+                            <DatePicker Margin="0,5,0,0" SelectedDate="{Binding StartDate}" Style="{StaticResource CompactDatePickerStyle}" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2" Margin="0,0,15,0">
+                            <TextBlock Style="{StaticResource FilterLabelText}" Text="To Date" />
+                            <DatePicker Margin="0,5,0,0" SelectedDate="{Binding EndDate}" Style="{StaticResource CompactDatePickerStyle}" />
+                        </StackPanel>
+                    </Grid>
                 </Grid>
             </Border>
 
-            <!-- Invoices List -->
-            <Border Grid.Row="2" Margin="5,10" Style="{StaticResource ModernCardStyle}">
-                <DataGrid
-                    ItemsSource="{Binding Invoices}"
-                    AutoGenerateColumns="False"
-                    IsReadOnly="True"
-                    Style="{StaticResource ModernDataGridStyle}">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Invoice #" Binding="{Binding InvoiceNumber}" Width="*" />
-                        <DataGridTextColumn Header="Vendor ID" Binding="{Binding VendorId}" Width="*" />
-                        <DataGridTextColumn Header="Date" Binding="{Binding InvoiceDate, StringFormat='MMM dd, yyyy'}" Width="*" />
-                        <DataGridTextColumn Header="Due Date" Binding="{Binding DueDate, StringFormat='MMM dd, yyyy'}" Width="*" />
-                        <DataGridTextColumn Header="Total" Binding="{Binding TotalAmount, StringFormat=C}" Width="*" />
-                        <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="*" />
-                    </DataGrid.Columns>
-                </DataGrid>
-            </Border>
+            <!-- Main Content Grid -->
+            <Grid Grid.Row="3">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="3*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Invoices Grid -->
+                <Border Grid.Column="0" Margin="5,10" Style="{StaticResource ModernCardStyle}">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,15">
+                            <TextBlock Style="{StaticResource SectionHeaderText}" Text="📋 Purchase Bills" />
+                            <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="#7F8C8D" Text="{Binding ResultsSummary}" />
+                        </Grid>
+
+                        <DataGrid
+                            MaxHeight="600"
+                            GridLinesVisibility="None"
+                            ItemsSource="{Binding FilteredInvoices}"
+                            SelectedItem="{Binding SelectedInvoice}"
+                            SelectionMode="Single"
+                            Style="{StaticResource ModernDataGridStyle}">
+
+                            <DataGrid.RowStyle>
+                                <Style BasedOn="{StaticResource MaterialDesignDataGridRow}" TargetType="DataGridRow">
+                                    <Setter Property="Height" Value="40" />
+                                    <Setter Property="Background" Value="Transparent" />
+                                    <Style.Triggers>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter Property="Background" Value="#2A4A7B" />
+                                            <Setter Property="Foreground" Value="White" />
+                                        </Trigger>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#1E3A5F" />
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </DataGrid.RowStyle>
+
+                            <DataGrid.ColumnHeaderStyle>
+                                <Style BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}" TargetType="DataGridColumnHeader">
+                                    <Setter Property="Foreground" Value="#FF4472C4" />
+                                    <Setter Property="FontWeight" Value="Bold" />
+                                    <Setter Property="Background" Value="#1E1E1E" />
+                                    <Setter Property="BorderThickness" Value="0,0,0,1" />
+                                </Style>
+                            </DataGrid.ColumnHeaderStyle>
+
+                            <DataGrid.Columns>
+                                <DataGridTemplateColumn Width="Auto" Header="Status">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Border VerticalAlignment="Center" Background="{Binding Status, Converter={StaticResource StatusColorConverter}}" Style="{StaticResource TransactionStatusBadge}">
+                                                <TextBlock Foreground="Black" Style="{StaticResource StatusBadgeText}" Text="{Binding Status}" />
+                                            </Border>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+
+                                <DataGridTextColumn Width="Auto" Binding="{Binding InvoiceNumber}" Header="Bill #" IsReadOnly="True">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="VerticalAlignment" Value="Center" />
+                                            <Setter Property="Foreground" Value="Gainsboro" />
+                                            <Setter Property="FontWeight" Value="Medium" />
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+
+                                <DataGridTextColumn Width="Auto" Binding="{Binding InvoiceDate, StringFormat='MMM dd, yyyy'}" Header="Date" IsReadOnly="True">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="VerticalAlignment" Value="Center" />
+                                            <Setter Property="Foreground" Value="Gainsboro" />
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+
+                                <DataGridTextColumn Width="*" Binding="{Binding Vendor.VendorName}" Header="Vendor" IsReadOnly="True">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="VerticalAlignment" Value="Center" />
+                                            <Setter Property="Foreground" Value="Gainsboro" />
+                                            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+
+                                <DataGridTextColumn Width="Auto" Binding="{Binding TotalAmount, StringFormat=C}" Header="Total" IsReadOnly="True">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="VerticalAlignment" Value="Center" />
+                                            <Setter Property="HorizontalAlignment" Value="Right" />
+                                            <Setter Property="Foreground" Value="#E74C3C" />
+                                            <Setter Property="FontWeight" Value="Bold" />
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Side Detail Panel -->
+                <Border Grid.Column="1" MaxWidth="300" Margin="5,10" Style="{StaticResource ModernCardStyle}">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource SectionHeaderText}" Text="📋 Bill Details" />
+
+                        <StackPanel Margin="0,10,0,0" Visibility="{Binding SelectedInvoice, Converter={StaticResource NullToVisibilityConverter}}">
+                            <Border Margin="0,0,0,10" Style="{StaticResource DetailInfoBorder}">
+                                <StackPanel>
+                                    <TextBlock Style="{StaticResource DetailHeaderText}" Text="{Binding SelectedInvoice.InvoiceNumber}" />
+                                    <TextBlock Style="{StaticResource DetailSubText}" Text="{Binding SelectedInvoice.InvoiceDate, StringFormat='MMM dd, yyyy'}" />
+                                    <Border Margin="0,5,0,0" HorizontalAlignment="Left" Background="{Binding SelectedInvoice.Status, Converter={StaticResource StatusColorConverter}}" Style="{StaticResource TransactionStatusBadge}">
+                                        <TextBlock Style="{StaticResource StatusBadgeText}" Text="{Binding SelectedInvoice.Status}" />
+                                    </Border>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Margin="0,0,0,10" Style="{StaticResource DetailInfoBorder}">
+                                <StackPanel>
+                                    <TextBlock Style="{StaticResource DetailLabelText}" Text="Vendor" />
+                                    <TextBlock Style="{StaticResource DetailValueText}" Text="{Binding SelectedInvoice.Vendor.VendorName}" />
+                                    <TextBlock FontSize="12" Foreground="Gray" Style="{StaticResource DetailValueText}" Text="{Binding SelectedInvoice.Vendor.Email}" />
+                                </StackPanel>
+                            </Border>
+
+                            <Border Margin="0,0,0,10" Style="{StaticResource DetailInfoBorder}">
+                                <StackPanel>
+                                    <TextBlock Style="{StaticResource DetailLabelText}" Text="Summary" />
+                                    <Grid Margin="0,2">
+                                        <TextBlock Foreground="Gray" Text="Total:" />
+                                        <TextBlock HorizontalAlignment="Right" FontWeight="Bold" Foreground="White" Text="{Binding SelectedInvoice.TotalAmount, StringFormat=C}" />
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+
+                            <StackPanel Margin="0,10,0,0">
+                                <Button Margin="0,0,0,5" Command="{Binding EditInvoiceCommand}" CommandParameter="{Binding SelectedInvoice}" Content="📝 Edit Bill" Style="{StaticResource ModernSecondaryButton}" />
+                                <Button Margin="0,0,0,5" Command="{Binding PostInvoiceCommand}" CommandParameter="{Binding SelectedInvoice}" Content="✅ Post Bill" Style="{StaticResource ModernSecondaryButton}" Visibility="{Binding SelectedInvoice.Status, Converter={StaticResource StatusToVisibilityConverter}}" />
+                                <Button Command="{Binding DeleteInvoiceCommand}" CommandParameter="{Binding SelectedInvoice}" Content="🗑️ Delete Draft" Style="{StaticResource ModernSecondaryButton}" Visibility="{Binding SelectedInvoice.Status, Converter={StaticResource StatusToVisibilityConverter}}" />
+                            </StackPanel>
+                        </StackPanel>
+
+                        <StackPanel Margin="0,20,0,0" HorizontalAlignment="Center" Visibility="{Binding SelectedInvoice, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Invert}">
+                            <TextBlock Margin="0,0,0,10" HorizontalAlignment="Center" FontSize="48" Opacity="0.3" Text="🧾" />
+                            <TextBlock HorizontalAlignment="Center" Style="{StaticResource DetailSubText}" Text="Select a bill to view details" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </Grid>
         </Grid>
     </ScrollViewer>
 </base:BaseAnimatedPage>

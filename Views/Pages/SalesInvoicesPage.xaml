@@ -34,7 +34,7 @@
             <!--  Header Section  -->
             <Border
                 Grid.Row="0"
-                Margin="5,10"
+                Margin="5,0"
                 Style="{StaticResource ModernCardStyle}">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -63,7 +63,7 @@
             </Border>
 
             <!--  Quick Stats  -->
-            <Grid Grid.Row="1" Margin="0,0,0,10">
+            <Grid Grid.Row="1" Margin="5,10">
                 <UniformGrid Columns="4">
                     <!--  Drafts  -->
                     <Border Style="{StaticResource ModernCardStyle}">
@@ -109,7 +109,7 @@
             <!--  Filters  -->
             <Border
                 Grid.Row="2"
-                Margin="5"
+                Margin="5,0"
                 Style="{StaticResource ModernCardStyle}">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -206,9 +206,7 @@
                     Style="{StaticResource ModernCardStyle}">
                     <StackPanel>
                         <Grid Margin="0,0,0,15">
-                            <TextBlock
-                                Style="{StaticResource SectionHeaderText}"
-                                Text="📋 Invoice List" />
+                            <TextBlock Style="{StaticResource SectionHeaderText}" Text="📋 Invoice List" />
                             <TextBlock
                                 HorizontalAlignment="Right"
                                 VerticalAlignment="Center"
@@ -269,8 +267,8 @@
 
                                 <!--  Number  -->
                                 <DataGridTextColumn
-                                    Binding="{Binding InvoiceNumber}"
                                     Width="Auto"
+                                    Binding="{Binding InvoiceNumber}"
                                     Header="Invoice #"
                                     IsReadOnly="True">
                                     <DataGridTextColumn.ElementStyle>
@@ -284,9 +282,9 @@
 
                                 <!--  Date  -->
                                 <DataGridTextColumn
+                                    Width="Auto"
                                     Binding="{Binding InvoiceDate, StringFormat='MMM dd, yyyy'}"
                                     Header="Date"
-                                    Width="Auto"
                                     IsReadOnly="True">
                                     <DataGridTextColumn.ElementStyle>
                                         <Style TargetType="TextBlock">
@@ -313,9 +311,9 @@
 
                                 <!--  Amount  -->
                                 <DataGridTextColumn
+                                    Width="Auto"
                                     Binding="{Binding TotalAmount, StringFormat=C}"
                                     Header="Total"
-                                    Width="Auto"
                                     IsReadOnly="True">
                                     <DataGridTextColumn.ElementStyle>
                                         <Style TargetType="TextBlock">
@@ -335,7 +333,7 @@
                 <Border
                     Grid.Column="1"
                     MaxWidth="300"
-                    Margin="3,10"
+                    Margin="5,10"
                     Style="{StaticResource ModernCardStyle}">
                     <StackPanel>
                         <TextBlock Style="{StaticResource SectionHeaderText}" Text="📋 Invoice Details" />
@@ -363,7 +361,11 @@
                                 <StackPanel>
                                     <TextBlock Style="{StaticResource DetailLabelText}" Text="Customer" />
                                     <TextBlock Style="{StaticResource DetailValueText}" Text="{Binding SelectedInvoice.Customer.CustomerName}" />
-                                    <TextBlock Style="{StaticResource DetailValueText}" Text="{Binding SelectedInvoice.Customer.Email}" FontSize="12" Foreground="Gray" />
+                                    <TextBlock
+                                        FontSize="12"
+                                        Foreground="Gray"
+                                        Style="{StaticResource DetailValueText}"
+                                        Text="{Binding SelectedInvoice.Customer.Email}" />
                                 </StackPanel>
                             </Border>
 
@@ -372,8 +374,12 @@
                                 <StackPanel>
                                     <TextBlock Style="{StaticResource DetailLabelText}" Text="Summary" />
                                     <Grid Margin="0,2">
-                                        <TextBlock Text="Total:" Foreground="Gray" />
-                                        <TextBlock Text="{Binding SelectedInvoice.TotalAmount, StringFormat=C}" HorizontalAlignment="Right" FontWeight="Bold" Foreground="White" />
+                                        <TextBlock Foreground="Gray" Text="Total:" />
+                                        <TextBlock
+                                            HorizontalAlignment="Right"
+                                            FontWeight="Bold"
+                                            Foreground="White"
+                                            Text="{Binding SelectedInvoice.TotalAmount, StringFormat=C}" />
                                     </Grid>
                                 </StackPanel>
                             </Border>

@@ -1,12 +1,25 @@
+using PrimeAppBooks.ViewModels.Pages;
 using System.Windows.Controls;
 
 namespace PrimeAppBooks.Views.Pages
 {
-    public partial class PayablesPage : Page
+    /// <summary>
+    /// Interaction logic for PayablesPage.xaml
+    /// </summary>
+    public partial class PayablesPage : BaseAnimatedPage
     {
-        public PayablesPage()
+        public PayablesPage(PayablesPageViewModel viewModel)
         {
             InitializeComponent();
+            DataContext = viewModel;
+        }
+
+        public override async void OnNavigatedTo(object parameter)
+        {
+            if (DataContext is PayablesPageViewModel viewModel)
+            {
+                await viewModel.LoadDataAsync();
+            }
         }
     }
 }

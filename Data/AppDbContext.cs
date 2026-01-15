@@ -37,6 +37,7 @@ namespace PrimeAppBooks.Data
         public DbSet<PaymentTerm> PaymentTerms { get; set; }
         public DbSet<PaymentPlan> PaymentPlans { get; set; }
         public DbSet<CollectionFollowup> CollectionFollowups { get; set; }
+        public DbSet<StudentGrade> StudentGrades { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {

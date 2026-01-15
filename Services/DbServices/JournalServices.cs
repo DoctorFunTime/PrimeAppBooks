@@ -21,6 +21,58 @@ namespace PrimeAppBooks.Services.DbServices
 
         #region Journal Entries
 
+        public async Task<JournalEntry> CreateBadDebtWriteOffJournalAsync(
+            int customerId,
+            decimal amount,
+            string notes,
+            int arAccountId,
+            int badDebtsAccountId,
+            string customerReference,
+            int userId = 1)
+        {
+            var journal = new JournalEntry
+            {
+                JournalDate = DateTime.UtcNow,
+                Description = notes,
+                Reference = $"WO-{customerReference}",
+                JournalType = "GENERAL",
+                Status = "POSTED",
+                PostedAt = DateTime.UtcNow,
+                PostedBy = userId,
+                Amount = amount,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+
+            // Debit Bad Debts Expense
+            journal.JournalLines.Add(new JournalLine
+            {
+                AccountId = badDebtsAccountId,
+                DebitAmount = amount,
+                CreditAmount = 0,
+                Description = notes,
+                ContactId = customerId,
+                ContactType = "Customer",
+                LineDate = journal.JournalDate,
+                CreatedAt = DateTime.UtcNow
+            });
+
+            // Credit Accounts Receivable
+            journal.JournalLines.Add(new JournalLine
+            {
+                AccountId = arAccountId,
+                DebitAmount = 0,
+                CreditAmount = amount,
+                Description = notes,
+                ContactId = customerId,
+                ContactType = "Customer",
+                LineDate = journal.JournalDate,
+                CreatedAt = DateTime.UtcNow
+            });
+
+            return await CreateJournalEntryAsync(journal);
+        }
+
         public async Task<JournalEntry> CreateJournalEntryAsync(JournalEntry journalEntry)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
@@ -538,6 +590,38 @@ namespace PrimeAppBooks.Services.DbServices
             }
 
             return result;
+        }
+
+        public async Task<List<JournalLine>> GetCustomerTransactionsAsync(int customerId, int arAccountId = 1100, DateTime? fromDate = null, DateTime? toDate = null)
+        {
+            var query = _context.JournalLines
+                .Include(l => l.JournalEntry)
+                .Include(l => l.Currency)
+                .Where(l => l.JournalEntry.Status == "POSTED" && 
+                           (l.AccountId == arAccountId || (l.ContactId == customerId && l.ContactType == "Customer")));
+
+            // Filter for lines that are either:
+            // 1. Specifically tagged with this customer (ContactId)
+            // 2. OR if searching generally in AR account, make sure we only get this customer's lines (if linked)
+            // Ideally, lines in AR should have ContactId set.
+            query = query.Where(l => l.ContactId == customerId && l.ContactType == "Customer");
+            
+            if (fromDate.HasValue)
+            {
+                var utcFrom = fromDate.Value.Kind == DateTimeKind.Utc ? fromDate.Value : fromDate.Value.ToUniversalTime();
+                query = query.Where(l => l.LineDate >= utcFrom);
+            }
+
+            if (toDate.HasValue)
+            {
+                var utcTo = toDate.Value.Kind == DateTimeKind.Utc ? toDate.Value : toDate.Value.ToUniversalTime();
+                query = query.Where(l => l.LineDate <= utcTo);
+            }
+
+            return await query
+                .OrderBy(l => l.LineDate)
+                .ThenBy(l => l.CreatedAt)
+                .ToListAsync();
         }
 
         #endregion Reporting and Analysis

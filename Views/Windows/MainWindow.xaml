@@ -7,7 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:views="clr-namespace:PrimeAppBooks.Views.Controls"
     Title="PrimeApp Books"
-    Width="1310"
+    Width="1330"
     Height="700"
     MinWidth="980"
     MinHeight="560"
@@ -221,7 +221,7 @@
                                                         GroupName="Navigation"
                                                         IsChecked="{Binding IsChartOfAccountsSelected}"
                                                         Style="{StaticResource ModernRadioButtonStyle}" />
-                                            
+
                                             <!--  Transactions Expandable Section  -->
                                             <ToggleButton
                                                         Content="💸  Transactions"
@@ -262,7 +262,7 @@
                                                         FontWeight="Bold"
                                                         Foreground="#90FFFFFF"
                                                         Text="FINANCIALS" />
-                                            
+
                                             <!--  Sales & Receivables Expandable Section  -->
                                             <ToggleButton
                                                         Content="💰  Sales &amp; Receivables"
@@ -429,7 +429,7 @@
                                                         IsChecked="{Binding IsTransactionsExpanded}"
                                                         Style="{StaticResource CollapsedExpandableIconStyle}"
                                                         ToolTip="Transactions" />
-                                            
+
                                             <!--  Transactions Sub-Items in Collapsed Mode  -->
                                             <StackPanel Visibility="{Binding TransactionsExpandedVisibility}">
                                                 <RadioButton
@@ -469,7 +469,7 @@
                                                         IsChecked="{Binding IsSalesExpanded}"
                                                         Style="{StaticResource CollapsedExpandableIconStyle}"
                                                         ToolTip="Sales &amp; Receivables" />
-                                            
+
                                             <!--  Sales Sub-Items in Collapsed Mode  -->
                                             <StackPanel Visibility="{Binding SalesExpandedVisibility}">
                                                 <RadioButton
@@ -508,13 +508,13 @@
                                                             Style="{StaticResource CollapsedRadioButtonStyle}"
                                                             ToolTip="Customer Analytics" />
                                             </StackPanel>
-                                            
+
                                             <ToggleButton
                                                         Content="🛍️"
                                                         IsChecked="{Binding IsPurchasesExpanded}"
                                                         Style="{StaticResource CollapsedExpandableIconStyle}"
                                                         ToolTip="Purchases &amp; Payables" />
-                                            
+
                                             <!--  Purchases Sub-Items in Collapsed Mode  -->
                                             <StackPanel Visibility="{Binding PurchasesExpandedVisibility}">
                                                 <RadioButton
@@ -539,7 +539,7 @@
                                                             Style="{StaticResource CollapsedRadioButtonStyle}"
                                                             ToolTip="Debit Notes" />
                                             </StackPanel>
-                                            
+
                                             <RadioButton
                                                         Command="{Binding NavigateToReportsCommand}"
                                                         Content="📈"

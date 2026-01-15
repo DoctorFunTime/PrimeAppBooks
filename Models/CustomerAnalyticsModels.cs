@@ -36,11 +36,15 @@ namespace PrimeAppBooks.Models
     {
         public int CustomerId { get; set; }
         public string CustomerName { get; set; }
+        public string CustomerPhone { get; set; }
         public decimal TotalOutstanding { get; set; }
         public decimal OverdueAmount { get; set; }
         public double AvgDaysToPay { get; set; }
         public decimal TotalInvoicedYTD { get; set; }
         public decimal TotalPaidYTD { get; set; }
+        public bool HasActivePaymentPlan { get; set; }
+        public DateTime? NextFollowupDate { get; set; }
+        public string FollowupUrgency { get; set; } // Red, Orange, Normal
         public List<CustomerAgingBucket> AgingBuckets { get; set; } = new();
     }
 

@@ -16,13 +16,14 @@
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
         <!--  Header Section  -->
         <Border
             Grid.Row="0"
-            Margin="0,0,0,20"
+            Margin="5,0"
             Style="{StaticResource ModernCardStyle}">
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -34,73 +35,101 @@
                     <TextBlock Style="{StaticResource WelcomeTitleText}" Text="Customer Directory" />
                     <TextBlock Style="{StaticResource WelcomeSubtitleText}" Text="Manage your clinical and commercial client relationships" />
                 </StackPanel>
-
-                <StackPanel
-                    Grid.Column="1"
-                    VerticalAlignment="Center"
-                    Orientation="Horizontal">
-
-                    <!-- Name Filter -->
-                    <hc:SearchBar
-                        Width="180"
-                        Margin="0,0,10,0"
-                        hc:InfoElement.Placeholder="Name / Code..."
-                        Style="{StaticResource SearchBarPlus}"
-                        Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
-
-                    <!-- Student ID Filter -->
-                    <hc:SearchBar
-                        Width="140"
-                        Margin="0,0,10,0"
-                        hc:InfoElement.Placeholder="Student ID..."
-                        Style="{StaticResource SearchBarPlus}"
-                        Text="{Binding SearchStudentId, UpdateSourceTrigger=PropertyChanged}" />
-
-                    <!-- Grade Level Filter -->
-                    <ComboBox
-                        Width="130"
-                        Margin="0,0,10,0"
-                        ItemsSource="{Binding GradeLevels}"
-                        SelectedItem="{Binding SelectedGrade}"
-                        Style="{StaticResource ModernComboBox}"
-                        ToolTip="Filter by Grade" />
-
-                    <!-- Clear Filter -->
-                    <!-- Clear Filters Button -->
-                    <Button
-                        Margin="0,0,10,0"
-                        Command="{Binding ClearFiltersCommand}"
-                        Content="↺"
-                        FontSize="16"
-                        Style="{StaticResource ModernMiniButton}"
-                        ToolTip="Clear all filters" />
-
-                    <!-- Analytics Button -->
-                    <Button
-                        Command="{Binding NavigateToAnalyticsCommand}"
-                        Content="📈 Analytics"
-                        Style="{StaticResource ModernSecondaryButton}"
-                        ToolTip="View customer analytics and aging reports" />
-
-                    <Button
-                        Command="{Binding AddCustomerCommand}"
-                        Content="➕ Add Customer"
-                        Style="{StaticResource ModernActionButton}" />
-                </StackPanel>
             </Grid>
         </Border>
 
-        <!--  Customers List  -->
         <Grid Grid.Row="1" Margin="0,0,0,0">
+            <!--  Entry Header Information  -->
+            <Border
+                Grid.Row="1"
+                Margin="5,10"
+                Style="{StaticResource ModernCardStyle}">
+                <Grid>
+                    <StackPanel
+                        Grid.Column="1"
+                        VerticalAlignment="Center"
+                        Orientation="Horizontal">
+
+                        <!--  Name Filter  -->
+                        <hc:SearchBar
+                            Width="150"
+                            Margin="0,0,20,0"
+                            hc:InfoElement.Placeholder="Name / Code..."
+                            Style="{StaticResource SearchBarPlus}"
+                            Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+
+                        <!--  Student ID Filter  -->
+                        <hc:SearchBar
+                            Width="80"
+                            Margin="0,0,20,0"
+                            hc:InfoElement.Placeholder="Student ID..."
+                            Style="{StaticResource SearchBarPlus}"
+                            Text="{Binding SearchStudentId, UpdateSourceTrigger=PropertyChanged}" />
+
+                        <!--  Grade Level Filter  -->
+                        <ComboBox
+                            Width="200"
+                            Margin="0,0,10,0"
+                            ItemsSource="{Binding GradeLevels}"
+                            SelectedItem="{Binding SelectedGrade}"
+                            Style="{StaticResource ModernComboBox}"
+                            ToolTip="Filter by Grade" />
+
+                        <CheckBox
+                            Margin="0,0,20,0"
+                            Content="Show Inactive"
+                            IsChecked="{Binding ShowInactive}" />
+
+                        <!--  Clear Filter  -->
+                        <!--  Clear Filters Button  -->
+                        <Button
+                            Margin="0,0,20,0"
+                            Command="{Binding ClearFiltersCommand}"
+                            Content="↺"
+                            FontSize="16"
+                            Style="{StaticResource ModernMiniButton}"
+                            ToolTip="Clear all filters" />
+
+                        <!--  Analytics Button  -->
+                        <Button
+                            Margin="0,0,20,0"
+                            Command="{Binding NavigateToAnalyticsCommand}"
+                            Content="📈 Analytics"
+                            Style="{StaticResource ModernSecondaryButton}"
+                            ToolTip="View customer analytics and aging reports" />
+
+                        <Button
+                            Command="{Binding AddCustomerCommand}"
+                            Content="➕ Add Customer"
+                            Style="{StaticResource ModernActionButton}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!--  Customers List  -->
+        <Grid Grid.Row="2" Margin="0,0,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="3*" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <Border Grid.Row="1" Style="{StaticResource ModernCardStyle}">
+            <Border
+                Grid.Row="1"
+                Margin="5,0"
+                Padding="8"
+                Style="{StaticResource ModernCardStyle}">
                 <Grid>
                     <DataGrid
+                        Margin="0"
+                        HorizontalAlignment="Stretch"
+                        AutoGenerateColumns="False"
+                        BorderThickness="0"
+                        CanUserAddRows="False"
+                        CanUserDeleteRows="False"
                         GridLinesVisibility="None"
                         ItemsSource="{Binding Customers}"
+                        ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                        ScrollViewer.VerticalScrollBarVisibility="Auto"
                         SelectedItem="{Binding SelectedCustomer}"
                         SelectionMode="Single"
                         Style="{StaticResource ModernDataGridStyle}">
@@ -191,7 +220,7 @@
                                 Width="120"
                                 Binding="{Binding Phone}"
                                 Header="PHONE" />
-                            <DataGridTemplateColumn Width="150" Header="AUTO-BILLING">
+                            <DataGridTemplateColumn Width="120" Header="AUTO-BILLING">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel VerticalAlignment="Center">
@@ -210,17 +239,25 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Width="120" Header="ACTIONS">
+                            <DataGridTemplateColumn Width="150" Header="ACTIONS">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal">
                                             <Button
-                                                Margin="0,0,5,0"
+                                                Margin="0,0,3,0"
                                                 Padding="8,4"
                                                 Command="{Binding DataContext.EditCustomerCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                 CommandParameter="{Binding}"
                                                 Content="Edit"
-                                                Style="{StaticResource ModernSecondaryButton}" />
+                                                Style="{StaticResource ModernMiniButton}" />
+
+                                            <Button
+                                                Margin="3,0,0,0"
+                                                Command="{Binding DataContext.ViewStatementCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                CommandParameter="{Binding}"
+                                                Content="Statement"
+                                                Style="{StaticResource ModernMiniButton}"
+                                                ToolTip="View Statement of Account" />
                                         </StackPanel>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
@@ -240,20 +277,20 @@
                     </StackPanel>
 
                     <!--  Loading Overlay  -->
-                    <!--<Border Background="#80000000" Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <ProgressBar
-                        Width="50"
-                        Height="50"
-                        IsIndeterminate="True"
-                        Style="{StaticResource MaterialDesignCircularProgressBar}" />
-                </Border>-->
+                    <Border Background="#80000000" Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <ProgressBar
+                            Width="50"
+                            Height="50"
+                            IsIndeterminate="True"
+                            Style="{StaticResource MaterialDesignCircularProgressBar}" />
+                    </Border>
                 </Grid>
             </Border>
             <!--  Right Panel - Customer Details  -->
             <Border
                 Grid.Column="1"
                 MaxWidth="400"
-                Margin="10,0,0,0"
+                Margin="5,0"
                 Style="{StaticResource ModernCardStyle}">
                 <Grid>
 
@@ -450,9 +487,7 @@
                                     <TextBlock Style="{StaticResource DetailLabelText}" Text="⚙️ Auto-Invoice" />
 
                                     <StackPanel Visibility="{Binding IsAutoInvoiceEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                        <TextBlock
-                                            Margin="0,5,0,2"
-                                            Foreground="White">
+                                        <TextBlock Margin="0,5,0,2" Foreground="White">
                                             <Run Text="{Binding AutoInvoiceFrequency}" />
                                             <Run Text=" (Every " />
                                             <Run Text="{Binding AutoInvoiceInterval}" />
@@ -462,9 +497,7 @@
                                             Margin="0,0,0,2"
                                             Foreground="#3498DB"
                                             Text="{Binding AutoInvoiceAmount, StringFormat='Amount: {0:C}'}" />
-                                        <TextBlock
-                                            Foreground="#AAAAAA"
-                                            Text="{Binding NextAutoInvoiceDate, StringFormat='Next: {0:d}'}" />
+                                        <TextBlock Foreground="#AAAAAA" Text="{Binding NextAutoInvoiceDate, StringFormat='Next: {0:d}'}" />
                                     </StackPanel>
 
                                     <TextBlock

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using PrimeAppBooks.Data;
 using PrimeAppBooks.Models;
 using System;
@@ -174,11 +175,29 @@ namespace PrimeAppBooks.Services
                 }
             }
 
+            // Drawings
+            foreach (var account in equity.Where(a => a.AccountSubtype == "Owner's Equity"))
+            {
+                if (accountBalances.TryGetValue(account.AccountId, out var data) && Math.Abs(data.Balance) > 0.01m)
+                {
+                    report.Equity.Add(new AccountLineItem
+                    {
+                        AccountId = account.AccountId,
+                        AccountNumber = account.AccountNumber,
+                        AccountName = account.AccountName,
+                        AccountType = account.AccountType,
+                        AccountSubtype = account.AccountSubtype,
+                        NormalBalance = account.NormalBalance,
+                        Amount = data.Balance
+                    });
+                    report.TotalEquity += data.Balance;
+                }
+            }
             // Calculate Net Income for previous years (which should be in Retained Earnings)
             // If books haven't been closed, we need to calculate this manually
             var fiscalYearStart = GetFiscalYearStart(asOfDate);
             var historicalNetIncome = await CalculateNetIncomeAsync(new DateTime(1900, 1, 1), fiscalYearStart.AddDays(-1));
-            
+
             bool retainedEarningsAdded = false;
 
             // Retained Earnings
@@ -188,7 +207,7 @@ namespace PrimeAppBooks.Services
                 {
                     // Even if balance is 0, we might need to show it if we have historical net income to add
                     decimal finalAmount = data.Balance;
-                    
+
                     if (!retainedEarningsAdded)
                     {
                         finalAmount += historicalNetIncome;
@@ -217,7 +236,7 @@ namespace PrimeAppBooks.Services
             {
                 report.Equity.Add(new AccountLineItem
                 {
-                    AccountNumber = "", 
+                    AccountNumber = "",
                     AccountName = "Retained Earnings (Calculated)",
                     AccountType = "EQUITY",
                     AccountSubtype = "RETAINED_EARNINGS",
@@ -584,54 +603,63 @@ namespace PrimeAppBooks.Services
 
             var operatingTotal = netIncome;
 
-            // Add back non-cash expenses
-            var depreciation = await GetAccountActivitySumAsync("Depreciation Expense", startDate, endDate);
-            if (Math.Abs(depreciation) > 0.01m)
+            // Add back non-cash expenses (Depreciation frequently named accounts)
+            var depreciationAccounts = await _context.ChartOfAccounts
+                .Where(a => a.IsActive && a.AccountType == "EXPENSE" && (a.AccountName.Contains("Depreciation") || a.AccountName.Contains("Amortization")))
+                .ToListAsync();
+
+            foreach (var depAcc in depreciationAccounts)
             {
-                report.OperatingActivities.Add(new CashFlowLineItem
+                var amount = await GetAccountBalanceForPeriodAsync(depAcc.AccountId, startDate, endDate);
+                if (Math.Abs(amount) > 0.01m)
                 {
-                    Description = "Depreciation & Amortization",
-                    Amount = depreciation,
-                    Category = "OPERATING"
-                });
-                operatingTotal += depreciation;
+                    report.OperatingActivities.Add(new CashFlowLineItem
+                    {
+                        Description = depAcc.AccountName,
+                        Amount = amount, // Positive for expense (debit)
+                        Category = "OPERATING"
+                    });
+                    operatingTotal += amount;
+                }
             }
 
-            // Changes in working capital
-            var arChange = await GetAccountBalanceChangeAsync("Accounts Receivable", startDate, endDate);
-            if (Math.Abs(arChange) > 0.01m)
-            {
-                report.OperatingActivities.Add(new CashFlowLineItem
-                {
-                    Description = "Change in Accounts Receivable",
-                    Amount = -arChange, // Increase in AR decreases cash
-                    Category = "OPERATING"
-                });
-                operatingTotal -= arChange;
-            }
+            // Changes in working capital (Operating Assets & Liabilities)
+            // We include all active Assets and Liabilities, but exclude fixed assets and long-term debt.
+            // This is more robust than checking for specific "CURRENT_*" subtypes which might be missing.
+            var workingCapitalAccounts = await _context.ChartOfAccounts
+                .Where(a => a.IsActive && 
+                           (a.AccountType == "ASSET" || a.AccountType == "LIABILITY") &&
+                           a.AccountSubtype != "FIXED_ASSET" && 
+                           a.AccountSubtype != "INTANGIBLE_ASSET" &&
+                           a.AccountSubtype != "LONG_TERM_LIABILITY" &&
+                           a.AccountSubtype != "Fixed Assets" &&
+                           a.AccountSubtype != "Long Term Debt")
+                .ToListAsync();
 
-            var inventoryChange = await GetAccountBalanceChangeAsync("Inventory", startDate, endDate);
-            if (Math.Abs(inventoryChange) > 0.01m)
+            foreach (var acc in workingCapitalAccounts)
             {
-                report.OperatingActivities.Add(new CashFlowLineItem
-                {
-                    Description = "Change in Inventory",
-                    Amount = -inventoryChange,
-                    Category = "OPERATING"
-                });
-                operatingTotal -= inventoryChange;
-            }
+                // Skip Cash and Bank accounts (they are the target, not the change component)
+                if (cashAccounts.Any(c => c.AccountId == acc.AccountId)) continue;
 
-            var apChange = await GetAccountBalanceChangeAsync("Accounts Payable", startDate, endDate);
-            if (Math.Abs(apChange) > 0.01m)
-            {
-                report.OperatingActivities.Add(new CashFlowLineItem
+                var change = await GetAccountBalanceChangeAsync(acc.AccountId, startDate, endDate);
+                if (Math.Abs(change) > 0.01m)
                 {
-                    Description = "Change in Accounts Payable",
-                    Amount = apChange, // Increase in AP increases cash
-                    Category = "OPERATING"
-                });
-                operatingTotal += apChange;
+                    // For both asset and liability adjustments in indirect method:
+                    // Change = DebitBalance_End - DebitBalance_Start
+                    // Cash Impact = -Change
+                    
+                    // Logic check:
+                    // Asset increase (Debit up) -> Change(+), Cash Outflow(-) -> Correct (Amount = -change)
+                    // Liability increase (Credit up, Debit down) -> Change(-), Cash Inflow(+) -> Correct (Amount = -change)
+
+                    report.OperatingActivities.Add(new CashFlowLineItem
+                    {
+                        Description = $"Change in {acc.AccountName}",
+                        Amount = -change,
+                        Category = "OPERATING"
+                    });
+                    operatingTotal -= change;
+                }
             }
 
             report.NetCashFromOperating = operatingTotal;
@@ -747,6 +775,14 @@ namespace PrimeAppBooks.Services
             return await GetAccountBalanceForPeriodAsync(account.AccountId, startDate, endDate);
         }
 
+        private async Task<decimal> GetAccountBalanceChangeAsync(int accountId, DateTime startDate, DateTime endDate)
+        {
+            var endBalance = await GetAccountBalanceAsync(accountId, endDate);
+            var startBalance = await GetAccountBalanceAsync(accountId, startDate.AddDays(-1));
+
+            return endBalance - startBalance;
+        }
+
         private async Task<decimal> GetAccountBalanceChangeAsync(string accountName, DateTime startDate, DateTime endDate)
         {
             var account = await _context.ChartOfAccounts
@@ -754,10 +790,7 @@ namespace PrimeAppBooks.Services
 
             if (account == null) return 0;
 
-            var endBalance = await GetAccountBalanceAsync(account.AccountId, endDate);
-            var startBalance = await GetAccountBalanceAsync(account.AccountId, startDate.AddDays(-1));
-
-            return endBalance - startBalance;
+            return await GetAccountBalanceChangeAsync(account.AccountId, startDate, endDate);
         }
 
         private DateTime GetFiscalYearStart(DateTime date)

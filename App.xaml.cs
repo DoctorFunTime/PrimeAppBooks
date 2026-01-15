@@ -12,6 +12,8 @@ using PrimeAppBooks.ViewModels.Windows;
 using PrimeAppBooks.Views.Pages;
 using PrimeAppBooks.Views.Pages.SubTransactionsPage;
 using PrimeAppBooks.Views.Windows;
+using QuestPDF.Infrastructure;
+using QuestPDF.Settings;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -23,6 +25,9 @@ namespace PrimeAppBooks
 
         protected override void OnStartup(StartupEventArgs e)
         {
+            // Set QuestPDF license as early as possible
+            QuestPDF.Settings.License = LicenseType.Community;
+
             base.OnStartup(e);
             ShutdownMode = ShutdownMode.OnMainWindowClose;
 
@@ -51,10 +56,13 @@ namespace PrimeAppBooks
             // Register Sales and Purchase Services
             services.AddScoped<SalesServices>();
             services.AddScoped<PurchaseServices>();
+            services.AddScoped<VendorAnalyticsService>();
+            services.AddScoped<VendorServices>();
             services.AddScoped<CustomerAnalyticsService>();
 
             // Register ALL ViewModels
             services.AddTransient<MainWindowViewModel>();
+            services.AddTransient<BadDebtsPageViewModel>();
             services.AddTransient<TransactionsPageViewModel>();
             services.AddTransient<DashboardPageViewModel>();
             services.AddTransient<ChartOfAccountsPageViewModel>();
@@ -75,7 +83,12 @@ namespace PrimeAppBooks
             services.AddTransient<AddCustomerPageViewModel>();
             services.AddTransient<CustomersPageViewModel>();
             services.AddTransient<CustomerAnalyticsViewModel>();
+            services.AddTransient<CustomerStatementPageViewModel>();
             services.AddTransient<CollectionManagementViewModel>();
+            services.AddTransient<VendorsPageViewModel>();
+            services.AddTransient<AddVendorPageViewModel>();
+            services.AddTransient<PayablesPageViewModel>();
+
 
             //Subpages
             services.AddTransient<JournalPageViewModel>();
@@ -99,7 +112,11 @@ namespace PrimeAppBooks
             services.AddTransient<AddCustomerPage>();
             services.AddTransient<CustomersPage>();
             services.AddTransient<CustomerAnalyticsPage>();
+            services.AddTransient<CustomerStatementPage>();
             services.AddTransient<CollectionManagementPage>();
+            services.AddTransient<VendorsPage>();
+            services.AddTransient<AddVendorPage>();
+            services.AddTransient<PayablesPage>();
 
             // Sales & Receivables Sub-Pages
             services.AddTransient<ReceivablesPage>();
@@ -116,6 +133,7 @@ namespace PrimeAppBooks
 
             //Sub pages
             services.AddTransient<JournalPage>();
+
 
             // Register MainWindow
             services.AddSingleton<MainWindow>();
@@ -208,7 +226,10 @@ namespace PrimeAppBooks
             navigationService.RegisterPageAnimation<AddCustomerPage>(AnimationDirection.FromRight);
             navigationService.RegisterPageAnimation<CustomersPage>(AnimationDirection.FromRight);
             navigationService.RegisterPageAnimation<CustomerAnalyticsPage>(AnimationDirection.FromBottom);
+            navigationService.RegisterPageAnimation<CustomerStatementPage>(AnimationDirection.FromRight);
             navigationService.RegisterPageAnimation<CollectionManagementPage>(AnimationDirection.FromRight);
+            navigationService.RegisterPageAnimation<VendorsPage>(AnimationDirection.FromRight);
+            navigationService.RegisterPageAnimation<AddVendorPage>(AnimationDirection.FromRight);
 
             // Sales & Receivables Sub-Pages
             navigationService.RegisterPageAnimation<ReceivablesPage>(AnimationDirection.FromBottom);
@@ -222,6 +243,7 @@ namespace PrimeAppBooks
             // Transactions Sub-Pages
             navigationService.RegisterPageAnimation<GeneralLedgerPage>(AnimationDirection.FromBottom);
             navigationService.RegisterPageAnimation<BankReconciliationPage>(AnimationDirection.FromBottom);
+
         }
     }
 }

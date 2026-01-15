@@ -13,5 +13,15 @@ namespace PrimeAppBooks.Views.Pages
             InitializeComponent();
             DataContext = viewModel;
         }
+
+        public override void OnNavigatedTo(object parameter)
+        {
+            if (DataContext is AddPurchaseInvoicePageViewModel viewModel)
+            {
+                int id = 0;
+                if (parameter is int intId) id = intId;
+                viewModel.Initialize(id);
+            }
+        }
     }
 }

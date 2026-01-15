@@ -111,4 +111,12 @@ namespace PrimeAppBooks.Models
         public string Description { get; set; }
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     }
+    public class StudentGrade
+    {
+        public int GradeId { get; set; }
+        public string GradeName { get; set; }
+        public string? Description { get; set; }
+        public int SortOrder { get; set; }
+        public bool IsActive { get; set; } = true;
+    }
 }

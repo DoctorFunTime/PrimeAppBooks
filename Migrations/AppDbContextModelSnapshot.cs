@@ -1427,6 +1427,222 @@ namespace PrimeAppBooks.Migrations
                     b.ToTable("PaymentTerms");
                 });
 
+            modelBuilder.Entity("PrimeAppBooks.Models.StudentGrade", b =>
+                {
+                    b.Property<int>("GradeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("GradeId"));
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<string>("GradeName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer");
+
+                    b.HasKey("GradeId");
+
+                    b.ToTable("StudentGrades", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            GradeId = 1,
+                            Description = "",
+                            GradeName = "Pre-K",
+                            IsActive = true,
+                            SortOrder = 10
+                        },
+                        new
+                        {
+                            GradeId = 2,
+                            Description = "",
+                            GradeName = "Kindergarten",
+                            IsActive = true,
+                            SortOrder = 20
+                        },
+                        new
+                        {
+                            GradeId = 3,
+                            Description = "",
+                            GradeName = "Grade 1",
+                            IsActive = true,
+                            SortOrder = 30
+                        },
+                        new
+                        {
+                            GradeId = 4,
+                            Description = "",
+                            GradeName = "Grade 2",
+                            IsActive = true,
+                            SortOrder = 40
+                        },
+                        new
+                        {
+                            GradeId = 5,
+                            Description = "",
+                            GradeName = "Grade 3",
+                            IsActive = true,
+                            SortOrder = 50
+                        },
+                        new
+                        {
+                            GradeId = 6,
+                            Description = "",
+                            GradeName = "Grade 4",
+                            IsActive = true,
+                            SortOrder = 60
+                        },
+                        new
+                        {
+                            GradeId = 7,
+                            Description = "",
+                            GradeName = "Grade 5",
+                            IsActive = true,
+                            SortOrder = 70
+                        },
+                        new
+                        {
+                            GradeId = 8,
+                            Description = "",
+                            GradeName = "Grade 6",
+                            IsActive = true,
+                            SortOrder = 80
+                        },
+                        new
+                        {
+                            GradeId = 9,
+                            Description = "",
+                            GradeName = "Grade 7",
+                            IsActive = true,
+                            SortOrder = 90
+                        },
+                        new
+                        {
+                            GradeId = 10,
+                            Description = "",
+                            GradeName = "Grade 8",
+                            IsActive = true,
+                            SortOrder = 100
+                        },
+                        new
+                        {
+                            GradeId = 11,
+                            Description = "",
+                            GradeName = "Grade 9",
+                            IsActive = true,
+                            SortOrder = 110
+                        },
+                        new
+                        {
+                            GradeId = 12,
+                            Description = "",
+                            GradeName = "Grade 10",
+                            IsActive = true,
+                            SortOrder = 120
+                        },
+                        new
+                        {
+                            GradeId = 13,
+                            Description = "",
+                            GradeName = "Grade 11",
+                            IsActive = true,
+                            SortOrder = 130
+                        },
+                        new
+                        {
+                            GradeId = 14,
+                            Description = "",
+                            GradeName = "Grade 12",
+                            IsActive = true,
+                            SortOrder = 140
+                        },
+                        new
+                        {
+                            GradeId = 15,
+                            Description = "",
+                            GradeName = "Form 1",
+                            IsActive = true,
+                            SortOrder = 150
+                        },
+                        new
+                        {
+                            GradeId = 16,
+                            Description = "",
+                            GradeName = "Form 2",
+                            IsActive = true,
+                            SortOrder = 160
+                        },
+                        new
+                        {
+                            GradeId = 17,
+                            Description = "",
+                            GradeName = "Form 3",
+                            IsActive = true,
+                            SortOrder = 170
+                        },
+                        new
+                        {
+                            GradeId = 18,
+                            Description = "",
+                            GradeName = "Form 4",
+                            IsActive = true,
+                            SortOrder = 180
+                        },
+                        new
+                        {
+                            GradeId = 19,
+                            Description = "",
+                            GradeName = "Form 5",
+                            IsActive = true,
+                            SortOrder = 190
+                        },
+                        new
+                        {
+                            GradeId = 20,
+                            Description = "",
+                            GradeName = "Form 6",
+                            IsActive = true,
+                            SortOrder = 200
+                        },
+                        new
+                        {
+                            GradeId = 21,
+                            Description = "",
+                            GradeName = "Undergraduate",
+                            IsActive = true,
+                            SortOrder = 210
+                        },
+                        new
+                        {
+                            GradeId = 22,
+                            Description = "",
+                            GradeName = "Graduate",
+                            IsActive = true,
+                            SortOrder = 220
+                        },
+                        new
+                        {
+                            GradeId = 23,
+                            Description = "",
+                            GradeName = "Postgraduate",
+                            IsActive = true,
+                            SortOrder = 230
+                        });
+                });
+
             modelBuilder.Entity("PrimeAppBooks.Models.TaxRate", b =>
                 {
                     b.Property<int>("TaxRateId")

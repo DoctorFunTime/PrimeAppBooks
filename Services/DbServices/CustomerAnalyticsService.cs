@@ -62,6 +62,7 @@ namespace PrimeAppBooks.Services.DbServices
                 {
                     CustomerId = customer.CustomerId,
                     CustomerName = customer.CustomerName,
+                    CustomerPhone = customer.Phone,
                     TotalOutstanding = totalOutstanding,
                     TotalInvoicedYTD = customerInvoices.Where(i => i.InvoiceDate.Year == today.Year).Sum(i => i.TotalAmount)
                 };
@@ -73,6 +74,30 @@ namespace PrimeAppBooks.Services.DbServices
                 
                 // DSO Calculation
                 m.AvgDaysToPay = CalculateDSO(customerInvoices, customerArLines);
+
+                // Enhancement: Payment Plans
+                m.HasActivePaymentPlan = await _context.PaymentPlans
+                    .AnyAsync(p => p.CustomerId == customer.CustomerId && p.Status == "ACTIVE");
+
+                // Enhancement: Follow-ups
+                var nextFollowup = await _context.CollectionFollowups
+                    .Where(f => f.CustomerId == customer.CustomerId)
+                    .OrderByDescending(f => f.NextFollowupDate)
+                    .Select(f => (DateTime?)f.NextFollowupDate)
+                    .FirstOrDefaultAsync();
+
+                m.NextFollowupDate = nextFollowup;
+                if (nextFollowup.HasValue)
+                {
+                    var daysUntil = (nextFollowup.Value - today).TotalDays;
+                    if (daysUntil < 0) m.FollowupUrgency = "Red"; // Overdue
+                    else if (daysUntil <= 7) m.FollowupUrgency = "Orange"; // Within a week
+                    else m.FollowupUrgency = "Normal";
+                }
+                else
+                {
+                    m.FollowupUrgency = "None";
+                }
 
                 metrics.Add(m);
             }
