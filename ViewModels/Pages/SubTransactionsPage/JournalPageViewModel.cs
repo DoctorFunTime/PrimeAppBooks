@@ -140,6 +140,14 @@ namespace PrimeAppBooks.ViewModels.Pages.SubTransactionsPage
             set => SetProperty(ref _currentStatus, value);
         }
 
+        private bool _isForeignCurrency = false;
+
+        public bool IsForeignCurrency
+        {
+            get => _isForeignCurrency;
+            set => SetProperty(ref _isForeignCurrency, value);
+        }
+
         private Currency _selectedCurrency;
 
         public Currency SelectedCurrency
@@ -149,6 +157,7 @@ namespace PrimeAppBooks.ViewModels.Pages.SubTransactionsPage
             {
                 if (SetProperty(ref _selectedCurrency, value))
                 {
+                    IsForeignCurrency = value != null && !value.IsBaseCurrency;
                     UpdateCalculations();
                 }
             }
@@ -442,15 +451,27 @@ namespace PrimeAppBooks.ViewModels.Pages.SubTransactionsPage
         [RelayCommand]
         private void AddLine()
         {
+            decimal balanceAmount = Math.Abs(Difference);
+            bool isDebit = Difference < 0; // If Diff < 0, Credits > Debits, we need a Debit
+            bool isCredit = Difference > 0; // If Diff > 0, Debits > Credits, we need a Credit
+
             var newLine = new JournalLineViewModel
             {
                 LineNumber = JournalLines.Count + 1,
                 LineDate = EntryDate,
                 Description = string.Empty,
-                DebitAmount = 0,
-                CreditAmount = 0,
+                DebitAmount = isDebit ? balanceAmount : 0,
+                CreditAmount = isCredit ? balanceAmount : 0,
                 CreatedBy = 1 // TODO: Get from current user
             };
+
+            // If foreign currency is selected, also set the foreign amounts
+            if (SelectedCurrency != null && !SelectedCurrency.IsBaseCurrency && ExchangeRate > 0)
+            {
+                decimal foreignAmount = Math.Round(balanceAmount / ExchangeRate, 2);
+                if (isDebit) newLine.ForeignDebitAmount = foreignAmount;
+                if (isCredit) newLine.ForeignCreditAmount = foreignAmount;
+            }
 
             // Subscribe to amount changes to update calculations immediately
             newLine.AmountChanged += OnLineAmountChanged;
@@ -698,19 +719,26 @@ namespace PrimeAppBooks.ViewModels.Pages.SubTransactionsPage
 
             try
             {
+                var templateData = new JournalTemplateData
+                {
+                    Description = EntryDescription,
+                    Reference = ReferenceNumber,
+                    Lines = JournalLines.Select(l => new JournalTemplateLineData
+                    {
+                        AccountId = l.AccountId,
+                        Description = l.Description,
+                        DebitAmount = l.DebitAmount,
+                        CreditAmount = l.CreditAmount,
+                        Reference = l.Reference
+                    }).ToList()
+                };
+
                 var template = new JournalTemplate
                 {
                     Name = $"Template - {EntryDescription}",
                     Description = $"Template created from journal entry: {EntryDescription}",
                     JournalType = "GENERAL",
-                    TemplateData = System.Text.Json.JsonSerializer.Serialize(JournalLines.Select(l => new
-                    {
-                        l.AccountId,
-                        l.Description,
-                        l.DebitAmount,
-                        l.CreditAmount,
-                        l.Reference
-                    })),
+                    TemplateData = System.Text.Json.JsonSerializer.Serialize(templateData),
                     CreatedBy = 1 // TODO: Get from current user
                 };
 
@@ -742,26 +770,108 @@ namespace PrimeAppBooks.ViewModels.Pages.SubTransactionsPage
 
             try
             {
-                var templateData = System.Text.Json.JsonSerializer.Deserialize<List<dynamic>>(SelectedTemplate.TemplateData);
-                JournalLines.Clear();
-
-                foreach (var item in templateData)
+                try
                 {
-                    var line = new JournalLineViewModel
+                    // Try parsing as the new structured format first
+                    var templateDataObj = System.Text.Json.JsonSerializer.Deserialize<JournalTemplateData>(SelectedTemplate.TemplateData);
+                    
+                    if (templateDataObj != null && templateDataObj.Lines != null)
                     {
-                        LineNumber = JournalLines.Count + 1,
-                        LineDate = EntryDate,
-                        AccountId = (int)item.GetProperty("AccountId").GetInt32(),
-                        Description = item.GetProperty("Description").GetString() ?? string.Empty,
-                        DebitAmount = (decimal)item.GetProperty("DebitAmount").GetDecimal(),
-                        CreditAmount = (decimal)item.GetProperty("CreditAmount").GetDecimal(),
-                        Reference = item.TryGetProperty("Reference", out JsonElement refProp) ? refProp.GetString() ?? string.Empty : string.Empty,
-                        CreatedBy = 1 // TODO: Get from current user
-                    };
+                        // New Format
+                        if (string.IsNullOrWhiteSpace(EntryDescription) || (templateDataObj != null && !string.IsNullOrWhiteSpace(templateDataObj.Description)))
+                        {
+                            EntryDescription = templateDataObj.Description ?? string.Empty;
+                        }
+                        
+                        /*if (string.IsNullOrWhiteSpace(ReferenceNumber) || (templateDataObj != null && !string.IsNullOrWhiteSpace(templateDataObj.Reference)))
+                        {
+                            ReferenceNumber = templateDataObj.Reference ?? string.Empty;
+                        }*/
+                        
+                        JournalLines.Clear();
 
-                    // Subscribe to amount changes to update calculations immediately
-                    line.AmountChanged += OnLineAmountChanged;
-                    JournalLines.Add(line);
+                        foreach (var item in templateDataObj.Lines)
+                        {
+                            var line = new JournalLineViewModel
+                            {
+                                LineNumber = JournalLines.Count + 1,
+                                LineDate = EntryDate,
+                                AccountId = item.AccountId,
+                                Description = item.Description ?? string.Empty,
+                                DebitAmount = item.DebitAmount,
+                                CreditAmount = item.CreditAmount,
+                                // Use the current header reference for the lines, not the stale template reference
+                                Reference = ReferenceNumber, 
+                                CreatedBy = 1
+                            };
+
+                            line.AmountChanged += OnLineAmountChanged;
+                            JournalLines.Add(line);
+                        }
+                    }
+                    else
+                    {
+                        // Fallback to old format logic
+                        throw new JsonException("Not new format");
+                    }
+                }
+                catch
+                {
+                    // Fallback to old format (List of objects)
+                    var oldTemplateData = System.Text.Json.JsonSerializer.Deserialize<List<dynamic>>(SelectedTemplate.TemplateData);
+                    JournalLines.Clear();
+
+                    if (oldTemplateData != null)
+                    {
+                        // Attempt to extract header info from ANY line for old templates
+                        if (string.IsNullOrWhiteSpace(EntryDescription) || string.IsNullOrWhiteSpace(ReferenceNumber))
+                        {
+                            foreach (var item in oldTemplateData)
+                            {
+                                try
+                                {
+                                    JsonElement descProp = default;
+                                    if (string.IsNullOrWhiteSpace(EntryDescription) && item.TryGetProperty("Description", out descProp))
+                                    {
+                                        var val = descProp.GetString();
+                                        if (!string.IsNullOrWhiteSpace(val)) EntryDescription = val;
+                                    }
+
+                                    JsonElement refProp = default;
+                                    if (string.IsNullOrWhiteSpace(ReferenceNumber) && item.TryGetProperty("Reference", out refProp))
+                                    {
+                                        var val = refProp.GetString();
+                                        if (!string.IsNullOrWhiteSpace(val)) ReferenceNumber = val;
+                                    }
+
+                                    if (!string.IsNullOrWhiteSpace(EntryDescription) && !string.IsNullOrWhiteSpace(ReferenceNumber))
+                                    {
+                                        break;
+                                    }
+                                }
+                                catch { /* Ignore */ }
+                            }
+                        }
+
+                        foreach (var item in oldTemplateData)
+                        {
+                            var line = new JournalLineViewModel
+                            {
+                                LineNumber = JournalLines.Count + 1,
+                                LineDate = EntryDate,
+                                AccountId = (int)item.GetProperty("AccountId").GetInt32(),
+                                Description = item.GetProperty("Description").GetString() ?? string.Empty,
+                                DebitAmount = (decimal)item.GetProperty("DebitAmount").GetDecimal(),
+                                CreditAmount = (decimal)item.GetProperty("CreditAmount").GetDecimal(),
+                                // Use the current header reference for the lines, not the stale template reference
+                                Reference = ReferenceNumber,
+                                CreatedBy = 1
+                            };
+
+                            line.AmountChanged += OnLineAmountChanged;
+                            JournalLines.Add(line);
+                        }
+                    }
                 }
 
                 UpdateCalculations();
@@ -774,7 +884,7 @@ namespace PrimeAppBooks.ViewModels.Pages.SubTransactionsPage
         }
 
         [RelayCommand]
-        private void SelectQuickAccount()
+        private void SelectStudent()
         {
             if (SelectedQuickAccount != null && SelectedLine != null)
             {
@@ -936,6 +1046,19 @@ namespace PrimeAppBooks.ViewModels.Pages.SubTransactionsPage
 
         private void UpdateCalculations()
         {
+            // Auto-sync entry description and reference to lines if they are empty
+            foreach (var line in JournalLines)
+            {
+                if (string.IsNullOrWhiteSpace(line.Description) && !string.IsNullOrWhiteSpace(EntryDescription))
+                {
+                    line.Description = EntryDescription;
+                }
+                if (string.IsNullOrWhiteSpace(line.Reference) && !string.IsNullOrWhiteSpace(ReferenceNumber))
+                {
+                    line.Reference = ReferenceNumber;
+                }
+            }
+
             // Auto-calculate base amounts from foreign amounts if applicable
             if (SelectedCurrency != null && !SelectedCurrency.IsBaseCurrency && ExchangeRate > 0)
             {
@@ -1275,6 +1398,10 @@ namespace PrimeAppBooks.ViewModels.Pages.SubTransactionsPage
         private void OnSelectedTemplateChanged(JournalTemplate value)
         {
             HasSelectedTemplate = value != null;
+            if (value != null)
+            {
+                ApplyTemplate();
+            }
         }
 
         private void OnSelectedQuickAccountChanged(ChartOfAccount value)

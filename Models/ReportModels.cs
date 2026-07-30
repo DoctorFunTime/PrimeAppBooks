@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using static PrimeAppBooks.Models.Pages.TransactionsModels;
 
 namespace PrimeAppBooks.Models
 {
@@ -31,6 +32,10 @@ namespace PrimeAppBooks.Models
         public decimal TotalLiabilities { get; set; }
         public decimal TotalEquity { get; set; }
         public decimal TotalLiabilitiesAndEquity { get; set; }
+
+        public List<FixedAssetGroup> FixedAssetGroups { get; set; } = new();
+        public decimal TotalFixedAssetsCost { get; set; }
+        public decimal TotalAccumDepreciation { get; set; }
 
         // Validation properties
         public bool IsBalanced => Math.Abs(TotalAssets - TotalLiabilitiesAndEquity) < 0.01m;
@@ -85,6 +90,15 @@ namespace PrimeAppBooks.Models
         public decimal BalanceDifference => TotalDebits - TotalCredits;
     }
 
+    public class AssetRegisterReportData : ReportData
+    {
+        public List<AssetRegisterCategoryGroup> CategoryGroups { get; set; } = new();
+        public decimal TotalCost { get; set; }
+        public decimal TotalAccumulatedDepreciation { get; set; }
+        public decimal TotalBookValue { get; set; }
+        public int TotalAssets { get; set; }
+    }
+
     // Line item models
     public class AccountLineItem
     {
@@ -130,6 +144,30 @@ namespace PrimeAppBooks.Models
         public decimal Balance => NormalBalance == "DEBIT"
             ? DebitAmount - CreditAmount
             : CreditAmount - DebitAmount;
+    }
+
+    public class AssetRegisterCategoryGroup
+    {
+        public string CategoryName { get; set; }
+        public List<AssetRegisterLineItem> Assets { get; set; } = new();
+        public decimal TotalCost => Assets.Sum(a => a.PurchaseCost);
+        public decimal TotalAccumulatedDepreciation => Assets.Sum(a => a.AccumulatedDepreciation);
+        public decimal TotalBookValue => Assets.Sum(a => a.BookValue);
+    }
+
+    public class AssetRegisterLineItem
+    {
+        public string AssetCode { get; set; }
+        public string AssetName { get; set; }
+        public DateTime PurchaseDate { get; set; }
+        public decimal PurchaseCost { get; set; }
+        public decimal AccumulatedDepreciation { get; set; }
+        public decimal BookValue { get; set; }
+        public decimal ResidualValue { get; set; }
+        public decimal UsefulLifeYears { get; set; }
+        public string DepreciationMethod { get; set; }
+        public string Status { get; set; }
+        public string AssetAccountName { get; set; }
     }
 
     // Recent Report Model (for UI)

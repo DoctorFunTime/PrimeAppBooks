@@ -83,7 +83,7 @@ namespace PrimeAppBooks.Configurations.AppDbContextConfigurations
             builder.HasIndex(j => j.JournalDate).HasDatabaseName("idx_journal_entries_date");
             builder.HasIndex(j => j.PeriodId).HasDatabaseName("idx_journal_entries_period");
             builder.HasIndex(j => j.Status).HasDatabaseName("idx_journal_entries_status");
-            builder.HasIndex(j => j.JournalNumber).HasDatabaseName("idx_journal_entries_number").IsUnique();
+            builder.HasIndex(j => j.JournalNumber).HasDatabaseName("idx_journal_entries_number");
         }
     }
 }

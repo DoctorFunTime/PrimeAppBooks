@@ -86,9 +86,6 @@
                                         <GradientStop Offset="1.0" Color="#1E5A7A" />
                                     </LinearGradientBrush>
                                 </Border.Background>
-                                <Border.Effect>
-                                    <DropShadowEffect Color="#4AB8E6" BlurRadius="3" ShadowDepth="0" Opacity="0.6" />
-                                </Border.Effect>
                                 <Border.Width>
                                     <MultiBinding Converter="{StaticResource ProgressToWidthConverter}">
                                         <Binding Path="Value" RelativeSource="{RelativeSource TemplatedParent}" />
@@ -139,12 +136,9 @@
                     Margin="0,0,0,20"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
-                    Source="/Images/LogoBlueGlow.png"
+                    Source="/Images/PrimeAppSystems.png"
                     Stretch="Uniform"
                     RenderOptions.BitmapScalingMode="HighQuality">
-                    <Image.Effect>
-                        <DropShadowEffect Color="#4AB8E6" BlurRadius="8" ShadowDepth="0" Opacity="0.4" />
-                    </Image.Effect>
                 </Image>
 
                 <ProgressBar
@@ -172,9 +166,6 @@
                     TextTrimming="CharacterEllipsis"
                     TextOptions.TextFormattingMode="Display"
                     TextOptions.TextRenderingMode="ClearType">
-                    <TextBlock.Effect>
-                        <DropShadowEffect Color="#000000" BlurRadius="2" ShadowDepth="1" Opacity="0.3" />
-                    </TextBlock.Effect>
                 </TextBlock>
 
                 <TextBlock

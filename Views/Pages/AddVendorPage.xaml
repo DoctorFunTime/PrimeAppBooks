@@ -8,8 +8,8 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:pages="clr-namespace:PrimeAppBooks.ViewModels.Pages"
     d:DataContext="{d:DesignInstance Type=pages:AddVendorPageViewModel}"
-    d:DesignHeight="800"
-    d:DesignWidth="1200"
+    d:DesignHeight="8000"
+    d:DesignWidth="1100"
     Background="Transparent"
     mc:Ignorable="d">
 
@@ -21,7 +21,11 @@
             </Grid.RowDefinitions>
 
             <!-- Header Section -->
-            <Border Grid.Row="0" Margin="0,0,0,20" Style="{StaticResource ModernCardStyle}">
+            <Border 
+                Grid.Row="0"
+                Margin="0,0,0,20"
+                HorizontalAlignment="Left"
+                Style="{StaticResource ModernCardStyle}" Width="1030">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -43,8 +47,8 @@
             <!-- Main Content -->
             <StackPanel Grid.Row="1">
                 <!-- Basic Information -->
-                <Border Margin="0,0,0,20" Style="{StaticResource ModernCardStyle}">
-                    <StackPanel Margin="25">
+                <Border Margin="0,0,0,20" Style="{StaticResource ModernCardStyle}" Width="1030" HorizontalAlignment="Left">
+                    <StackPanel Margin="10">
                         <TextBlock Style="{StaticResource SectionHeaderText}" Text="📋 Basic Information" Margin="0,0,0,20" />
 
                         <Grid Style="{StaticResource SettingsRowStyle}">
@@ -98,8 +102,8 @@
                 </Border>
 
                 <!-- Financial Configuration -->
-                <Border Margin="0,0,0,20" Style="{StaticResource ModernCardStyle}">
-                    <StackPanel Margin="25">
+                <Border Margin="0,0,0,20" Style="{StaticResource ModernCardStyle}" Width="1030" HorizontalAlignment="Left">
+                    <StackPanel Margin="10">
                         <TextBlock Style="{StaticResource SectionHeaderText}" Text="⚙️ Financial Settings" Margin="0,0,0,20" />
 
                         <Grid Style="{StaticResource SettingsRowStyle}">
@@ -126,8 +130,8 @@
                 </Border>
 
                 <!-- Additional Information -->
-                <Border Margin="0,0,0,20" Style="{StaticResource ModernCardStyle}">
-                    <StackPanel Margin="25">
+                <Border Margin="0,0,0,20" Style="{StaticResource ModernCardStyle}" Width="1030" HorizontalAlignment="Left">
+                    <StackPanel Margin="10">
                         <TextBlock Style="{StaticResource SectionHeaderText}" Text="📍 Additional Details" Margin="0,0,0,20" />
 
                         <Grid Style="{StaticResource SettingsRowStyle}">
@@ -152,12 +156,12 @@
             </StackPanel>
 
             <!-- Loading Overlay -->
-            <Border Grid.RowSpan="2" Background="#80000000" Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
+           <!-- <Border Grid.RowSpan="2" Background="#80000000" Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                     <ProgressBar Width="80" Height="80" IsIndeterminate="True" Style="{StaticResource MaterialDesignCircularProgressBar}" />
                     <TextBlock Margin="0,15,0,0" HorizontalAlignment="Center" Style="{StaticResource DetailValueText}" Text="Saving Vendor..." Foreground="White" />
                 </StackPanel>
-            </Border>
+            </Border>-->
         </Grid>
     </ScrollViewer>
 </base:BaseAnimatedPage>

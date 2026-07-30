@@ -14,11 +14,13 @@
     <AssemblyName>PrimeAppBooks</AssemblyName>
     <NoWarn>NU1701</NoWarn>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="Images\LogoBlueGlow.png" />
     <None Remove="Images\NewLogoIconDark.png" />
+    <None Remove="Images\PrimeAppSystems.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -33,6 +35,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="BCrypt.Net-Next" Version="4.2.0" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="FluentWPF" Version="0.10.2" />
     <PackageReference Include="HandyControl" Version="3.5.1" />
@@ -65,6 +68,9 @@
     <Resource Include="Images\NewLogoIconDark.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Images\PrimeAppSystems.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
   <ItemGroup>
@@ -76,5 +82,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="xcopy /Y /E &quot;$(TargetDir)*&quot; &quot;C:\Users\Keith\Desktop\Everything\PrimeAppBooks\Staging\&quot;" />
+  </Target>
 
 </Project>

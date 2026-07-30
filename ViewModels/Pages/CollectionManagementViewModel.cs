@@ -63,7 +63,7 @@ namespace PrimeAppBooks.ViewModels.Pages
 
                 // Get analytics for this specific customer
                 var allMetrics = await _analyticsService.GetOverallAnalyticsAsync();
-                CustomerMetrics = allMetrics.FirstOrDefault(m => m.CustomerId == _customerId);
+                CustomerMetrics = allMetrics.Metrics.FirstOrDefault(m => m.CustomerId == _customerId);
 
                 if (CustomerMetrics != null)
                 {

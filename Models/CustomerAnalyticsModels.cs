@@ -45,6 +45,7 @@ namespace PrimeAppBooks.Models
         public bool HasActivePaymentPlan { get; set; }
         public DateTime? NextFollowupDate { get; set; }
         public string FollowupUrgency { get; set; } // Red, Orange, Normal
+        public string GradeLevel { get; set; }
         public List<CustomerAgingBucket> AgingBuckets { get; set; } = new();
     }
 
@@ -61,5 +62,12 @@ namespace PrimeAppBooks.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public Customer Customer { get; set; }
+    }
+
+    public class CustomerAnalyticsResult
+    {
+        public List<CustomerSummaryMetrics> Metrics { get; set; } = new();
+        public decimal TotalOutstanding { get; set; }
+        public decimal TotalOverdue { get; set; }
     }
 }

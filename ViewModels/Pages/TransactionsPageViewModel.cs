@@ -600,7 +600,19 @@ namespace PrimeAppBooks.ViewModels.Pages
         [RelayCommand]
         private async Task DeleteJournalEntry(JournalEntry entry)
         {
-            if (entry == null || entry.Status != "DRAFT") return;
+            if (entry == null) return;
+
+            // Confirm deletion
+            string message = entry.Status == "POSTED"
+                ? $"Are you sure you want to delete this POSTED journal entry ({entry.JournalNumber})?\n\nThis will reverse all associated account balances and remove the transaction permanently. This action cannot be undone."
+                : $"Are you sure you want to delete this draft journal entry ({entry.JournalNumber})?";
+
+            var confirmed = await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
+            {
+                return _messageBoxService.ShowConfirmation(message, "Delete Transaction", "DeleteOutline");
+            });
+
+            if (!confirmed) return;
 
             try
             {

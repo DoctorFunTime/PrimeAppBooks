@@ -38,7 +38,8 @@ namespace PrimeAppBooks.ViewModels.Pages
         public ObservableCollection<Vendor> Vendors { get; } = new();
         public ObservableCollection<ChartOfAccount> Accounts { get; } = new();
         public ObservableCollection<Currency> Currencies { get; } = new();
-        public ObservableCollection<InvoiceLineViewModel> BillLines { get; } = new();
+        public ObservableCollection<PurchaseBillLineViewModel> BillLines { get; } = new();
+        public ObservableCollection<InventoryItem> InventoryItems { get; } = new();
         public ObservableCollection<string> ValidationErrors { get; } = new();
 
         public AddPurchaseInvoicePageViewModel(INavigationService navigationService, IServiceProvider serviceProvider)
@@ -106,14 +107,17 @@ namespace PrimeAppBooks.ViewModels.Pages
                 BillLines.Clear();
                 foreach (var line in invoice.Lines)
                 {
-                    var vm = new InvoiceLineViewModel
+                    var vm = new PurchaseBillLineViewModel
                     {
                         Description = line.Description,
                         Quantity = line.Quantity,
                         UnitPrice = line.UnitPrice,
-                        SelectedAccount = Accounts.FirstOrDefault(a => a.AccountId == line.AccountId)
+                        SelectedAccount = Accounts.FirstOrDefault(a => a.AccountId == line.AccountId),
+                        SelectedItem = line.ItemId.HasValue
+                            ? InventoryItems.FirstOrDefault(i => i.ItemId == line.ItemId.Value)
+                            : null
                     };
-                    vm.PropertyChanged += (s, e) => CalculateTotals();
+                    vm.PropertyChanged += OnLinePropertyChanged;
                     BillLines.Add(vm);
                 }
                 UpdateLineNumbers();
@@ -140,6 +144,7 @@ namespace PrimeAppBooks.ViewModels.Pages
                 var vendors = await context.Vendors.Where(v => v.IsActive).OrderBy(v => v.VendorName).ToListAsync();
                 var accounts = await context.ChartOfAccounts.Where(a => a.IsActive).OrderBy(a => a.AccountNumber).ToListAsync();
                 var currencies = await context.Currencies.OrderBy(c => c.CurrencyCode).ToListAsync();
+                var inventoryItems = await context.InventoryItems.Where(i => i.IsActive).OrderBy(i => i.ItemName).ToListAsync();
 
                 var settingsService = scope.ServiceProvider.GetRequiredService<SettingsService>();
                 var baseCurrencyId = await settingsService.GetBaseCurrencyIdAsync();
@@ -155,9 +160,12 @@ namespace PrimeAppBooks.ViewModels.Pages
                     Currencies.Clear();
                     foreach (var cur in currencies) Currencies.Add(cur);
 
+                    InventoryItems.Clear();
+                    foreach (var i in inventoryItems) InventoryItems.Add(i);
+
                     SelectedCurrency = Currencies.FirstOrDefault(c => c.CurrencyId == baseCurrencyId);
                     ExchangeRate = 1.0m;
-                    
+
                     if (!IsEditMode) InitializeNewInvoice();
                 });
             }
@@ -192,14 +200,27 @@ namespace PrimeAppBooks.ViewModels.Pages
         [RelayCommand]
         private void AddLine()
         {
-            var newLine = new InvoiceLineViewModel();
-            newLine.PropertyChanged += (s, e) => CalculateTotals();
+            var newLine = new PurchaseBillLineViewModel();
+            newLine.PropertyChanged += OnLinePropertyChanged;
             BillLines.Add(newLine);
             UpdateLineNumbers();
         }
 
+        private void OnLinePropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (sender is PurchaseBillLineViewModel line && e.PropertyName == nameof(PurchaseBillLineViewModel.SelectedItem))
+            {
+                // Auto-select Inventory Asset account when an item is picked
+                if (line.SelectedItem != null && line.SelectedItem.AssetAccountId > 0)
+                {
+                    line.SelectedAccount = Accounts.FirstOrDefault(a => a.AccountId == line.SelectedItem.AssetAccountId);
+                }
+            }
+            CalculateTotals();
+        }
+
         [RelayCommand]
-        private void RemoveLine(InvoiceLineViewModel line)
+        private void RemoveLine(PurchaseBillLineViewModel line)
         {
             if (BillLines.Count > 1)
             {
@@ -276,12 +297,14 @@ namespace PrimeAppBooks.ViewModels.Pages
                     CurrencyId = SelectedCurrency?.CurrencyId,
                     ExchangeRate = ExchangeRate,
                     Status = status,
-                    Notes = Notes,
+                    Terms = "",
+                    Notes = Notes ?? "",
                     CreatedBy = 1, // System User
                     Lines = BillLines.Where(l => l.SelectedAccount != null && l.Amount > 0).Select(l => new PurchaseInvoiceLine
                     {
                         Description = l.Description ?? $"Service from {SelectedVendor.VendorName}",
                         AccountId = l.SelectedAccount.AccountId,
+                        ItemId = l.SelectedItem?.ItemId,   // Fix: pass ItemId so stock receipt fires on posting
                         Quantity = l.Quantity ?? 0,
                         UnitPrice = l.UnitPrice ?? 0,
                         Amount = l.Amount

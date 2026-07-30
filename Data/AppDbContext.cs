@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using PrimeAppBooks.Configurations.AppDbContextConfigurations;
 using PrimeAppBooks.Models;
 using System;
@@ -19,11 +19,15 @@ namespace PrimeAppBooks.Data
         public DbSet<ChartOfAccount> ChartOfAccounts { get; set; }
         public DbSet<JournalTemplate> JournalTemplates { get; set; }
         public DbSet<BankReconciliation> BankReconciliations { get; set; }
+        public DbSet<ImportSession> ImportSessions { get; set; }
 
         public DbSet<SalesInvoice> SalesInvoices { get; set; }
         public DbSet<SalesInvoiceLine> SalesInvoiceLines { get; set; }
         public DbSet<PurchaseInvoice> PurchaseInvoices { get; set; }
         public DbSet<PurchaseInvoiceLine> PurchaseInvoiceLines { get; set; }
+
+        //Users
+        public DbSet<User> Users { get; set; }
 
         // New Reference Tables
         public DbSet<Vendor> Vendors { get; set; }
@@ -38,6 +42,15 @@ namespace PrimeAppBooks.Data
         public DbSet<PaymentPlan> PaymentPlans { get; set; }
         public DbSet<CollectionFollowup> CollectionFollowups { get; set; }
         public DbSet<StudentGrade> StudentGrades { get; set; }
+
+        public DbSet<InventoryItem> InventoryItems { get; set; }
+        public DbSet<InventoryTransaction> InventoryTransactions { get; set; }
+
+        // Fixed Assets
+        public DbSet<AssetCategory> AssetCategories { get; set; }
+        public DbSet<FixedAsset> FixedAssets { get; set; }
+        public DbSet<DepreciationEntry> DepreciationEntries { get; set; }
+        public DbSet<AssetDisposal> AssetDisposals { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {

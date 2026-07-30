@@ -325,14 +325,14 @@
                         </Grid>
 
                         <!--  Journal Entries DataGrid with Modern Styling  -->
-                        <Viewbox MaxWidth="700">
-                            <DataGrid
-                                MaxHeight="600"
-                                GridLinesVisibility="None"
-                                ItemsSource="{Binding FilteredJournalEntries}"
-                                SelectedItem="{Binding SelectedJournalEntry}"
-                                SelectionMode="Single"
-                                Style="{StaticResource ModernDataGridStyle}">
+                        <DataGrid
+                            MaxWidth="700"
+                            MaxHeight="600"
+                            GridLinesVisibility="None"
+                            ItemsSource="{Binding FilteredJournalEntries}"
+                            SelectedItem="{Binding SelectedJournalEntry}"
+                            SelectionMode="Single"
+                            Style="{StaticResource ModernDataGridStyle}">
 
                                 <!--  Set row height and vertical alignment with enhanced selection state  -->
                                 <DataGrid.RowStyle>
@@ -410,13 +410,6 @@
                                                     VerticalAlignment="Center"
                                                     Background="{Binding Status, Converter={StaticResource StatusIndicatorConverter}}"
                                                     CornerRadius="6">
-                                                    <Border.Effect>
-                                                        <DropShadowEffect
-                                                            BlurRadius="3"
-                                                            Opacity="0.3"
-                                                            ShadowDepth="1"
-                                                            Color="Black" />
-                                                    </Border.Effect>
                                                 </Border>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
@@ -535,13 +528,6 @@
                                                     VerticalAlignment="Center"
                                                     Background="{Binding Status, Converter={StaticResource StatusColorConverter}}"
                                                     Style="{StaticResource TransactionStatusBadge}">
-                                                    <Border.Effect>
-                                                        <DropShadowEffect
-                                                            BlurRadius="4"
-                                                            Opacity="0.2"
-                                                            ShadowDepth="1"
-                                                            Color="Black" />
-                                                    </Border.Effect>
                                                     <TextBlock
                                                         VerticalAlignment="Center"
                                                         Foreground="Black"
@@ -552,8 +538,7 @@
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
                                 </DataGrid.Columns>
-                            </DataGrid>
-                        </Viewbox>
+                        </DataGrid>
 
                         <!--  Pagination  -->
                         <Grid Margin="0,15,0,0">
@@ -666,7 +651,8 @@
                                     Command="{Binding EditJournalEntryCommand}"
                                     CommandParameter="{Binding SelectedJournalEntry}"
                                     Content="📝 Edit Entry"
-                                    Style="{StaticResource ModernSecondaryButton}" />
+                                    Style="{StaticResource ModernSecondaryButton}"
+                                    Visibility="{Binding SelectedJournalEntry.Status, Converter={StaticResource StatusToVisibilityConverter}}" />
                                 <Button
                                     Margin="0,0,0,5"
                                     Command="{Binding PostJournalEntryCommand}"
@@ -677,9 +663,9 @@
                                 <Button
                                     Command="{Binding DeleteJournalEntryCommand}"
                                     CommandParameter="{Binding SelectedJournalEntry}"
-                                    Content="🗑️ Delete Draft"
+                                    Content="🗑️ Delete Transaction"
                                     Style="{StaticResource ModernSecondaryButton}"
-                                    Visibility="{Binding SelectedJournalEntry.Status, Converter={StaticResource StatusToVisibilityConverter}}" />
+                                    Visibility="{Binding SelectedJournalEntry.Status, Converter={StaticResource StatusToVisibilityConverter}, ConverterParameter=Delete}" />
                             </StackPanel>
                         </StackPanel>
 

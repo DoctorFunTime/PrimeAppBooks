@@ -21,7 +21,7 @@
     </base:BaseAnimatedPage.Resources>
 
     <ScrollViewer Style="{StaticResource ModernScrollViewer}">
-        <Grid Margin="5">
+        <Grid Margin="5" Width="1060" HorizontalAlignment="Left">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
@@ -30,7 +30,7 @@
             </Grid.RowDefinitions>
 
             <!-- Header Section -->
-            <Border Grid.Row="0" Margin="5,0" Style="{StaticResource ModernCardStyle}">
+            <Border Grid.Row="0" Margin="5,0" Style="{StaticResource ModernCardStyle}" Width="1040" HorizontalAlignment="Left">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -52,7 +52,7 @@
             <!-- Quick Stats -->
             <Grid Grid.Row="1" Margin="5,10">
                 <UniformGrid Columns="4">
-                    <Border Style="{StaticResource ModernCardStyle}">
+                    <Border Style="{StaticResource ModernCardStyle}" Width="248">
                         <StackPanel Style="{StaticResource CardContentContainer}">
                             <TextBlock Style="{StaticResource DraftHeaderText}" Text="📝 Draft Bills" />
                             <TextBlock Style="{StaticResource CardValueText}" Text="{Binding DraftCount}" />
@@ -87,7 +87,7 @@
             </Grid>
 
             <!-- Filters -->
-            <Border Grid.Row="2" Margin="5,0" Style="{StaticResource ModernCardStyle}">
+            <Border Grid.Row="2" Margin="5,0" Style="{StaticResource ModernCardStyle}" Width="1040" HorizontalAlignment="Left">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -144,7 +144,7 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- Invoices Grid -->
-                <Border Grid.Column="0" Margin="5,10" Style="{StaticResource ModernCardStyle}">
+                <Border Grid.Column="0" Margin="5,10" Style="{StaticResource ModernCardStyle}" Width="760" HorizontalAlignment="Left">
                     <StackPanel>
                         <Grid Margin="0,0,0,15">
                             <TextBlock Style="{StaticResource SectionHeaderText}" Text="📋 Purchase Bills" />
@@ -240,7 +240,7 @@
                 </Border>
 
                 <!-- Side Detail Panel -->
-                <Border Grid.Column="1" MaxWidth="300" Margin="5,10" Style="{StaticResource ModernCardStyle}">
+                <Border Grid.Column="1" MaxWidth="300" Margin="5,10" Style="{StaticResource ModernCardStyle}" Width="245">
                     <StackPanel>
                         <TextBlock Style="{StaticResource SectionHeaderText}" Text="📋 Bill Details" />
 

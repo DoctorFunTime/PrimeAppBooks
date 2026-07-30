@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -107,6 +107,41 @@ namespace PrimeAppBooks.Models.Pages
             public BankReconciliation BankReconciliation { get; set; }
         }
 
+        public class FixedAssetLineItem
+        {
+            public int AssetId { get; set; }
+            public string AssetCode { get; set; }
+            public string AssetName { get; set; }
+            public decimal Cost { get; set; }
+            public decimal AccumulatedDepreciation { get; set; }
+            public decimal NetBookValue { get; set; }
+        }
+
+        public class FixedAssetGroup
+        {
+            public string CategoryName { get; set; }
+            public List<FixedAssetLineItem> Assets { get; set; } = new();
+            public decimal TotalCost => Assets.Sum(a => a.Cost);
+            public decimal TotalAccumDep => Assets.Sum(a => a.AccumulatedDepreciation);
+            public decimal TotalNBV => Assets.Sum(a => a.NetBookValue);
+        }
+
+        public class ImportSession
+        {
+            [System.ComponentModel.DataAnnotations.Key]
+            public string SessionId { get; set; }
+            public DateTime ImportDate { get; set; }
+            public DateTime StartDate { get; set; }
+            public DateTime EndDate { get; set; }
+            public int NewStudentsCount { get; set; }
+            public int ExistingStudentsCount { get; set; }
+            public int TransactionsCount { get; set; }
+            public decimal TotalAmount { get; set; }
+            public string Status { get; set; } = "COMPLETED"; // COMPLETED, REVERSED
+            public bool IncludeOpeningBalances { get; set; }
+            public string Notes { get; set; } = string.Empty;
+        }
+
         public class BankReconciliation
         {
             [System.ComponentModel.DataAnnotations.Key]
@@ -164,6 +199,22 @@ namespace PrimeAppBooks.Models.Pages
             public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
         }
 
+        public class JournalTemplateData
+        {
+            public string Description { get; set; }
+            public string Reference { get; set; }
+            public List<JournalTemplateLineData> Lines { get; set; } = new();
+        }
+
+        public class JournalTemplateLineData
+        {
+            public int AccountId { get; set; }
+            public string Description { get; set; }
+            public decimal DebitAmount { get; set; }
+            public decimal CreditAmount { get; set; }
+            public string Reference { get; set; }
+        }
+
         #region Sales Invoices
 
         public class SalesInvoice
@@ -198,12 +249,14 @@ namespace PrimeAppBooks.Models.Pages
             public int SalesInvoiceId { get; set; }
             public string Description { get; set; }
             public int AccountId { get; set; }
+            public int? ItemId { get; set; }
             public decimal Quantity { get; set; }
             public decimal UnitPrice { get; set; }
             public decimal Amount { get; set; }
 
             public SalesInvoice SalesInvoice { get; set; }
             public ChartOfAccount Account { get; set; }
+            public InventoryItem Item { get; set; }
         }
 
         #endregion Sales Invoices
@@ -242,14 +295,115 @@ namespace PrimeAppBooks.Models.Pages
             public int PurchaseInvoiceId { get; set; }
             public string Description { get; set; }
             public int AccountId { get; set; }
+            public int? ItemId { get; set; }
             public decimal Quantity { get; set; }
             public decimal UnitPrice { get; set; }
             public decimal Amount { get; set; }
 
             public PurchaseInvoice PurchaseInvoice { get; set; }
             public ChartOfAccount Account { get; set; }
+            public InventoryItem Item { get; set; }
         }
 
         #endregion Purchase Invoices
+
+        #region Fixed Assets
+
+        public class AssetCategory
+        {
+            public int CategoryId { get; set; }
+            public string CategoryName { get; set; } = string.Empty;
+            public string? Description { get; set; }
+            public decimal DefaultUsefulLifeYears { get; set; } = 5;
+            public string DefaultDepreciationMethod { get; set; } = "STRAIGHT_LINE";
+            public int? DefaultAssetAccountId { get; set; }
+            public int? DefaultAccumDepnAccountId { get; set; }
+            public int? DefaultDepnExpenseAccountId { get; set; }
+            public bool IsActive { get; set; } = true;
+
+            public ICollection<FixedAsset> Assets { get; set; } = new List<FixedAsset>();
+        }
+
+        public class FixedAsset
+        {
+            public int AssetId { get; set; }
+            public string AssetCode { get; set; } = string.Empty;
+            public string AssetName { get; set; } = string.Empty;
+            public string? Description { get; set; }
+            public int CategoryId { get; set; }
+
+            // GL Accounts
+            public int AssetAccountId { get; set; }          // e.g. 1430 Equipment
+            public int AccumDepnAccountId { get; set; }      // e.g. 1500 Accumulated Depreciation
+            public int DepnExpenseAccountId { get; set; }    // e.g. 5400 Depreciation Expense
+            public int? CwipAccountId { get; set; }          // e.g. 1470 Capital Work in Progress (null when not staged)
+
+            // Acquisition
+            public DateTime PurchaseDate { get; set; }
+            public decimal PurchaseCost { get; set; }
+            public decimal ResidualValue { get; set; } = 0;
+
+            // Depreciation Setup
+            public decimal UsefulLifeYears { get; set; } = 5;
+            public string DepreciationMethod { get; set; } = "STRAIGHT_LINE"; // STRAIGHT_LINE | REDUCING_BALANCE
+
+            // Running Totals (updated after each depreciation run)
+            public decimal AccumulatedDepreciation { get; set; } = 0;
+            public decimal BookValue { get; set; } = 0; // = PurchaseCost - AccumulatedDepreciation
+
+            // Status
+            public string Status { get; set; } = "ACTIVE"; // ACTIVE | CWIP | FULLY_DEPRECIATED | DISPOSED
+            public string? Notes { get; set; }
+            public bool IsActive { get; set; } = true;
+            public int CreatedBy { get; set; } = 1;
+            public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+            public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+            // Navigation
+            public AssetCategory Category { get; set; }
+            public ChartOfAccount AssetAccount { get; set; }
+            public ChartOfAccount AccumDepnAccount { get; set; }
+            public ChartOfAccount DepnExpenseAccount { get; set; }
+            public ChartOfAccount CwipAccount { get; set; }
+            public ICollection<DepreciationEntry> DepreciationEntries { get; set; } = new List<DepreciationEntry>();
+            public AssetDisposal Disposal { get; set; }
+        }
+
+        public class DepreciationEntry
+        {
+            public int EntryId { get; set; }
+            public int AssetId { get; set; }
+            public DateTime PeriodDate { get; set; }         // The date of the depreciation run (end of period)
+            public decimal DepreciationAmount { get; set; }
+            public decimal BookValueAfter { get; set; }      // Book value after this entry
+            public int? JournalId { get; set; }              // Link back to posted journal
+            public string Notes { get; set; } = string.Empty;
+            public int CreatedBy { get; set; } = 1;
+            public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+            public FixedAsset Asset { get; set; }
+            public JournalEntry Journal { get; set; }
+        }
+
+        public class AssetDisposal
+        {
+            public int DisposalId { get; set; }
+            public int AssetId { get; set; }
+            public DateTime DisposalDate { get; set; }
+            public decimal SaleProceeds { get; set; } = 0;    // Cash received (0 if scrapped)
+            public decimal BookValueAtDisposal { get; set; }
+            public decimal GainOrLoss { get; set; }            // Positive = Gain, Negative = Loss
+            public string DisposalType { get; set; } = "SALE"; // SALE | SCRAP
+            public int? ProceedsAccountId { get; set; }        // Bank/Cash account for proceeds
+            public int? JournalId { get; set; }
+            public string? Notes { get; set; }
+            public int CreatedBy { get; set; } = 1;
+            public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+            public FixedAsset Asset { get; set; }
+            public JournalEntry Journal { get; set; }
+        }
+
+        #endregion Fixed Assets
     }
 }

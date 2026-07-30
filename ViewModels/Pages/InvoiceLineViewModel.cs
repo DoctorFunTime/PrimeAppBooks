@@ -9,6 +9,7 @@ namespace PrimeAppBooks.ViewModels.Pages
     {
         private int _lineNumber;
         private ChartOfAccount _selectedAccount;
+        private InventoryItem _selectedItem;
         private string _description;
         private decimal? _quantity = 1;
         private decimal? _unitPrice;
@@ -28,6 +29,18 @@ namespace PrimeAppBooks.ViewModels.Pages
                 if (SetProperty(ref _selectedAccount, value))
                 {
                     OnPropertyChanged(nameof(IsValid));
+                }
+            }
+        }
+
+        public InventoryItem SelectedItem
+        {
+            get => _selectedItem;
+            set
+            {
+                if (SetProperty(ref _selectedItem, value))
+                {
+                    // Logic handled by parent via PropertyChanged
                 }
             }
         }

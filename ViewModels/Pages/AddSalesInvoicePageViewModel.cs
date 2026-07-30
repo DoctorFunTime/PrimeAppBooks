@@ -61,6 +61,7 @@ namespace PrimeAppBooks.ViewModels.Pages
         public ObservableCollection<ChartOfAccount> Accounts { get; } = new();
         public ObservableCollection<Currency> Currencies { get; } = new();
         public ObservableCollection<PaymentTerm> PaymentTerms { get; } = new(); // New Collection
+        public ObservableCollection<InventoryItem> InventoryItems { get; } = new();
         public ObservableCollection<InvoiceLineViewModel> BillLines { get; } = new();
         public ObservableCollection<string> ValidationErrors { get; } = new();
 
@@ -160,6 +161,7 @@ namespace PrimeAppBooks.ViewModels.Pages
                 var accounts = await context.ChartOfAccounts.Where(a => a.IsActive).OrderBy(a => a.AccountNumber).ToListAsync();
                 var currencies = await context.Currencies.OrderBy(c => c.CurrencyCode).ToListAsync();
                 var paymentTerms = await context.PaymentTerms.Where(t => t.IsActive).OrderBy(t => t.Days).ToListAsync();
+                var inventoryItems = await context.InventoryItems.Where(i => i.IsActive).OrderBy(i => i.ItemName).ToListAsync();
 
                 // Ensure default terms exist if empty
                 if (!paymentTerms.Any())
@@ -194,6 +196,9 @@ namespace PrimeAppBooks.ViewModels.Pages
 
                     PaymentTerms.Clear();
                     foreach (var t in paymentTerms) PaymentTerms.Add(t);
+
+                    InventoryItems.Clear();
+                    foreach (var i in inventoryItems) InventoryItems.Add(i);
 
                     if (existingInvoice != null)
                     {
@@ -231,12 +236,13 @@ namespace PrimeAppBooks.ViewModels.Pages
                             var lineVm = new InvoiceLineViewModel
                             {
                                 SelectedAccount = Accounts.FirstOrDefault(a => a.AccountId == line.AccountId),
+                                SelectedItem = line.ItemId.HasValue ? InventoryItems.FirstOrDefault(i => i.ItemId == line.ItemId) : null,
                                 Description = line.Description,
                                 Quantity = line.Quantity,
                                 UnitPrice = line.UnitPrice,
                                 Amount = line.Amount
                             };
-                            lineVm.PropertyChanged += (s, e) => CalculateTotals();
+                            lineVm.PropertyChanged += OnLinePropertyChanged;
                             BillLines.Add(lineVm);
                         }
                     }
@@ -278,9 +284,33 @@ namespace PrimeAppBooks.ViewModels.Pages
                 newLine.SelectedAccount = _currentDefaultRevenueAccount;
             }
 
-            newLine.PropertyChanged += (s, e) => CalculateTotals();
+            newLine.PropertyChanged += OnLinePropertyChanged;
             BillLines.Add(newLine);
             UpdateLineNumbers();
+        }
+
+        private void OnLinePropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (sender is InvoiceLineViewModel line)
+            {
+                if (e.PropertyName == nameof(InvoiceLineViewModel.SelectedItem))
+                {
+                    if (line.SelectedItem != null)
+                    {
+                        line.Description = line.SelectedItem.ItemName;
+                        line.UnitPrice = line.SelectedItem.SalePrice;
+                        line.Quantity = 1;
+                        
+                        // Auto-select Income Account
+                        if (line.SelectedItem.IncomeAccountId > 0)
+                        {
+                            line.SelectedAccount = Accounts.FirstOrDefault(a => a.AccountId == line.SelectedItem.IncomeAccountId);
+                        }
+                    }
+                }
+                
+                CalculateTotals();
+            }
         }
 
         [RelayCommand]
@@ -288,6 +318,7 @@ namespace PrimeAppBooks.ViewModels.Pages
         {
             if (BillLines.Count > 1)
             {
+                line.PropertyChanged -= OnLinePropertyChanged;
                 BillLines.Remove(line);
                 UpdateLineNumbers();
                 CalculateTotals();
@@ -387,6 +418,7 @@ namespace PrimeAppBooks.ViewModels.Pages
                         {
                             Description = l.Description ?? "No Description",
                             AccountId = l.SelectedAccount.AccountId,
+                            ItemId = l.SelectedItem?.ItemId,
                             Quantity = l.Quantity ?? 0,
                             UnitPrice = l.UnitPrice ?? 0,
                             Amount = l.Amount
@@ -417,6 +449,7 @@ namespace PrimeAppBooks.ViewModels.Pages
                         {
                             Description = l.Description ?? "No Description",
                             AccountId = l.SelectedAccount.AccountId,
+                            ItemId = l.SelectedItem?.ItemId,
                             Quantity = l.Quantity ?? 0,
                             UnitPrice = l.UnitPrice ?? 0,
                             Amount = l.Amount

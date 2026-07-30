@@ -1,0 +1,389 @@
+<base:BaseAnimatedPage
+    x:Class="PrimeAppBooks.Views.Pages.InventoryListPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:base="clr-namespace:PrimeAppBooks.Views.Pages"
+    xmlns:converters="clr-namespace:PrimeAppBooks.Conveters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:fw="clr-namespace:SourceChord.FluentWPF;assembly=FluentWPF"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:PrimeAppBooks.ViewModels.Pages"
+    d:DataContext="{d:DesignInstance Type=vm:InventoryListPageViewModel}"
+    d:DesignHeight="700"
+    d:DesignWidth="1100"
+    Background="Transparent"
+    mc:Ignorable="d">
+
+    <base:BaseAnimatedPage.Resources>
+        <converters:StatusToVisibilityConverter x:Key="StatusToVisibilityConverter" />
+        <converters:StatusIndicatorConverter x:Key="StatusIndicatorConverter" />
+        <converters:StatusColorConverter x:Key="StatusColorConverter" />
+        <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+        <converters:AmountDisplayConverter x:Key="AmountDisplayConverter" />
+    </base:BaseAnimatedPage.Resources>
+
+    <ScrollViewer Style="{StaticResource ModernScrollViewer}">
+        <Grid Margin="5">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!--  Header Section  -->
+            <Border
+                Grid.Row="0"
+                Margin="5,0"
+                Style="{StaticResource ModernCardStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Style="{StaticResource WelcomeTitleText}" Text="Inventory Items" />
+                        <TextBlock Style="{StaticResource WelcomeSubtitleText}" Text="Manage stock, tracking, and item details" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                        <Button
+                            Margin="5,0"
+                            Command="{Binding CreateNewItemCommand}"
+                            Content="📦 New Item"
+                            Style="{StaticResource ModernActionButton}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!--  Quick Stats  -->
+            <Grid Grid.Row="1" Margin="5,10">
+                <UniformGrid Columns="3">
+                    <!--  Total Items  -->
+                    <Border Style="{StaticResource ModernCardStyle}">
+                        <StackPanel Style="{StaticResource CardContentContainer}">
+                            <TextBlock Style="{StaticResource DraftHeaderText}" Text="📦 Total Items" />
+                            <TextBlock Style="{StaticResource CardValueText}" Text="{Binding TotalItemsCount}" />
+                            <TextBlock Style="{StaticResource CardSubText}" Text="SKUs in database" />
+                        </StackPanel>
+                    </Border>
+
+                    <!--  Low Stock  -->
+                    <Border Style="{StaticResource ModernCardStyle}">
+                        <StackPanel Style="{StaticResource CardContentContainer}">
+                            <TextBlock Style="{StaticResource BalanceHeaderText}" Text="⚠️ Low Stock" />
+                            <TextBlock
+                                Foreground="#E74C3C"
+                                Style="{StaticResource CardValueText}"
+                                Text="{Binding LowStockCount}" />
+                            <TextBlock Style="{StaticResource CardSubText}" Text="Items below threshold" />
+                        </StackPanel>
+                    </Border>
+
+                    <!--  Total Value  -->
+                    <Border Style="{StaticResource ModernCardStyle}">
+                        <StackPanel Style="{StaticResource CardContentContainer}">
+                            <TextBlock Style="{StaticResource MonthlyHeaderText}" Text="💰 Inventory Value" />
+                            <TextBlock Style="{StaticResource CardValueText}" Text="{Binding TotalInventoryValue, StringFormat=C0}" />
+                            <TextBlock Style="{StaticResource CardSubText}" Text="Total asset value (Cost)" />
+                        </StackPanel>
+                    </Border>
+                </UniformGrid>
+            </Grid>
+
+            <!--  Filters  -->
+            <Border
+                Grid.Row="2"
+                Margin="5,0"
+                Style="{StaticResource ModernCardStyle}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <!--  Filter Header & Toggles  -->
+                    <Grid Grid.Row="0" Margin="0,0,0,20">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock
+                            Grid.Column="0"
+                            Style="{StaticResource SectionHeaderText}"
+                            Text="🔍 Search &amp; Filter" />
+
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <TextBlock
+                                Margin="0,0,8,0"
+                                VerticalAlignment="Center"
+                                Style="{StaticResource FilterLabelText}"
+                                Text="Show:" />
+                            <RadioButton
+                                Content="All"
+                                IsChecked="{Binding ShowLowStockOnly, Converter={StaticResource InverseBooleanConverter}, Mode=OneWay}"
+                                Command="{Binding ClearFiltersCommand}"
+                                Style="{StaticResource FilterToggleButton}" />
+                            <RadioButton
+                                Margin="5,0"
+                                Content="Low Stock"
+                                IsChecked="{Binding ShowLowStockOnly}"
+                                Style="{StaticResource FilterToggleButton}" />
+                            <Button
+                                Margin="5,0"
+                                Command="{Binding ClearFiltersCommand}"
+                                Content="Clear"
+                                Style="{StaticResource ModernSecondaryButton}" />
+                        </StackPanel>
+                    </Grid>
+
+                    <!--  Filter Inputs  -->
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="2*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <!--  Search  -->
+                        <StackPanel Grid.Column="0" Margin="0,0,15,0">
+                            <TextBlock Style="{StaticResource FilterLabelText}" Text="Search Name or SKU" />
+                            <TextBox Style="{StaticResource ModernTextBoxStyle}" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <!--  Main Content (Grid + Side Panel)  -->
+            <Grid Grid.Row="3">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="3*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!--  Items Grid  -->
+                <Border
+                    Grid.Column="0"
+                    Margin="5,10"
+                    Style="{StaticResource ModernCardStyle}">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,15">
+                            <TextBlock Style="{StaticResource SectionHeaderText}" Text="📋 Inventory List" />
+                            <TextBlock
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Center"
+                                Foreground="#7F8C8D"
+                                Text="{Binding ResultsSummary}" />
+                        </Grid>
+
+                        <DataGrid
+                            MaxHeight="600"
+                            GridLinesVisibility="None"
+                            ItemsSource="{Binding FilteredItems}"
+                            SelectedItem="{Binding SelectedItem}"
+                            SelectionMode="Single"
+                            AutoGenerateColumns="False"
+                            IsReadOnly="True"
+                            Style="{StaticResource ModernDataGridStyle}">
+
+                            <DataGrid.RowStyle>
+                                <Style BasedOn="{StaticResource MaterialDesignDataGridRow}" TargetType="DataGridRow">
+                                    <Setter Property="Height" Value="40" />
+                                    <Setter Property="Background" Value="Transparent" />
+                                    <Style.Triggers>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter Property="Background" Value="#2A4A7B" />
+                                            <Setter Property="Foreground" Value="White" />
+                                        </Trigger>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#1E3A5F" />
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </DataGrid.RowStyle>
+
+                            <DataGrid.ColumnHeaderStyle>
+                                <Style BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}" TargetType="DataGridColumnHeader">
+                                    <Setter Property="Foreground" Value="#FF4472C4" />
+                                    <Setter Property="FontWeight" Value="Bold" />
+                                    <Setter Property="Background" Value="#1E1E1E" />
+                                    <Setter Property="BorderThickness" Value="0,0,0,1" />
+                                </Style>
+                            </DataGrid.ColumnHeaderStyle>
+
+                            <DataGrid.Columns>
+                                <!--  SKU  -->
+                                <DataGridTextColumn
+                                    Width="Auto"
+                                    Binding="{Binding SKU}"
+                                    Header="SKU"
+                                    IsReadOnly="True">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="VerticalAlignment" Value="Center" />
+                                            <Setter Property="Foreground" Value="Gainsboro" />
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+
+                                <!--  Name  -->
+                                <DataGridTextColumn
+                                    Width="*"
+                                    Binding="{Binding ItemName}"
+                                    Header="Item Name"
+                                    IsReadOnly="True">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="VerticalAlignment" Value="Center" />
+                                            <Setter Property="Foreground" Value="White" />
+                                            <Setter Property="FontWeight" Value="Medium" />
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+
+                                <!--  Stock  -->
+                                <DataGridTextColumn
+                                    Width="Auto"
+                                    Binding="{Binding QuantityOnHand}"
+                                    Header="On Hand"
+                                    IsReadOnly="True">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="VerticalAlignment" Value="Center" />
+                                            <Setter Property="Foreground" Value="Gainsboro" />
+                                            <Setter Property="HorizontalAlignment" Value="Center" />
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+
+                                <!--  Price  -->
+                                <DataGridTextColumn
+                                    Width="Auto"
+                                    Binding="{Binding SalePrice, StringFormat=C}"
+                                    Header="Price"
+                                    IsReadOnly="True">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="VerticalAlignment" Value="Center" />
+                                            <Setter Property="HorizontalAlignment" Value="Right" />
+                                            <Setter Property="Foreground" Value="#27AE60" />
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+
+                                 <!--  Cost  -->
+                                <DataGridTextColumn
+                                    Width="Auto"
+                                    Binding="{Binding PurchaseCost, StringFormat=C}"
+                                    Header="Cost"
+                                    IsReadOnly="True">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="VerticalAlignment" Value="Center" />
+                                            <Setter Property="HorizontalAlignment" Value="Right" />
+                                            <Setter Property="Foreground" Value="Gray" />
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
+                </Border>
+
+                <!--  Side Detail Panel  -->
+                <Border
+                    Grid.Column="1"
+                    MaxWidth="300"
+                    Margin="5,10"
+                    Style="{StaticResource ModernCardStyle}">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource SectionHeaderText}" Text="📋 Item Details" />
+
+                        <!--  Selected Details  -->
+                        <StackPanel Margin="0,10,0,0" Visibility="{Binding SelectedItem, Converter={StaticResource NullToVisibilityConverter}}">
+
+                            <!--  Header  -->
+                            <Border Margin="0,0,0,10" Style="{StaticResource DetailInfoBorder}">
+                                <StackPanel>
+                                    <TextBlock Style="{StaticResource DetailHeaderText}" Text="{Binding SelectedItem.SKU}" />
+                                    <TextBlock Style="{StaticResource DetailSubText}" Text="{Binding SelectedItem.ItemName}" />
+                                </StackPanel>
+                            </Border>
+
+                            <!--  Financials  -->
+                            <Border Margin="0,0,0,10" Style="{StaticResource DetailInfoBorder}">
+                                <StackPanel>
+                                    <Grid Margin="0,2">
+                                        <TextBlock Foreground="Gray" Text="On Hand:" />
+                                        <TextBlock
+                                            HorizontalAlignment="Right"
+                                            FontWeight="Bold"
+                                            Foreground="White"
+                                            Text="{Binding SelectedItem.QuantityOnHand}" />
+                                    </Grid>
+                                    <Grid Margin="0,2">
+                                        <TextBlock Foreground="Gray" Text="Avg Cost:" />
+                                        <TextBlock
+                                            HorizontalAlignment="Right"
+                                            Foreground="White"
+                                            Text="{Binding SelectedItem.PurchaseCost, StringFormat=C}" />
+                                    </Grid>
+                                    <Grid Margin="0,2">
+                                        <TextBlock Foreground="Gray" Text="Sale Price:" />
+                                        <TextBlock
+                                            HorizontalAlignment="Right"
+                                            Foreground="#27AE60"
+                                            Text="{Binding SelectedItem.SalePrice, StringFormat=C}" />
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+
+                            <!--  Description  -->
+                            <Border Margin="0,0,0,10" Style="{StaticResource DetailInfoBorder}">
+                                <TextBlock
+                                    Style="{StaticResource DetailSubText}"
+                                    Text="{Binding SelectedItem.Description}"
+                                    TextWrapping="Wrap" />
+                            </Border>
+
+                            <!--  Actions  -->
+                            <StackPanel Margin="0,10,0,0">
+                                <Button
+                                    Margin="0,0,0,5"
+                                    Command="{Binding EditItemCommand}"
+                                    CommandParameter="{Binding SelectedItem}"
+                                    Content="📝 Edit Item"
+                                    Style="{StaticResource ModernSecondaryButton}" />
+
+                                <Button
+                                    Command="{Binding DeleteItemCommand}"
+                                    CommandParameter="{Binding SelectedItem}"
+                                    Content="🗑️ Delete Item"
+                                    Style="{StaticResource ModernSecondaryButton}" />
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!--  Empty State  -->
+                        <StackPanel
+                            Margin="0,20,0,0"
+                            HorizontalAlignment="Center"
+                            Visibility="{Binding SelectedItem, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Invert}">
+                            <TextBlock
+                                Margin="0,0,0,10"
+                                HorizontalAlignment="Center"
+                                FontSize="48"
+                                Opacity="0.3"
+                                Text="📄" />
+                            <TextBlock
+                                HorizontalAlignment="Center"
+                                Style="{StaticResource DetailSubText}"
+                                Text="Select an item to view details" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Grid>
+    </ScrollViewer>
+</base:BaseAnimatedPage>

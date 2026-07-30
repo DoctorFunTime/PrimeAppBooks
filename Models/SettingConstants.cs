@@ -86,5 +86,18 @@ namespace PrimeAppBooks.Models
         public const string AutoMatchTransactions = "AutoMatchTransactions";
         public const string EnableOnlinePayments = "EnableOnlinePayments";
         public const string SyncPaymentConfirmations = "SyncPaymentConfirmations";
+        public const string LastStudentImportDate = "LastStudentImportDate";
+        public const string LastImportSessionId = "LastImportSessionId";
+
+        public const string UseExternalConnection = "UseExternalConnection";
+        public const string ExternalHost = "ExternalHost";
+        public const string ExternalPort = "ExternalPort";
+        public const string ExternalDatabase = "ExternalDatabase";
+        public const string ExternalUsername = "ExternalUsername";
+        public const string ExternalPassword = "ExternalPassword";
+
+        // Cashbook Expense Import
+        public const string LastExpenseImportDate = "LastExpenseImportDate";
+        public const string LastExpenseImportSessionId = "LastExpenseImportSessionId";
     }
 }

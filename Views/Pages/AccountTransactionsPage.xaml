@@ -37,7 +37,7 @@
                         <TextBlock VerticalAlignment="Center" Style="{StaticResource WelcomeTitleText}" Text="📊 Transactions: " />
                         <ComboBox
                             Margin="10,0,0,0"
-                            Width="300"
+                            Width="200"
                             ItemsSource="{Binding AvailableAccounts}"
                             SelectedItem="{Binding SelectedAccount}"
                             Style="{StaticResource ModernComboBox}"
@@ -82,6 +82,12 @@
                         Margin="0,0,20,0"
                         SelectedDate="{Binding EndDate}"
                         Style="{StaticResource CompactDatePickerStyle}" />
+
+                    <Button
+                        Margin="0,0,10,0"
+                        Command="{Binding PrintReportCommand}"
+                        Content="Print Report"
+                        Style="{StaticResource ModernSecondaryButton}" />
 
                     <Button
                         Command="{Binding NavigateBackCommand}"

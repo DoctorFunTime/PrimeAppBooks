@@ -12,7 +12,7 @@ namespace PrimeAppBooks.Views.Pages
         {
             // Set default animation properties - fix the enum access
             AnimationDirection = Interfaces.AnimationDirection.FromBottom;
-            AnimationDuration = 400;
+            AnimationDuration = 200;
             AnimationEasing = Interfaces.AnimationEasing.EaseOut;
             AnimateOut = true;
         }

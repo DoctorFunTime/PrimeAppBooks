@@ -340,6 +340,235 @@ namespace PrimeAppBooks.Migrations
                     b.ToTable("customers", (string)null);
                 });
 
+            modelBuilder.Entity("PrimeAppBooks.Models.InventoryItem", b =>
+                {
+                    b.Property<int>("ItemId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ItemId"));
+
+                    b.Property<int>("AssetAccountId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("ExpenseAccountId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("IncomeAccountId")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("ItemName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<decimal>("LowStockThreshold")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("PurchaseCost")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("QuantityOnHand")
+                        .HasColumnType("numeric");
+
+                    b.Property<string>("SKU")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<decimal>("SalePrice")
+                        .HasColumnType("numeric");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("ItemId");
+
+                    b.ToTable("InventoryItems");
+                });
+
+            modelBuilder.Entity("PrimeAppBooks.Models.InventoryTransaction", b =>
+                {
+                    b.Property<int>("TransactionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("TransactionId"));
+
+                    b.Property<int?>("BillId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("InvoiceId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ItemId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("QuantityChange")
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<decimal>("TotalCost")
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<DateTime>("TransactionDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("TransactionType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("UnitCost")
+                        .HasColumnType("decimal(18,4)");
+
+                    b.HasKey("TransactionId");
+
+                    b.HasIndex("ItemId");
+
+                    b.ToTable("InventoryTransactions");
+                });
+
+            modelBuilder.Entity("PrimeAppBooks.Models.Pages.TransactionsModels+AssetCategory", b =>
+                {
+                    b.Property<int>("CategoryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("category_id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("CategoryId"));
+
+                    b.Property<string>("CategoryName")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)")
+                        .HasColumnName("category_name");
+
+                    b.Property<int?>("DefaultAccumDepnAccountId")
+                        .HasColumnType("integer")
+                        .HasColumnName("default_accum_depn_account_id");
+
+                    b.Property<int?>("DefaultAssetAccountId")
+                        .HasColumnType("integer")
+                        .HasColumnName("default_asset_account_id");
+
+                    b.Property<int?>("DefaultDepnExpenseAccountId")
+                        .HasColumnType("integer")
+                        .HasColumnName("default_depn_expense_account_id");
+
+                    b.Property<string>("DefaultDepreciationMethod")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasDefaultValue("STRAIGHT_LINE")
+                        .HasColumnName("default_depreciation_method");
+
+                    b.Property<decimal>("DefaultUsefulLifeYears")
+                        .HasColumnType("decimal(5,2)")
+                        .HasColumnName("default_useful_life_years");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("is_active");
+
+                    b.HasKey("CategoryId");
+
+                    b.ToTable("asset_categories", (string)null);
+                });
+
+            modelBuilder.Entity("PrimeAppBooks.Models.Pages.TransactionsModels+AssetDisposal", b =>
+                {
+                    b.Property<int>("DisposalId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("disposal_id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("DisposalId"));
+
+                    b.Property<int>("AssetId")
+                        .HasColumnType("integer")
+                        .HasColumnName("asset_id");
+
+                    b.Property<decimal>("BookValueAtDisposal")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("book_value_at_disposal");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("integer")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTime>("DisposalDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("disposal_date");
+
+                    b.Property<string>("DisposalType")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("SALE")
+                        .HasColumnName("disposal_type");
+
+                    b.Property<decimal>("GainOrLoss")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("gain_or_loss");
+
+                    b.Property<int?>("JournalId")
+                        .HasColumnType("integer")
+                        .HasColumnName("journal_id");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("text")
+                        .HasColumnName("notes");
+
+                    b.Property<int?>("ProceedsAccountId")
+                        .HasColumnType("integer")
+                        .HasColumnName("proceeds_account_id");
+
+                    b.Property<decimal>("SaleProceeds")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("decimal(18,2)")
+                        .HasDefaultValue(0m)
+                        .HasColumnName("sale_proceeds");
+
+                    b.HasKey("DisposalId");
+
+                    b.HasIndex("AssetId")
+                        .IsUnique();
+
+                    b.HasIndex("JournalId");
+
+                    b.ToTable("asset_disposals", (string)null);
+                });
+
             modelBuilder.Entity("PrimeAppBooks.Models.Pages.TransactionsModels+BankReconciliation", b =>
                 {
                     b.Property<int>("ReconciliationId")
@@ -600,6 +829,232 @@ namespace PrimeAppBooks.Migrations
                     b.ToTable("chart_of_accounts", (string)null);
                 });
 
+            modelBuilder.Entity("PrimeAppBooks.Models.Pages.TransactionsModels+DepreciationEntry", b =>
+                {
+                    b.Property<int>("EntryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("entry_id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("EntryId"));
+
+                    b.Property<int>("AssetId")
+                        .HasColumnType("integer")
+                        .HasColumnName("asset_id");
+
+                    b.Property<decimal>("BookValueAfter")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("book_value_after");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("integer")
+                        .HasColumnName("created_by");
+
+                    b.Property<decimal>("DepreciationAmount")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("depreciation_amount");
+
+                    b.Property<int?>("JournalId")
+                        .HasColumnType("integer")
+                        .HasColumnName("journal_id");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("notes");
+
+                    b.Property<DateTime>("PeriodDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("period_date");
+
+                    b.HasKey("EntryId");
+
+                    b.HasIndex("AssetId");
+
+                    b.HasIndex("JournalId");
+
+                    b.ToTable("depreciation_entries", (string)null);
+                });
+
+            modelBuilder.Entity("PrimeAppBooks.Models.Pages.TransactionsModels+FixedAsset", b =>
+                {
+                    b.Property<int>("AssetId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("asset_id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("AssetId"));
+
+                    b.Property<int>("AccumDepnAccountId")
+                        .HasColumnType("integer")
+                        .HasColumnName("accum_depn_account_id");
+
+                    b.Property<decimal>("AccumulatedDepreciation")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("decimal(18,2)")
+                        .HasDefaultValue(0m)
+                        .HasColumnName("accumulated_depreciation");
+
+                    b.Property<int>("AssetAccountId")
+                        .HasColumnType("integer")
+                        .HasColumnName("asset_account_id");
+
+                    b.Property<string>("AssetCode")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("asset_code");
+
+                    b.Property<string>("AssetName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("asset_name");
+
+                    b.Property<decimal>("BookValue")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("book_value");
+
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("integer")
+                        .HasColumnName("category_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("integer")
+                        .HasColumnName("created_by");
+
+                    b.Property<int?>("CwipAccountId")
+                        .HasColumnType("integer")
+                        .HasColumnName("cwip_account_id");
+
+                    b.Property<int>("DepnExpenseAccountId")
+                        .HasColumnType("integer")
+                        .HasColumnName("depn_expense_account_id");
+
+                    b.Property<string>("DepreciationMethod")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasDefaultValue("STRAIGHT_LINE")
+                        .HasColumnName("depreciation_method");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("text")
+                        .HasColumnName("notes");
+
+                    b.Property<decimal>("PurchaseCost")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("purchase_cost");
+
+                    b.Property<DateTime>("PurchaseDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("purchase_date");
+
+                    b.Property<decimal>("ResidualValue")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("decimal(18,2)")
+                        .HasDefaultValue(0m)
+                        .HasColumnName("residual_value");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(25)
+                        .HasColumnType("character varying(25)")
+                        .HasDefaultValue("ACTIVE")
+                        .HasColumnName("status");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<decimal>("UsefulLifeYears")
+                        .HasColumnType("decimal(5,2)")
+                        .HasColumnName("useful_life_years");
+
+                    b.HasKey("AssetId");
+
+                    b.HasIndex("AccumDepnAccountId");
+
+                    b.HasIndex("AssetAccountId");
+
+                    b.HasIndex("AssetCode")
+                        .IsUnique();
+
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("CwipAccountId");
+
+                    b.HasIndex("DepnExpenseAccountId");
+
+                    b.ToTable("fixed_assets", (string)null);
+                });
+
+            modelBuilder.Entity("PrimeAppBooks.Models.Pages.TransactionsModels+ImportSession", b =>
+                {
+                    b.Property<string>("SessionId")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("ExistingStudentsCount")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("ImportDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IncludeOpeningBalances")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("NewStudentsCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("numeric");
+
+                    b.Property<int>("TransactionsCount")
+                        .HasColumnType("integer");
+
+                    b.HasKey("SessionId");
+
+                    b.ToTable("ImportSessions");
+                });
+
             modelBuilder.Entity("PrimeAppBooks.Models.Pages.TransactionsModels+JournalEntry", b =>
                 {
                     b.Property<int>("JournalId")
@@ -699,7 +1154,6 @@ namespace PrimeAppBooks.Migrations
                         .HasDatabaseName("idx_journal_entries_date");
 
                     b.HasIndex("JournalNumber")
-                        .IsUnique()
                         .HasDatabaseName("idx_journal_entries_number");
 
                     b.HasIndex("PeriodId")
@@ -1136,6 +1590,10 @@ namespace PrimeAppBooks.Migrations
                         .HasColumnType("text")
                         .HasColumnName("description");
 
+                    b.Property<int?>("ItemId")
+                        .HasColumnType("integer")
+                        .HasColumnName("item_id");
+
                     b.Property<int>("PurchaseInvoiceId")
                         .HasColumnType("integer")
                         .HasColumnName("purchase_invoice_id");
@@ -1151,6 +1609,8 @@ namespace PrimeAppBooks.Migrations
                     b.HasKey("LineId");
 
                     b.HasIndex("AccountId");
+
+                    b.HasIndex("ItemId");
 
                     b.HasIndex("PurchaseInvoiceId");
 
@@ -1295,6 +1755,9 @@ namespace PrimeAppBooks.Migrations
                         .HasColumnType("text")
                         .HasColumnName("description");
 
+                    b.Property<int?>("ItemId")
+                        .HasColumnType("integer");
+
                     b.Property<decimal>("Quantity")
                         .HasColumnType("decimal(18,2)")
                         .HasColumnName("quantity");
@@ -1310,6 +1773,8 @@ namespace PrimeAppBooks.Migrations
                     b.HasKey("LineId");
 
                     b.HasIndex("AccountId");
+
+                    b.HasIndex("ItemId");
 
                     b.HasIndex("SalesInvoiceId");
 
@@ -1689,6 +2154,70 @@ namespace PrimeAppBooks.Migrations
                     b.ToTable("tax_rates", (string)null);
                 });
 
+            modelBuilder.Entity("PrimeAppBooks.Models.User", b =>
+                {
+                    b.Property<int>("UserId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("user_id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("UserId"));
+
+                    b.Property<string>("AccountDepartment")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("account_department");
+
+                    b.Property<string>("AccountName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("account_name");
+
+                    b.Property<string>("AccountSurname")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("account_surname");
+
+                    b.Property<bool>("AccountTasks")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("account_tasks");
+
+                    b.Property<string>("AccountTitle")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("account_title");
+
+                    b.Property<string>("AccountType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("accounttype");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("password_hash");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("username");
+
+                    b.HasKey("UserId");
+
+                    b.HasIndex("Username")
+                        .IsUnique();
+
+                    b.ToTable("users", (string)null);
+                });
+
             modelBuilder.Entity("PrimeAppBooks.Models.Vendor", b =>
                 {
                     b.Property<int>("VendorId")
@@ -1786,6 +2315,35 @@ namespace PrimeAppBooks.Migrations
                     b.Navigation("Customer");
                 });
 
+            modelBuilder.Entity("PrimeAppBooks.Models.InventoryTransaction", b =>
+                {
+                    b.HasOne("PrimeAppBooks.Models.InventoryItem", "Item")
+                        .WithMany()
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Item");
+                });
+
+            modelBuilder.Entity("PrimeAppBooks.Models.Pages.TransactionsModels+AssetDisposal", b =>
+                {
+                    b.HasOne("PrimeAppBooks.Models.Pages.TransactionsModels+FixedAsset", "Asset")
+                        .WithOne("Disposal")
+                        .HasForeignKey("PrimeAppBooks.Models.Pages.TransactionsModels+AssetDisposal", "AssetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PrimeAppBooks.Models.Pages.TransactionsModels+JournalEntry", "Journal")
+                        .WithMany()
+                        .HasForeignKey("JournalId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Asset");
+
+                    b.Navigation("Journal");
+                });
+
             modelBuilder.Entity("PrimeAppBooks.Models.Pages.TransactionsModels+BankReconciliation", b =>
                 {
                     b.HasOne("PrimeAppBooks.Models.Pages.TransactionsModels+ChartOfAccount", "Account")
@@ -1816,6 +2374,66 @@ namespace PrimeAppBooks.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("ParentAccount");
+                });
+
+            modelBuilder.Entity("PrimeAppBooks.Models.Pages.TransactionsModels+DepreciationEntry", b =>
+                {
+                    b.HasOne("PrimeAppBooks.Models.Pages.TransactionsModels+FixedAsset", "Asset")
+                        .WithMany("DepreciationEntries")
+                        .HasForeignKey("AssetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PrimeAppBooks.Models.Pages.TransactionsModels+JournalEntry", "Journal")
+                        .WithMany()
+                        .HasForeignKey("JournalId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Asset");
+
+                    b.Navigation("Journal");
+                });
+
+            modelBuilder.Entity("PrimeAppBooks.Models.Pages.TransactionsModels+FixedAsset", b =>
+                {
+                    b.HasOne("PrimeAppBooks.Models.Pages.TransactionsModels+ChartOfAccount", "AccumDepnAccount")
+                        .WithMany()
+                        .HasForeignKey("AccumDepnAccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PrimeAppBooks.Models.Pages.TransactionsModels+ChartOfAccount", "AssetAccount")
+                        .WithMany()
+                        .HasForeignKey("AssetAccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PrimeAppBooks.Models.Pages.TransactionsModels+AssetCategory", "Category")
+                        .WithMany("Assets")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PrimeAppBooks.Models.Pages.TransactionsModels+ChartOfAccount", "CwipAccount")
+                        .WithMany()
+                        .HasForeignKey("CwipAccountId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("PrimeAppBooks.Models.Pages.TransactionsModels+ChartOfAccount", "DepnExpenseAccount")
+                        .WithMany()
+                        .HasForeignKey("DepnExpenseAccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("AccumDepnAccount");
+
+                    b.Navigation("AssetAccount");
+
+                    b.Navigation("Category");
+
+                    b.Navigation("CwipAccount");
+
+                    b.Navigation("DepnExpenseAccount");
                 });
 
             modelBuilder.Entity("PrimeAppBooks.Models.Pages.TransactionsModels+JournalLine", b =>
@@ -1889,6 +2507,11 @@ namespace PrimeAppBooks.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("PrimeAppBooks.Models.InventoryItem", "Item")
+                        .WithMany()
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("PrimeAppBooks.Models.Pages.TransactionsModels+PurchaseInvoice", "PurchaseInvoice")
                         .WithMany("Lines")
                         .HasForeignKey("PurchaseInvoiceId")
@@ -1896,6 +2519,8 @@ namespace PrimeAppBooks.Migrations
                         .IsRequired();
 
                     b.Navigation("Account");
+
+                    b.Navigation("Item");
 
                     b.Navigation("PurchaseInvoice");
                 });
@@ -1919,6 +2544,10 @@ namespace PrimeAppBooks.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("PrimeAppBooks.Models.InventoryItem", "Item")
+                        .WithMany()
+                        .HasForeignKey("ItemId");
+
                     b.HasOne("PrimeAppBooks.Models.Pages.TransactionsModels+SalesInvoice", "SalesInvoice")
                         .WithMany("Lines")
                         .HasForeignKey("SalesInvoiceId")
@@ -1926,6 +2555,8 @@ namespace PrimeAppBooks.Migrations
                         .IsRequired();
 
                     b.Navigation("Account");
+
+                    b.Navigation("Item");
 
                     b.Navigation("SalesInvoice");
                 });
@@ -1952,6 +2583,11 @@ namespace PrimeAppBooks.Migrations
                     b.Navigation("JournalLines");
                 });
 
+            modelBuilder.Entity("PrimeAppBooks.Models.Pages.TransactionsModels+AssetCategory", b =>
+                {
+                    b.Navigation("Assets");
+                });
+
             modelBuilder.Entity("PrimeAppBooks.Models.Pages.TransactionsModels+BankReconciliation", b =>
                 {
                     b.Navigation("ReconciledLines");
@@ -1967,6 +2603,14 @@ namespace PrimeAppBooks.Migrations
                     b.Navigation("ChildAccounts");
 
                     b.Navigation("JournalLines");
+                });
+
+            modelBuilder.Entity("PrimeAppBooks.Models.Pages.TransactionsModels+FixedAsset", b =>
+                {
+                    b.Navigation("DepreciationEntries");
+
+                    b.Navigation("Disposal")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("PrimeAppBooks.Models.Pages.TransactionsModels+JournalEntry", b =>

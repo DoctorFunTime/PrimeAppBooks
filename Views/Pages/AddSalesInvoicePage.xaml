@@ -10,7 +10,7 @@
     xmlns:pages="clr-namespace:PrimeAppBooks.ViewModels.Pages"
     d:DataContext="{d:DesignInstance Type=pages:AddSalesInvoicePageViewModel}"
     d:DesignHeight="900"
-    d:DesignWidth="1280"
+    d:DesignWidth="1100"
     Background="Transparent"
     mc:Ignorable="d">
 
@@ -29,7 +29,7 @@
             <Border
                 Grid.Row="0"
                 Margin="0,0,0,20"
-                Style="{StaticResource ModernCardStyle}">
+                Style="{StaticResource ModernCardStyle}" Width="1040">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -63,7 +63,7 @@
                 <Border
                     Grid.Row="0"
                     Margin="0,0,0,15"
-                    Style="{StaticResource ModernCardStyle}">
+                    Style="{StaticResource ModernCardStyle}" Width="1040">
                     <Grid Margin="10">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -176,7 +176,7 @@
                 <Border
                     Grid.Row="1"
                     Margin="0,0,0,15"
-                    Style="{StaticResource ModernCardStyle}">
+                    Style="{StaticResource ModernCardStyle}" Width="1040">
                     <Grid Margin="10">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
@@ -282,6 +282,19 @@
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
 
+                                <!--  Item Selection  -->
+                                <DataGridTemplateColumn Width="180" Header="Item / Product">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <ComboBox
+                                                DisplayMemberPath="ItemName"
+                                                ItemsSource="{Binding DataContext.InventoryItems, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                SelectedItem="{Binding SelectedItem, UpdateSourceTrigger=PropertyChanged}"
+                                                Style="{StaticResource ModernComboBox}" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+
                                 <!--  Account Selection  -->
                                 <DataGridTemplateColumn Width="180" Header="Account">
                                     <DataGridTemplateColumn.CellTemplate>
@@ -359,7 +372,7 @@
                         <Border
                             Grid.Column="0"
                             Margin="0,0,10,0"
-                            Style="{StaticResource ModernCardStyle}">
+                            Style="{StaticResource ModernCardStyle}" Width="720">
                             <StackPanel Margin="10">
                                 <TextBlock Style="{StaticResource DetailLabelText}" Text="Notes" />
                                 <TextBox
@@ -374,7 +387,7 @@
                         <Border
                             Grid.Column="1"
                             MinWidth="250"
-                            Style="{StaticResource ModernCardStyle}">
+                            Style="{StaticResource ModernCardStyle}" Width="300">
                             <StackPanel Margin="20">
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Style="{StaticResource SectionHeaderText}" Text="Total:" />
@@ -411,7 +424,7 @@
                         Margin="0,10,0,0"
                         Padding="15"
                         Background="#20FFFFFF"
-                        CornerRadius="8">
+                        CornerRadius="8" Width="1040">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />

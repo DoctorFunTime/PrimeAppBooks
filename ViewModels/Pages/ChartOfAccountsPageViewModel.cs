@@ -468,8 +468,10 @@ namespace PrimeAppBooks.ViewModels.Pages
         /// </summary>
         private decimal CalculateAccountBalance(ChartOfAccount account)
         {
+            var openingBalance = account.OpeningBalance;
+
             if (account.JournalLines == null || !account.JournalLines.Any())
-                return 0;
+                return openingBalance;
 
             // Only calculate from POSTED journal entries
             var postedLines = account.JournalLines
@@ -477,21 +479,32 @@ namespace PrimeAppBooks.ViewModels.Pages
                 .ToList();
 
             if (!postedLines.Any())
-                return 0;
+                return openingBalance;
 
             var debitTotal = postedLines.Sum(jl => jl.DebitAmount);
             var creditTotal = postedLines.Sum(jl => jl.CreditAmount);
 
-            // Calculate balance based on normal balance type
-            if (account.NormalBalance == "DEBIT")
+            // Calculate balance based on normal balance type (with fallback to account type)
+            var normalBalance = account.NormalBalance;
+            if (string.IsNullOrEmpty(normalBalance))
             {
-                // Assets, Expenses: Debit increases, Credit decreases
-                return debitTotal - creditTotal;
+                normalBalance = account.AccountType.ToUpper() switch
+                {
+                    "ASSET" or "EXPENSE" => "DEBIT",
+                    "LIABILITY" or "EQUITY" or "REVENUE" => "CREDIT",
+                    _ => "DEBIT"
+                };
+            }
+
+            if (normalBalance == "DEBIT")
+            {
+                // Assets, Expenses: OpeningBalance + Debit - Credit
+                return openingBalance + (debitTotal - creditTotal);
             }
             else
             {
-                // Liabilities, Equity, Revenue: Credit increases, Debit decreases
-                return creditTotal - debitTotal;
+                // Liabilities, Equity, Revenue: OpeningBalance + Credit - Debit
+                return openingBalance + (creditTotal - debitTotal);
             }
         }
 
@@ -503,29 +516,32 @@ namespace PrimeAppBooks.ViewModels.Pages
             AccountsWithTransactionsCount = Accounts.Count(a => a.JournalLines?.Any() == true);
 
             // Calculate balances by account type using POSTED transactions only
+            // IMPORTANT: Statistics MUST include inactive accounts with balances for the equation to hold
+            // Also, we must handle contra-accounts (e.g., an Asset with a normal CREDIT balance should be subtracted)
+            
             TotalAssetsBalance = Accounts
-                .Where(a => a.AccountType == "ASSET" && a.IsActive)
-                .Sum(a => CalculateAccountBalance(a));
+                .Where(a => string.Equals(a.AccountType, "ASSET", StringComparison.OrdinalIgnoreCase))
+                .Sum(a => a.NormalBalance == "CREDIT" ? -CalculateAccountBalance(a) : CalculateAccountBalance(a));
 
             TotalLiabilitiesBalance = Accounts
-                .Where(a => a.AccountType == "LIABILITY" && a.IsActive)
-                .Sum(a => CalculateAccountBalance(a));
+                .Where(a => string.Equals(a.AccountType, "LIABILITY", StringComparison.OrdinalIgnoreCase))
+                .Sum(a => a.NormalBalance == "DEBIT" ? -CalculateAccountBalance(a) : CalculateAccountBalance(a));
 
-            var equity = Accounts
-                .Where(a => a.AccountType == "EQUITY" && a.IsActive)
-                .Sum(a => CalculateAccountBalance(a));
+            var equityMagnitude = Accounts
+                .Where(a => string.Equals(a.AccountType, "EQUITY", StringComparison.OrdinalIgnoreCase))
+                .Sum(a => a.NormalBalance == "DEBIT" ? -CalculateAccountBalance(a) : CalculateAccountBalance(a));
 
             TotalRevenueBalance = Accounts
-                .Where(a => a.AccountType == "REVENUE" && a.IsActive)
-                .Sum(a => CalculateAccountBalance(a));
+                .Where(a => string.Equals(a.AccountType, "REVENUE", StringComparison.OrdinalIgnoreCase))
+                .Sum(a => a.NormalBalance == "DEBIT" ? -CalculateAccountBalance(a) : CalculateAccountBalance(a));
 
             TotalExpensesBalance = Accounts
-                .Where(a => a.AccountType == "EXPENSE" && a.IsActive)
-                .Sum(a => CalculateAccountBalance(a));
+                .Where(a => string.Equals(a.AccountType, "EXPENSE", StringComparison.OrdinalIgnoreCase))
+                .Sum(a => a.NormalBalance == "CREDIT" ? -CalculateAccountBalance(a) : CalculateAccountBalance(a));
 
             // Equity should include Net Income (Revenue - Expenses)
             // Based on the accounting equation: Assets = Liabilities + Equity + (Revenue - Expenses)
-            TotalEquityBalance = equity + TotalRevenueBalance - TotalExpensesBalance;
+            TotalEquityBalance = equityMagnitude + TotalRevenueBalance - TotalExpensesBalance;
         }
 
         private void ApplyFilters()

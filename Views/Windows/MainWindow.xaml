@@ -1,4 +1,4 @@
-﻿<Window
+<Window
     x:Class="PrimeAppBooks.Views.Windows.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -7,8 +7,8 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:views="clr-namespace:PrimeAppBooks.Views.Controls"
     Title="PrimeApp Books"
-    Width="1330"
-    Height="700"
+    Width="1400"
+    Height="800"
     MinWidth="980"
     MinHeight="560"
     AllowsTransparency="True"
@@ -22,7 +22,6 @@
     <Grid Margin="10">
         <!--  Beautiful Stepped Gradient Background  -->
         <!--  First gradient: Diagonal top-left to bottom-right  -->
-
         <!--  Shadow Border - positioned behind main content  -->
         <Border
             Margin="5"
@@ -32,17 +31,8 @@
             <!--  This creates a simple shadow effect  -->
         </Border>
 
-        <!--  Main Content Grid with Drop Shadow Effect  -->
+        <!--  Main Content Grid  -->
         <Grid Panel.ZIndex="1">
-            <Grid.Effect>
-                <DropShadowEffect
-                    BlurRadius="8"
-                    Direction="315"
-                    Opacity="0.5"
-                    RenderingBias="Quality"
-                    ShadowDepth="2"
-                    Color="#60000000" />
-            </Grid.Effect>
 
             <Rectangle RadiusX="8" RadiusY="8">
                 <Rectangle.Fill>
@@ -147,27 +137,19 @@
                     </Grid>
 
                     <!--  Main Content with Floating Panels  -->
-                    <Grid Grid.Row="1" Margin="10">
+                    <Grid Grid.Row="1" Margin="5">
                         <!--  Increased left/right margin to push sidebar right  -->
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="{Binding SidebarWidth}" />
-                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="Auto" />
                             <!--  Increased sidebar margin  -->
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
 
-                        <!--  Floating Sidebar with Shadow and Collapsible Functionality  -->
-                        <Grid Grid.Column="0">
+                        <!--  Floating Sidebar with Collapsible Functionality  -->
+                        <Grid Grid.Column="0" Margin="3">
                             <!--  Main Sidebar Panel with rounded edges  -->
                             <Border CornerRadius="12" Background="#D0000000">
-                                <Border.Effect>
-                                    <DropShadowEffect
-                                        BlurRadius="10"
-                                        ShadowDepth="3"
-                                        Direction="315"
-                                        Color="#40000000"
-                                        Opacity="0.5" />
-                                </Border.Effect>
                                 <Grid>
                                     <!--  Expanded Sidebar Content  -->
                                     <ScrollViewer VerticalScrollBarVisibility="Hidden" Style="{StaticResource ModernScrollViewer}" Visibility="{Binding SidebarContentVisibility}">
@@ -193,13 +175,13 @@
                                                                 FontSize="14"
                                                                 FontWeight="SemiBold"
                                                                 Foreground="White"
-                                                                Text="Sarah Williams" />
+                                                                Text="{Binding CurrentUserName}" />
                                                     <TextBlock
                                                                 Margin="0,2,0,0"
                                                                 HorizontalAlignment="Center"
                                                                 FontSize="11"
                                                                 Foreground="#D0FFFFFF"
-                                                                Text="Chief Financial Officer" />
+                                                                Text="{Binding CurrentUserTitle}" />
                                                 </StackPanel>
                                             </Border>
 
@@ -220,6 +202,18 @@
                                                         Content="📊  Chart of Accounts"
                                                         GroupName="Navigation"
                                                         IsChecked="{Binding IsChartOfAccountsSelected}"
+                                                        Style="{StaticResource ModernRadioButtonStyle}" />
+                                            <RadioButton
+                                                        Command="{Binding NavigateToInventoryCommand}"
+                                                        Content="📦  Inventory"
+                                                        GroupName="Navigation"
+                                                        IsChecked="{Binding IsInventorySelected}"
+                                                        Style="{StaticResource ModernRadioButtonStyle}" />
+                                            <RadioButton
+                                                        Command="{Binding NavigateToAssetRegisterCommand}"
+                                                        Content="🏢  Asset Register"
+                                                        GroupName="Navigation"
+                                                        IsChecked="{Binding IsAssetRegisterSelected}"
                                                         Style="{StaticResource ModernRadioButtonStyle}" />
 
                                             <!--  Transactions Expandable Section  -->
@@ -278,6 +272,7 @@
                                                 <RadioButton
                                                             Command="{Binding NavigateToReceivablesCommand}"
                                                             Content="     💵  Receivables"
+                                                    Visibility="Collapsed"
                                                             GroupName="Navigation"
                                                             IsChecked="{Binding IsReceivablesSelected}"
                                                             Style="{StaticResource ModernExpandedRadioButtonStyle}" />
@@ -290,6 +285,7 @@
                                                 <RadioButton
                                                             Command="{Binding NavigateToCreditNotesCommand}"
                                                             Content="     📋  Credit Notes"
+                                                    Visibility="Collapsed"
                                                             GroupName="Navigation"
                                                             IsChecked="{Binding IsCreditNotesSelected}"
                                                             Style="{StaticResource ModernExpandedRadioButtonStyle}" />
@@ -322,6 +318,7 @@
                                                 <RadioButton
                                                             Command="{Binding NavigateToDebitNotesCommand}"
                                                             Content="     📋  Debit Notes"
+                                                    Visibility="Collapsed"
                                                             GroupName="Navigation"
                                                             IsChecked="{Binding IsDebitNotesSelected}"
                                                             Style="{StaticResource ModernExpandedRadioButtonStyle}" />
@@ -336,6 +333,7 @@
                                             <RadioButton
                                                         Command="{Binding NavigateToAuditTrailsCommand}"
                                                         Content="🔍  Audit Trail"
+                                                Visibility="Collapsed"
                                                         GroupName="Navigation"
                                                         IsChecked="{Binding IsAuditTrailsSelected}"
                                                         Style="{StaticResource ModernRadioButtonStyle}" />
@@ -376,6 +374,7 @@
                                                         IsChecked="{Binding IsSettingsSelected}"
                                                         Style="{StaticResource ModernRadioButtonStyle}" />
                                             <RadioButton
+                                                        Command="{Binding NavigateToUserManagementCommand}"
                                                         Content="👥  User Management"
                                                         GroupName="Navigation"
                                                         IsChecked="{Binding IsUserManagementSelected}"
@@ -383,6 +382,7 @@
                                             <RadioButton
                                                         Content="🔐  Security Center"
                                                         GroupName="Navigation"
+                                                Visibility="Collapsed"
                                                         IsChecked="{Binding IsSecurityCenterSelected}"
                                                         Style="{StaticResource ModernRadioButtonStyle}" />
                                             <RadioButton
@@ -424,6 +424,20 @@
                                                         IsChecked="{Binding IsChartOfAccountsSelected}"
                                                         Style="{StaticResource CollapsedRadioButtonStyle}"
                                                         ToolTip="Chart of Accounts" />
+                                            <RadioButton
+                                                        Command="{Binding NavigateToInventoryCommand}"
+                                                        Content="📦"
+                                                        GroupName="CollapsedNavigation"
+                                                        IsChecked="{Binding IsInventorySelected}"
+                                                        Style="{StaticResource CollapsedRadioButtonStyle}"
+                                                        ToolTip="Inventory" />
+                                            <RadioButton
+                                                        Command="{Binding NavigateToAssetRegisterCommand}"
+                                                        Content="🏢"
+                                                        GroupName="CollapsedNavigation"
+                                                        IsChecked="{Binding IsAssetRegisterSelected}"
+                                                        Style="{StaticResource CollapsedRadioButtonStyle}"
+                                                        ToolTip="Asset Register" />
                                             <ToggleButton
                                                         Content="💸"
                                                         IsChecked="{Binding IsTransactionsExpanded}"
@@ -483,6 +497,7 @@
                                                             Command="{Binding NavigateToReceivablesCommand}"
                                                             Content="💵"
                                                             GroupName="CollapsedNavigation"
+                                                    Visibility="Collapsed"
                                                             IsChecked="{Binding IsReceivablesSelected}"
                                                             Style="{StaticResource CollapsedRadioButtonStyle}"
                                                             ToolTip="Receivables" />
@@ -497,6 +512,7 @@
                                                             Command="{Binding NavigateToCreditNotesCommand}"
                                                             Content="📋"
                                                             GroupName="CollapsedNavigation"
+                                                    Visibility="Collapsed"
                                                             IsChecked="{Binding IsCreditNotesSelected}"
                                                             Style="{StaticResource CollapsedRadioButtonStyle}"
                                                             ToolTip="Credit Notes" />
@@ -535,6 +551,7 @@
                                                             Command="{Binding NavigateToDebitNotesCommand}"
                                                             Content="📋"
                                                             GroupName="CollapsedNavigation"
+                                                    Visibility="Collapsed"
                                                             IsChecked="{Binding IsDebitNotesSelected}"
                                                             Style="{StaticResource CollapsedRadioButtonStyle}"
                                                             ToolTip="Debit Notes" />
@@ -551,6 +568,7 @@
                                                         Command="{Binding NavigateToAuditTrailsCommand}"
                                                         Content="🔍"
                                                         GroupName="CollapsedNavigation"
+                                                Visibility="Collapsed"
                                                         IsChecked="{Binding IsAuditTrailsSelected}"
                                                         Style="{StaticResource CollapsedRadioButtonStyle}"
                                                         ToolTip="Audit Trail" />
@@ -584,12 +602,14 @@
                                             <RadioButton
                                                         Content="👥"
                                                         GroupName="CollapsedNavigation"
+                                                Visibility="Collapsed"
                                                         IsChecked="{Binding IsUserManagementSelected}"
                                                         Style="{StaticResource CollapsedRadioButtonStyle}"
                                                         ToolTip="User Management" />
                                             <RadioButton
                                                         Content="🔐"
                                                         GroupName="CollapsedNavigation"
+                                                Visibility="Collapsed"
                                                         IsChecked="{Binding IsSecurityCenterSelected}"
                                                         Style="{StaticResource CollapsedRadioButtonStyle}"
                                                         ToolTip="Security Center" />
@@ -606,7 +626,7 @@
                         </Grid>
 
                         <!--  Navigation Frame - This replaces the hardcoded dashboard content  -->
-                        <Grid Grid.Column="2">
+                        <Grid Grid.Column="2" Margin="3">
                             <Frame
                                 x:Name="MainContentFrame"
                                 Background="Transparent"

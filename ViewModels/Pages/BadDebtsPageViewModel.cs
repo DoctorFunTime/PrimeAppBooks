@@ -151,7 +151,8 @@ namespace PrimeAppBooks.ViewModels.Pages
                     WriteOffNotes,
                     arAccount.AccountId,
                     badDebtsAccount.AccountId,
-                    SelectedCustomer.Customer.CustomerCode
+                    SelectedCustomer.Customer.CustomerCode,
+                    DateTime.UtcNow
                 );
 
                 // 3. Mark Customer as Inactive

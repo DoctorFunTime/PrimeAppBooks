@@ -11,14 +11,37 @@ namespace PrimeAppBooks.Configurations
     public class AppConfig
     {
         private static readonly IConfigurationRoot Configuration;
-        private static string _currentConnectionName = "DeployedDebugConn";
+        private static string _currentConnectionName = "DefaultConnection";
+        public static string SessionTokenSecret => Configuration["Security:SessionTokenSecret"] ?? string.Empty;
 
         static AppConfig()
         {
             Configuration = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
+                .SetBasePath(AppContext.BaseDirectory)
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .Build();
+        }
+
+        public static void SwitchConnectionString(string connectionName)
+        {
+            var validConnections = new[]
+            {
+                "DefaultConnection",
+                "PrimaryConnection",
+                "DefaultConnectionTest",
+                "DeployedDebugConn",
+                "DeployedDebugConnV18",
+                "DefaultConnectionV18"
+            };
+
+            if (validConnections.Contains(connectionName))
+            {
+                _currentConnectionName = connectionName;
+            }
+            else
+            {
+                throw new ArgumentException($"Invalid connection name. Valid options are: {string.Join(", ", validConnections)}");
+            }
         }
 
         public static string ConnectionString => GetConnectionString(_currentConnectionName);
@@ -31,8 +54,9 @@ namespace PrimeAppBooks.Configurations
 
         // Optional: Add properties to get specific connections directly
         public static string DefaultConnection => Configuration.GetConnectionString("DefaultConnection") ?? string.Empty;
-
+        public static string PrimaryConnection => Configuration.GetConnectionString("PrimaryConnection") ?? string.Empty;
+        public static string DefaultConnectionTest => Configuration.GetConnectionString("DefaultConnectionTest") ?? string.Empty;
         public static string DeployedDebugConn => Configuration.GetConnectionString("DeployedDebugConn") ?? string.Empty;
-        public static string SecondaryDatabase => Configuration.GetConnectionString("SecondaryDatabase") ?? string.Empty;
+        public static string DeployedDebugConnV18 => Configuration.GetConnectionString("DeployedDebugConnV18") ?? string.Empty;
     }
 }

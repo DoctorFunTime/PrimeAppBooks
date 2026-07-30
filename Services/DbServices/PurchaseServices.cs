@@ -87,6 +87,7 @@ namespace PrimeAppBooks.Services.DbServices
                     {
                         Description = line.Description,
                         AccountId = line.AccountId,
+                        ItemId = line.ItemId,   // Fix: carry ItemId so stock receipt fires on posting
                         Quantity = line.Quantity,
                         UnitPrice = line.UnitPrice,
                         Amount = line.Amount
@@ -162,9 +163,12 @@ namespace PrimeAppBooks.Services.DbServices
             var invoice = await _context.PurchaseInvoices.FindAsync(id);
             if (invoice == null) return false;
 
-            if (invoice.Status == "POSTED") throw new Exception("Cannot delete a posted invoice.");
+            if (invoice.Status == "POSTED")
+                throw new Exception("Posted invoices cannot be deleted. Void the invoice instead to preserve journal history.");
 
-            _context.PurchaseInvoices.Remove(invoice);
+            // Soft delete - preserves audit trail and linked journal entries
+            invoice.Status = "VOID";
+            invoice.UpdatedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
             return true;
         }
@@ -248,6 +252,55 @@ namespace PrimeAppBooks.Services.DbServices
                 ExchangeRate = invoice.ExchangeRate,
                 CreatedAt = DateTime.UtcNow
             });
+
+            // Inventory Stock Receipt Logic
+            // For any line linked to an inventory item, redirect the debit to the
+            // Inventory Asset account and update stock quantity and weighted average cost.
+            foreach (var line in invoice.Lines)
+            {
+                if (!line.ItemId.HasValue) continue;
+
+                var item = await _context.InventoryItems.FindAsync(line.ItemId.Value);
+                if (item == null) continue;
+
+                if (item.AssetAccountId <= 0)
+                    throw new Exception($"Item '{item.ItemName}' has no Inventory Asset account mapped. Please edit the item.");
+
+                // 1. Weighted average cost recalculation
+                decimal totalExistingValue = item.QuantityOnHand * item.PurchaseCost;
+                decimal newStockValue = line.Quantity * line.UnitPrice;
+                decimal newTotalQty = item.QuantityOnHand + line.Quantity;
+                item.PurchaseCost = newTotalQty > 0
+                    ? (totalExistingValue + newStockValue) / newTotalQty
+                    : line.UnitPrice;
+
+                // 2. Increment stock
+                item.QuantityOnHand += line.Quantity;
+                item.UpdatedAt = DateTime.UtcNow;
+
+                // 3. Record transaction history
+                _context.InventoryTransactions.Add(new InventoryTransaction
+                {
+                    ItemId = item.ItemId,
+                    TransactionType = "PURCHASE",
+                    QuantityChange = line.Quantity,
+                    UnitCost = line.UnitPrice,
+                    TotalCost = line.Quantity * line.UnitPrice,
+                    TransactionDate = DateTime.UtcNow,
+                    Notes = $"Purchase Invoice: {invoice.InvoiceNumber}",
+                    CreatedBy = invoice.CreatedBy
+                });
+
+                // 4. Redirect the debit line to Inventory Asset account
+                // The line was already written debiting line.AccountId - update it to hit the asset account
+                var existingJournalLine = journalEntry.JournalLines
+                    .FirstOrDefault(jl => jl.DebitAmount == line.Amount && jl.Description == line.Description);
+                if (existingJournalLine != null)
+                {
+                    existingJournalLine.AccountId = item.AssetAccountId;
+                    existingJournalLine.Description = $"Stock Receipt: {item.ItemName} x{line.Quantity}";
+                }
+            }
 
             _context.JournalEntries.Add(journalEntry);
         }

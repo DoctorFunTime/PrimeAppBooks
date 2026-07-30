@@ -5,6 +5,7 @@ using Microsoft.Win32;
 using PrimeAppBooks.Interfaces;
 using PrimeAppBooks.Models;
 using PrimeAppBooks.Services;
+using PrimeAppBooks.Services.DbServices;
 using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -25,12 +26,13 @@ namespace PrimeAppBooks.ViewModels.Pages
         private bool _isGenerating = false;
 
         [ObservableProperty]
-        private DateTime? _startDate = DateTime.Now.AddMonths(-1);
+        private DateTime? _startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
 
         [ObservableProperty]
         private DateTime? _endDate = DateTime.Now;
 
-        private string _selectedDatePreset = "This Month";
+        private string _selectedDatePreset;
+        private bool _isApplyingPreset;
 
         public string SelectedDatePreset
         {
@@ -39,20 +41,40 @@ namespace PrimeAppBooks.ViewModels.Pages
             {
                 if (SetProperty(ref _selectedDatePreset, value))
                 {
-                    // Apply the preset when the value changes
-                    if (!string.IsNullOrEmpty(value) && value != "Custom")
+                    if (value != "Custom" && !string.IsNullOrEmpty(value))
                     {
-                        ApplyDatePreset(value);
+                        _isApplyingPreset = true;
+                        try
+                        {
+                            ApplyDatePreset(value);
+                        }
+                        finally
+                        {
+                            _isApplyingPreset = false;
+                        }
                     }
                 }
             }
         }
 
-        [ObservableProperty]
-        private string _selectedFormat = "Print";
+        public ObservableCollection<string> DatePresets { get; } = new()
+        {
+            "Custom",
+            "This Month",
+            "Last Month",
+            "This Quarter",
+            "This Year"
+        };
 
-        [ObservableProperty]
-        private int _copies = 1;
+        partial void OnStartDateChanged(DateTime? value)
+        {
+            if (!_isApplyingPreset) SelectedDatePreset = "Custom";
+        }
+
+        partial void OnEndDateChanged(DateTime? value)
+        {
+            if (!_isApplyingPreset) SelectedDatePreset = "Custom";
+        }
 
         public ObservableCollection<RecentReport> RecentReports { get; } = new();
 
@@ -62,9 +84,9 @@ namespace PrimeAppBooks.ViewModels.Pages
             _serviceProvider = serviceProvider;
 
             // Set default date range to current month
-            //ApplyDatePreset("This Month");
+            SelectedDatePreset = "This Month";
 
-            // Load recent reports (in a real app, this would be from a database or file)
+            // Load recent reports
             LoadRecentReports();
         }
 
@@ -125,24 +147,10 @@ namespace PrimeAppBooks.ViewModels.Pages
                 var printService = scope.ServiceProvider.GetRequiredService<ReportPrintingService>();
 
                 var data = await reportService.GenerateBalanceSheetAsync(EndDate ?? DateTime.Now);
-
-                Debug.Print($"Selected value is {SelectedFormat}");
-
-                if (SelectedFormat == "PDF")
-                {
-                    var filePath = GetSaveFilePath("Balance_Sheet.pdf");
-                    if (!string.IsNullOrEmpty(filePath))
-                    {
-                        printService.ExportBalanceSheetToPdf(data, filePath);
-                        printService.OpenPdfFile(filePath);
-                        AddRecentReport("Balance Sheet", "📊", filePath);
-                    }
-                }
-                else
-                {
-                    var document = printService.GenerateBalanceSheetDocument(data);
-                    printService.PrintDocument(document, "Balance Sheet");
-                }
+                var filePath = printService.GenerateBalanceSheetPdf(data);
+                
+                printService.OpenPdfFile(filePath);
+                AddRecentReport("Balance Sheet", "📊", filePath);
             });
         }
 
@@ -156,22 +164,10 @@ namespace PrimeAppBooks.ViewModels.Pages
                 var printService = scope.ServiceProvider.GetRequiredService<ReportPrintingService>();
 
                 var data = await reportService.GenerateIncomeStatementAsync(StartDate ?? DateTime.Now.AddMonths(-1), EndDate ?? DateTime.Now);
+                var filePath = printService.GenerateIncomeStatementPdf(data);
 
-                if (SelectedFormat == "PDF")
-                {
-                    var filePath = GetSaveFilePath("Income_Statement.pdf");
-                    if (!string.IsNullOrEmpty(filePath))
-                    {
-                        printService.ExportIncomeStatementToPdf(data, filePath);
-                        printService.OpenPdfFile(filePath);
-                        AddRecentReport("Income Statement", "💰", filePath);
-                    }
-                }
-                else // Print
-                {
-                    var document = printService.GenerateIncomeStatementDocument(data);
-                    printService.PrintDocument(document, "Income Statement");
-                }
+                printService.OpenPdfFile(filePath);
+                AddRecentReport("Income Statement", "💰", filePath);
             });
         }
 
@@ -185,21 +181,10 @@ namespace PrimeAppBooks.ViewModels.Pages
                 var printService = scope.ServiceProvider.GetRequiredService<ReportPrintingService>();
 
                 var data = await reportService.GenerateCashFlowAsync(StartDate ?? DateTime.Now.AddMonths(-1), EndDate ?? DateTime.Now);
+                var filePath = printService.GenerateCashFlowPdf(data);
 
-                if (SelectedFormat == "PDF")
-                {
-                    var filePath = GetSaveFilePath("Cash_Flow.pdf");
-                    if (!string.IsNullOrEmpty(filePath))
-                    {
-                        // Note: Need to add PDF export for Cash Flow in ReportPrintingService
-                        _messageBoxService.ShowMessage("Cash Flow PDF export coming soon!", "Info", "InformationOutline");
-                    }
-                }
-                else // Print
-                {
-                    var document = printService.GenerateCashFlowDocument(data);
-                    printService.PrintDocument(document, "Cash Flow Statement");
-                }
+                printService.OpenPdfFile(filePath);
+                AddRecentReport("Cash Flow Statement", "🌊", filePath);
             });
         }
 
@@ -213,43 +198,98 @@ namespace PrimeAppBooks.ViewModels.Pages
                 var printService = scope.ServiceProvider.GetRequiredService<ReportPrintingService>();
 
                 var data = await reportService.GenerateTrialBalanceAsync(EndDate ?? DateTime.Now);
+                var filePath = printService.GenerateTrialBalancePdf(data);
 
-                if (SelectedFormat == "PDF")
-                {
-                    var filePath = GetSaveFilePath("Trial_Balance.pdf");
-                    if (!string.IsNullOrEmpty(filePath))
-                    {
-                        printService.ExportTrialBalanceToPdf(data, filePath);
-                        printService.OpenPdfFile(filePath);
-                        AddRecentReport("Trial Balance", "⚖️", filePath);
-                    }
-                }
-                else // Print
-                {
-                    var document = printService.GenerateTrialBalanceDocument(data);
-                    printService.PrintDocument(document, "Trial Balance");
-                }
+                printService.OpenPdfFile(filePath);
+                AddRecentReport("Trial Balance", "⚖️", filePath);
             });
         }
 
         [RelayCommand]
-        private async Task GenerateReport()
+        private async Task GenerateArAging()
         {
-            // Generic generate based on selected report type
-            await GenerateBalanceSheet();
+            await GenerateReportAsync("A/R Aging", async () =>
+            {
+                using var scope = _serviceProvider.CreateScope();
+                var analyticsService = scope.ServiceProvider.GetRequiredService<CustomerAnalyticsService>();
+                var printService = scope.ServiceProvider.GetRequiredService<ReportPrintingService>();
+
+                var data = await analyticsService.GetOverallAnalyticsAsync();
+                var filePath = printService.GenerateDebtorReportPdf(data.Metrics, "A/R Aging Summary");
+
+                printService.OpenPdfFile(filePath);
+                AddRecentReport("A/R Aging Summary", "📊", filePath);
+            });
+        }
+
+        [RelayCommand]
+        private async Task GenerateAssetRegister()
+        {
+            await GenerateReportAsync("Asset Register", async () =>
+            {
+                using var scope = _serviceProvider.CreateScope();
+                var reportService = scope.ServiceProvider.GetRequiredService<ReportGenerationService>();
+                var printService = scope.ServiceProvider.GetRequiredService<ReportPrintingService>();
+
+                var data = await reportService.GenerateAssetRegisterAsync(EndDate ?? DateTime.Now);
+                var filePath = printService.GenerateAssetRegisterPdf(data);
+
+                printService.OpenPdfFile(filePath);
+                AddRecentReport("Asset Register", "Asset", filePath);
+            });
+        }
+
+        [RelayCommand]
+        private async Task GenerateApAging()
+        {
+             _messageBoxService.ShowMessage("A/P Aging coming soon!", "Info", "InformationOutline");
+        }
+
+        [RelayCommand]
+        private async Task GenerateReceivablesSummary()
+        {
+            await GenerateReportAsync("Receivables Master Summary", async () =>
+            {
+                using var scope = _serviceProvider.CreateScope();
+                var analyticsService = scope.ServiceProvider.GetRequiredService<CustomerAnalyticsService>();
+                var printService = scope.ServiceProvider.GetRequiredService<ReportPrintingService>();
+
+                var data = await analyticsService.GetMasterSummaryDataAsync(StartDate, EndDate);
+                var filePath = printService.GenerateAnalyticsSummaryPdf(data);
+
+                printService.OpenPdfFile(filePath);
+                AddRecentReport("Receivables Master Summary", "📊", filePath);
+            });
+        }
+
+        [RelayCommand]
+        private async Task GenerateTaxReport()
+        {
+            await GenerateReportAsync("Tax Summary", async () =>
+            {
+                 _messageBoxService.ShowMessage("VAT / Tax Summary parsing logic is being finalized. Please check back shortly.", "Coming Soon", "InformationOutline");
+            });
+        }
+
+        [RelayCommand]
+        private void OpenRecent(RecentReport report)
+        {
+            if (report != null && File.Exists(report.FilePath))
+            {
+                using var scope = _serviceProvider.CreateScope();
+                var printService = scope.ServiceProvider.GetRequiredService<ReportPrintingService>();
+                printService.OpenPdfFile(report.FilePath);
+            }
+            else
+            {
+                _messageBoxService.ShowMessage("File no longer exists.", "Error", "ErrorOutline");
+            }
         }
 
         [RelayCommand]
         private async Task PrintAll()
         {
             _messageBoxService.ShowMessage("Print All feature coming soon!", "Info", "InformationOutline");
-        }
-
-        [RelayCommand]
-        private async Task GenerateSelected()
-        {
-            // Generate the currently selected report
-            await GenerateBalanceSheet();
         }
 
         #endregion Report Generation Commands

@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using PrimeAppBooks.ViewModels.Windows;
 using System;
 using System.Collections.Generic;
@@ -34,12 +34,21 @@ namespace PrimeAppBooks.Views.Windows
             _viewModel.OnLoadingComplete = () =>
             {
                 // Ensure this UI work runs on the UI thread.
-                Dispatcher.Invoke(async () =>
+                Dispatcher.Invoke(() =>
                 {
-                    var mainWindow = App.ServiceProvider.GetRequiredService<MainWindow>();
-                    mainWindow.DataContext = App.ServiceProvider.GetRequiredService<MainWindowViewModel>();
-                    Application.Current.MainWindow = mainWindow;
-                    mainWindow.Show();
+                    if (MyAppContext.CurrentLogin != null)
+                    {
+                        var mainWindow = App.ServiceProvider.GetRequiredService<MainWindow>();
+                        mainWindow.DataContext = App.ServiceProvider.GetRequiredService<MainWindowViewModel>();
+                        Application.Current.MainWindow = mainWindow;
+                        mainWindow.Show();
+                    }
+                    else
+                    {
+                        var loginWindow = App.ServiceProvider.GetRequiredService<Wndlogin>();
+                        Application.Current.MainWindow = loginWindow;
+                        loginWindow.Show();
+                    }
 
                     // Smooth fade-out transition before closing
                     var fadeOut = new DoubleAnimation(1.0, 0.0, TimeSpan.FromMilliseconds(200))

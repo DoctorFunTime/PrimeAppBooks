@@ -53,17 +53,8 @@
             </Border.Triggers>
         </Border>
 
-        <!--  Main Content Grid with Drop Shadow Effect  -->
+        <!--  Main Content Grid  -->
         <Grid Panel.ZIndex="1">
-            <Grid.Effect>
-                <DropShadowEffect
-                    BlurRadius="16"
-                    Direction="315"
-                    Opacity="0.6"
-                    RenderingBias="Quality"
-                    ShadowDepth="4"
-                    Color="#80000000" />
-            </Grid.Effect>
 
             <Grid.RenderTransform>
                 <TransformGroup>

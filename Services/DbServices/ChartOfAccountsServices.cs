@@ -133,10 +133,21 @@ namespace PrimeAppBooks.Services.DbServices
                 throw new InvalidOperationException($"Account name '{updatedAccount.AccountName}' already exists.");
             }
 
-            // Prevent changing Account Type if transactions exist
+            // Prevent risky Account Type changes if transactions exist. Allow a narrow
+            // metadata repair when the current type conflicts with the account subtype
+            // and the new type matches that subtype.
             if (account.JournalLines.Any() && account.AccountType != updatedAccount.AccountType)
             {
-                throw new InvalidOperationException("Cannot change Account Type because this account has existing transactions. Changing the type would affect historical financial reports.");
+                var isMetadataCorrection =
+                    !IsSubtypeValidForAccountType(account.AccountType, account.AccountSubtype) &&
+                    IsSubtypeValidForAccountType(updatedAccount.AccountType, updatedAccount.AccountSubtype) &&
+                    string.Equals(account.AccountSubtype, updatedAccount.AccountSubtype, StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals(account.NormalBalance, updatedAccount.NormalBalance, StringComparison.OrdinalIgnoreCase);
+
+                if (!isMetadataCorrection)
+                {
+                    throw new InvalidOperationException("Cannot change Account Type because this account has existing transactions. Changing the type would affect historical financial reports.");
+                }
             }
 
             // Update properties
@@ -393,6 +404,11 @@ namespace PrimeAppBooks.Services.DbServices
 
         public async Task<decimal> GetAccountBalanceAsync(int accountId, DateTime? asOfDate = null)
         {
+            var account = await _context.ChartOfAccounts.FindAsync(accountId);
+            if (account == null) return 0;
+
+            var openingBalance = account.OpeningBalance;
+
             var query = _context.JournalLines
                 .Include(l => l.JournalEntry)
                 .Where(l => l.AccountId == accountId && l.JournalEntry.Status == "POSTED");
@@ -400,13 +416,35 @@ namespace PrimeAppBooks.Services.DbServices
             if (asOfDate.HasValue)
             {
                 var utcDate = asOfDate.Value.Kind == DateTimeKind.Utc ? asOfDate.Value : asOfDate.Value.ToUniversalTime();
-                query = query.Where(l => l.LineDate <= utcDate);
+                // Use < for "as of" opening balances to exclude transactions ON the start date
+                query = query.Where(l => l.LineDate < utcDate);
             }
 
             var debitTotal = await query.SumAsync(l => l.DebitAmount);
             var creditTotal = await query.SumAsync(l => l.CreditAmount);
 
-            return debitTotal - creditTotal;
+            // Calculate balance based on normal balance type (with fallback to account type)
+            var normalBalance = account.NormalBalance;
+            if (string.IsNullOrEmpty(normalBalance))
+            {
+                normalBalance = account.AccountType.ToUpper() switch
+                {
+                    "ASSET" or "EXPENSE" => "DEBIT",
+                    "LIABILITY" or "EQUITY" or "REVENUE" => "CREDIT",
+                    _ => "DEBIT"
+                };
+            }
+
+            if (normalBalance == "DEBIT")
+            {
+                // Assets, Expenses: OpeningBalance + Debit - Credit
+                return openingBalance + (debitTotal - creditTotal);
+            }
+            else
+            {
+                // Liabilities, Equity, Revenue: OpeningBalance + Credit - Debit
+                return openingBalance + (creditTotal - debitTotal);
+            }
         }
 
         public async Task<Dictionary<int, decimal>> GetAccountBalancesAsync(List<int> accountIds, DateTime? asOfDate = null)
@@ -431,10 +469,25 @@ namespace PrimeAppBooks.Services.DbServices
                 })
                 .ToListAsync();
 
+            var accounts = await _context.ChartOfAccounts
+                .Where(a => accountIds.Contains(a.AccountId))
+                .ToListAsync();
+
             var result = new Dictionary<int, decimal>();
-            foreach (var balance in balances)
+            foreach (var account in accounts)
             {
-                result[balance.AccountId] = balance.DebitTotal - balance.CreditTotal;
+                var balanceInfo = balances.FirstOrDefault(b => b.AccountId == account.AccountId);
+                var debitTotal = balanceInfo?.DebitTotal ?? 0;
+                var creditTotal = balanceInfo?.CreditTotal ?? 0;
+
+                if (account.NormalBalance == "DEBIT")
+                {
+                    result[account.AccountId] = account.OpeningBalance + (debitTotal - creditTotal);
+                }
+                else
+                {
+                    result[account.AccountId] = account.OpeningBalance + (creditTotal - debitTotal);
+                }
             }
 
             // Add accounts with zero balance
@@ -464,7 +517,7 @@ namespace PrimeAppBooks.Services.DbServices
 
         public async Task<bool> UpdateAllAccountBalancesAsync()
         {
-            var accounts = await _context.ChartOfAccounts.Where(a => a.IsActive).ToListAsync();
+            var accounts = await _context.ChartOfAccounts.ToListAsync();
             var accountIds = accounts.Select(a => a.AccountId).ToList();
 
             var balances = await GetAccountBalancesAsync(accountIds);
@@ -569,6 +622,29 @@ namespace PrimeAppBooks.Services.DbServices
                 "ASSET" or "EXPENSE" => "DEBIT",
                 "LIABILITY" or "EQUITY" or "REVENUE" => "CREDIT",
                 _ => "DEBIT"
+            };
+        }
+
+        private static bool IsSubtypeValidForAccountType(string accountType, string accountSubtype)
+        {
+            if (string.IsNullOrWhiteSpace(accountType) || string.IsNullOrWhiteSpace(accountSubtype))
+                return true;
+
+            var subtype = accountSubtype.ToUpperInvariant();
+
+            return accountType.ToUpperInvariant() switch
+            {
+                "ASSET" => subtype is "CURRENT_ASSET" or "FIXED_ASSET" or "INTANGIBLE_ASSET" or
+                           "CASH" or "BANK" or "ACCOUNTS RECEIVABLE" or "INVENTORY" or "PREPAID EXPENSES",
+                "LIABILITY" => subtype is "CURRENT_LIABILITY" or "LONG_TERM_LIABILITY" or
+                               "ACCOUNTS PAYABLE" or "ACCRUED LIABILITIES" or "LONG TERM DEBT",
+                "EQUITY" => subtype is "CAPITAL" or "OWNER'S EQUITY" or "RETAINED_EARNINGS" or
+                            "NET_INCOME" or "DIVIDENDS" or "TREASURY_STOCK",
+                "REVENUE" => subtype is "OPERATING_REVENUE" or "OTHER_INCOME" or "OTHER REVENUE" or
+                             "OTHER INCOME" or "CONTRA_REVENUE" or "FEE INCOME" or "MISCELLANEOUS INCOME",
+                "EXPENSE" => subtype is "COGS" or "OPERATING_EXPENSE" or "OTHER_EXPENSE" or
+                             "FINANCIAL_EXPENSE" or "TAX_EXPENSE",
+                _ => true
             };
         }
 

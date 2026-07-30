@@ -39,6 +39,19 @@ namespace PrimeAppBooks.ViewModels.Pages
         [ObservableProperty]
         private decimal _netChange;
 
+        [ObservableProperty]
+        private decimal _openingBalance;
+
+        public AccountTransactionsPageViewModel(INavigationService navigationService, IServiceProvider serviceProvider)
+        {
+            _navigationService = navigationService;
+            _serviceProvider = serviceProvider;
+
+            // Default date range: All time
+            StartDate = null;
+            EndDate = null;
+        }
+
         [RelayCommand]
         public async Task LoadAccountsAsync()
         {
@@ -65,16 +78,6 @@ namespace PrimeAppBooks.ViewModels.Pages
 
         public ObservableCollection<ChartOfAccount> AvailableAccounts { get; } = new();
         public ObservableCollection<JournalLine> Transactions { get; } = new();
-
-        public AccountTransactionsPageViewModel(INavigationService navigationService, IServiceProvider serviceProvider)
-        {
-            _navigationService = navigationService;
-            _serviceProvider = serviceProvider;
-
-            // Default date range: All time
-            StartDate = null;
-            EndDate = null;
-        }
 
         public async Task Initialize(ChartOfAccount account = null)
         {
@@ -108,11 +111,25 @@ namespace PrimeAppBooks.ViewModels.Pages
             {
                 using var scope = _serviceProvider.CreateScope();
                 var journalServices = scope.ServiceProvider.GetRequiredService<JournalServices>();
+                
+                // Ensure UTC for PostgreSQL
+                var utcStart = StartDate.HasValue ? DateTime.SpecifyKind(StartDate.Value.Date, DateTimeKind.Utc) : (DateTime?)null;
+                var utcEnd = EndDate.HasValue ? DateTime.SpecifyKind(EndDate.Value.Date.AddDays(1).AddTicks(-1), DateTimeKind.Utc) : (DateTime?)null;
+
+                // Calculate opening balance if a starting date is provided
+                if (utcStart.HasValue)
+                {
+                    OpeningBalance = await journalServices.GetAccountBalanceAsync(SelectedAccount.AccountId, utcStart.Value);
+                }
+                else
+                {
+                    OpeningBalance = 0; // If all time, opening is 0 relative to history
+                }
 
                 var transactions = await journalServices.GetAccountTransactionsAsync(
                     SelectedAccount.AccountId,
-                    StartDate,
-                    EndDate);
+                    utcStart,
+                    utcEnd);
 
                 await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
                 {
@@ -146,6 +163,34 @@ namespace PrimeAppBooks.ViewModels.Pages
             TotalDebits = postedTransactions.Sum(t => t.DebitAmount);
             TotalCredits = postedTransactions.Sum(t => t.CreditAmount);
             NetChange = TotalDebits - TotalCredits;
+        }
+
+        [RelayCommand]
+        private void PrintReport()
+        {
+            if (SelectedAccount == null || !Transactions.Any())
+            {
+                return;
+            }
+
+            try
+            {
+                using var scope = _serviceProvider.CreateScope();
+                var printService = scope.ServiceProvider.GetRequiredService<ReportPrintingService>();
+                
+                var filePath = printService.GenerateAccountTransactionsPdf(
+                    SelectedAccount.AccountName,
+                    StartDate,
+                    EndDate,
+                    Transactions.ToList(),
+                    OpeningBalance);
+
+                printService.OpenPdfFile(filePath);
+            }
+            catch (Exception ex)
+            {
+                _messageBoxService.ShowMessage($"Error printing report: {ex.Message}", "Print Error", "ErrorOutline");
+            }
         }
 
         [RelayCommand]

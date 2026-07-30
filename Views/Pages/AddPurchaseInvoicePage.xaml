@@ -10,7 +10,7 @@
     xmlns:converters="clr-namespace:PrimeAppBooks.Conveters"
     d:DataContext="{d:DesignInstance Type=pages:AddPurchaseInvoicePageViewModel}"
     d:DesignHeight="900"
-    d:DesignWidth="1280"
+    d:DesignWidth="1100"
     Background="Transparent"
     mc:Ignorable="d">
 
@@ -22,11 +22,12 @@
         <Grid Margin="20">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
+                <RowDefinition Height="86*" />
+                <RowDefinition Height="159*"/>
             </Grid.RowDefinitions>
 
             <!-- Header Section -->
-            <Border Grid.Row="0" Margin="0,0,0,20" Style="{StaticResource ModernCardStyle}">
+            <Border Grid.Row="0" Margin="10,0,10,10" Style="{StaticResource ModernCardStyle}" Width="1035">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -49,7 +50,7 @@
             </Border>
 
             <!-- Main Form -->
-            <Grid Grid.Row="1">
+            <Grid Margin="0,125,0,0" Grid.RowSpan="3">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
@@ -57,7 +58,7 @@
                 </Grid.RowDefinitions>
 
                 <!-- Invoice Details Header -->
-                <Border Grid.Row="0" Margin="0,0,0,15" Style="{StaticResource ModernCardStyle}">
+                <Border Grid.Row="0" Margin="0,0,0,15" Style="{StaticResource ModernCardStyle}" Width="1040" HorizontalAlignment="Left">
                     <Grid Margin="10">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -69,7 +70,7 @@
                         <!-- Invoice Number -->
                         <StackPanel Grid.Column="0" Margin="5">
                             <TextBlock Style="{StaticResource DetailLabelText}" Text="Bill #" />
-                            <TextBox Style="{StaticResource ModernTextBoxStyle}" Text="{Binding InvoiceNumber}" />
+                            <TextBox Style="{StaticResource ModernTextBoxStyle}" Text="{Binding InvoiceNumber}" Width="210" />
                         </StackPanel>
 
                         <!-- Vendor Selection -->
@@ -79,18 +80,18 @@
                                 DisplayMemberPath="VendorName"
                                 ItemsSource="{Binding Vendors}"
                                 SelectedItem="{Binding SelectedVendor}"
-                                Style="{StaticResource ModernComboBox}" />
+                                Style="{StaticResource ModernComboBox}" Width="210" />
                         </StackPanel>
 
                         <!-- Dates -->
                         <StackPanel Grid.Column="2" Orientation="Horizontal">
                             <StackPanel Margin="5">
                                 <TextBlock Style="{StaticResource DetailLabelText}" Text="Date" />
-                                <DatePicker SelectedDate="{Binding InvoiceDate}" Style="{StaticResource CompactDatePickerStyle}" />
+                                <DatePicker SelectedDate="{Binding InvoiceDate}" Style="{StaticResource CompactDatePickerStyle}" Width="110"/>
                             </StackPanel>
                             <StackPanel Margin="5">
                                 <TextBlock Style="{StaticResource DetailLabelText}" Text="Due Date" />
-                                <DatePicker SelectedDate="{Binding DueDate}" Style="{StaticResource CompactDatePickerStyle}" />
+                                <DatePicker SelectedDate="{Binding DueDate}" Style="{StaticResource CompactDatePickerStyle}" Width="110"/>
                             </StackPanel>
                         </StackPanel>
 
@@ -118,7 +119,7 @@
                 </Border>
 
                 <!-- Line Items Grid -->
-                <Border Grid.Row="1" Margin="0,0,0,15" Style="{StaticResource ModernCardStyle}">
+                <Border Grid.Row="1" Margin="0,0,0,15" Style="{StaticResource ModernCardStyle}" Width="1040" HorizontalAlignment="Left">
                     <Grid Margin="10">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
@@ -137,21 +138,66 @@
                             CanUserAddRows="False"
                             CanUserDeleteRows="False"
                             GridLinesVisibility="None"
+                            IsReadOnly="False"
                             ItemsSource="{Binding BillLines}"
-                            ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                            ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                             ScrollViewer.VerticalScrollBarVisibility="Auto"
                             Style="{StaticResource ModernDataGridStyle}">
 
                             <DataGrid.RowStyle>
                                 <Style BasedOn="{StaticResource MaterialDesignDataGridRow}" TargetType="DataGridRow">
-                                    <Setter Property="Height" Value="50" />
+                                    <Setter Property="Height" Value="60" />
                                     <Setter Property="BorderThickness" Value="0" />
                                     <Setter Property="VerticalAlignment" Value="Center" />
                                     <Setter Property="VerticalContentAlignment" Value="Center" />
                                     <Setter Property="Foreground" Value="White" />
                                     <Setter Property="Background" Value="Transparent" />
+                                    <Style.Triggers>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter Property="Background" Value="#2A4A7B" />
+                                            <Setter Property="BorderBrush" Value="#4472C4" />
+                                            <Setter Property="BorderThickness" Value="1" />
+                                            <Setter Property="Foreground" Value="White" />
+                                        </Trigger>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#1E3A5F" />
+                                            <Setter Property="Foreground" Value="White" />
+                                        </Trigger>
+                                    </Style.Triggers>
                                 </Style>
                             </DataGrid.RowStyle>
+
+                            <DataGrid.CellStyle>
+                                <Style BasedOn="{StaticResource MaterialDesignDataGridCell}" TargetType="DataGridCell">
+                                    <Setter Property="VerticalAlignment" Value="Center" />
+                                    <Setter Property="VerticalContentAlignment" Value="Center" />
+                                    <Setter Property="BorderThickness" Value="0" />
+                                    <Setter Property="Background" Value="Transparent" />
+                                    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                    <Style.Triggers>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter Property="Background" Value="Transparent" />
+                                            <Setter Property="BorderBrush" Value="Transparent" />
+                                            <Setter Property="Foreground" Value="White" />
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </DataGrid.CellStyle>
+
+                            <DataGrid.ColumnHeaderStyle>
+                                <Style BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}" TargetType="DataGridColumnHeader">
+                                    <Setter Property="Foreground" Value="#FF4472C4" />
+                                    <Setter Property="FontWeight" Value="Bold" />
+                                    <Setter Property="FontFamily" Value="Segoe UI" />
+                                    <Setter Property="FontSize" Value="12" />
+                                    <Setter Property="VerticalContentAlignment" Value="Center" />
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                    <Setter Property="Height" Value="50" />
+                                    <Setter Property="Background" Value="#1E1E1E" />
+                                    <Setter Property="BorderBrush" Value="#3A3A3A" />
+                                    <Setter Property="BorderThickness" Value="0,0,0,1" />
+                                </Style>
+                            </DataGrid.ColumnHeaderStyle>
 
                             <DataGrid.Columns>
                                 <DataGridTextColumn
@@ -168,7 +214,20 @@
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
 
-                                <DataGridTemplateColumn Header="Account" Width="2*">
+                                <!-- Item / Product Selection (optional - for inventory items) -->
+                                <DataGridTemplateColumn Header="Item / Product" Width="180">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <ComboBox
+                                                DisplayMemberPath="ItemName"
+                                                ItemsSource="{Binding DataContext.InventoryItems, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                SelectedItem="{Binding SelectedItem, UpdateSourceTrigger=PropertyChanged}"
+                                                Style="{StaticResource ModernComboBox}" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+
+                                <DataGridTemplateColumn Header="Account" Width="180">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <ComboBox
@@ -179,10 +238,11 @@
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTextColumn Header="Description" Binding="{Binding Description, UpdateSourceTrigger=PropertyChanged}" Width="3*" />
-                                <DataGridTextColumn Header="Qty" Binding="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}" Width="80" />
-                                <DataGridTextColumn Header="Unit Price" Binding="{Binding UnitPrice, UpdateSourceTrigger=PropertyChanged, StringFormat=N2}" Width="120" />
-                                <DataGridTextColumn Header="Amount" Binding="{Binding Amount, StringFormat=N2}" IsReadOnly="True" Width="120" />
+
+                                <DataGridTextColumn Header="Description" Binding="{Binding Description, UpdateSourceTrigger=PropertyChanged}" Width="Auto" />
+                                <DataGridTextColumn Header="Qty" Binding="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}" Width="70" />
+                                <DataGridTextColumn Header="Unit Price" Binding="{Binding UnitPrice, UpdateSourceTrigger=PropertyChanged, StringFormat=N2}" Width="100" />
+                                <DataGridTextColumn Header="Amount" Binding="{Binding Amount, StringFormat=N2}" IsReadOnly="True" Width="Auto" />
                                 <DataGridTemplateColumn Header="Action" Width="Auto">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
@@ -204,7 +264,7 @@
                             </DataGrid.Columns>
                         </DataGrid>
 
-                        <StackPanel Grid.Row="2" HorizontalAlignment="Left">
+                        <StackPanel Grid.Row="0" HorizontalAlignment="Right">
                             <Button
                                 Margin="5"
                                 Command="{Binding AddLineCommand}"
@@ -220,14 +280,14 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
-                    
+
                     <Grid Grid.Row="0">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
 
-                        <Border Grid.Column="0" Margin="0,0,10,0" Style="{StaticResource ModernCardStyle}">
+                        <Border Grid.Column="0" Margin="0,0,10,0" Style="{StaticResource ModernCardStyle}" Width="750" HorizontalAlignment="Left">
                             <StackPanel Margin="10">
                                 <TextBlock Style="{StaticResource DetailLabelText}" Text="Notes" />
                                 <TextBox
@@ -239,7 +299,7 @@
                             </StackPanel>
                         </Border>
 
-                        <Border Grid.Column="1" MinWidth="250" Style="{StaticResource ModernCardStyle}">
+                        <Border Grid.Column="1" MinWidth="250" Style="{StaticResource ModernCardStyle}" Width="280">
                             <StackPanel Margin="20">
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Style="{StaticResource SectionHeaderText}" Text="Total:" />
@@ -268,7 +328,7 @@
                     </Grid>
 
                     <!-- Validation Summary Footer -->
-                    <Border Grid.Row="1" Margin="0,10,0,0" Padding="15" CornerRadius="8" Background="#20FFFFFF">
+                    <Border Grid.Row="1" Margin="0,10,0,0" Padding="15" CornerRadius="8" Background="#20FFFFFF" Width="1040">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
@@ -293,8 +353,8 @@
             </Grid>
 
             <!-- Loading Overlay -->
-            <Border
-                Grid.RowSpan="2"
+            <!--<Border
+                Grid.RowSpan="5"
                 Background="#80000000"
                 Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -309,7 +369,7 @@
                         Style="{StaticResource DetailValueText}"
                         Text="Processing..." />
                 </StackPanel>
-            </Border>
+            </Border>-->
         </Grid>
     </ScrollViewer>
 </base:BaseAnimatedPage>

@@ -36,6 +36,9 @@ namespace PrimeAppBooks.Configurations.AppDbContextConfigurations
                    .HasColumnType("decimal(18,2)")
                    .IsRequired();
 
+            // Inventory Item Link (optional - only set for inventory lines)
+            builder.Property(l => l.ItemId).HasColumnName("item_id");
+
             // Relationships
             builder.HasOne(l => l.PurchaseInvoice)
                    .WithMany(p => p.Lines)
@@ -44,6 +47,11 @@ namespace PrimeAppBooks.Configurations.AppDbContextConfigurations
             builder.HasOne(l => l.Account)
                    .WithMany()
                    .HasForeignKey(l => l.AccountId)
+                   .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne(l => l.Item)
+                   .WithMany()
+                   .HasForeignKey(l => l.ItemId)
                    .OnDelete(DeleteBehavior.Restrict);
         }
     }

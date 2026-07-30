@@ -1,11 +1,9 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
 using PrimeAppBooks.Data;
 using PrimeAppBooks.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Principal;
 using System.Threading.Tasks;
 using static PrimeAppBooks.Models.Pages.TransactionsModels;
 
@@ -43,19 +41,15 @@ namespace PrimeAppBooks.Services
             {
                 var balance = await GetAccountBalanceAsync(account.AccountId, asOfDate);
 
-                // Convert to proper sign based on normal balance
-                // For display on Balance Sheet, we want positive values showing the amount
                 decimal displayBalance;
-
                 if (account.AccountType == "ASSET")
                 {
-                    // Assets have DEBIT normal balance, so debit-credit is positive for assets
+                    // Assets have DEBIT normal balance, so debit-credit is positive
                     displayBalance = balance;
                 }
                 else if (account.AccountType == "LIABILITY" || account.AccountType == "EQUITY")
                 {
-                    // Liabilities & Equity have CREDIT normal balance
-                    // We stored debit-credit, so flip it to show credit-debit
+                    // Liabilities & Equity have CREDIT normal balance — flip sign for display
                     displayBalance = -balance;
                 }
                 else
@@ -67,12 +61,87 @@ namespace PrimeAppBooks.Services
             }
 
             // === ASSETS ===
-            var assets = accounts.Where(a => a.AccountType == "ASSET").ToList();
+            var assets = accounts
+                .Where(a => string.Equals(a.AccountType, "ASSET", StringComparison.OrdinalIgnoreCase))
+                .ToList();
 
-            // Current Assets
-            foreach (var account in assets.Where(a => a.AccountSubtype == "CURRENT_ASSET"))
+            // --- Fixed Assets — register provides the schedule structure (name, grouping),
+            // but Cost and Accum Dep are read from the actual GL account balances so the
+            // balance sheet stays tied to the double-entry and will always balance.
+            // Fixed asset reporting must be driven by the GL, not only by active
+            // asset-register rows. If an asset register row is deleted while its
+            // acquisition journal remains posted, the fixed asset account still
+            // belongs on the balance sheet.
+            var fixedAssetGlAccountIds = new HashSet<int>(
+                assets
+                    .Where(a => string.Equals(a.AccountSubtype, "FIXED_ASSET", StringComparison.OrdinalIgnoreCase))
+                    .Select(a => a.AccountId)
+            );
+
+            var fixedAssetAccountGroup = new FixedAssetGroup { CategoryName = "Fixed Asset Accounts" };
+
+            foreach (var account in assets
+                .Where(a => fixedAssetGlAccountIds.Contains(a.AccountId) &&
+                            string.Equals(a.NormalBalance, "DEBIT", StringComparison.OrdinalIgnoreCase))
+                .OrderBy(a => a.AccountNumber))
             {
-                if (accountBalances.TryGetValue(account.AccountId, out var data) && Math.Abs(data.Balance) > 0.01m)
+                var cost = await GetAccountBalanceAsync(account.AccountId, asOfDate);
+
+                if (Math.Abs(cost) <= 0.01m)
+                    continue;
+
+                fixedAssetAccountGroup.Assets.Add(new FixedAssetLineItem
+                {
+                    AssetId = 0,
+                    AssetCode = account.AccountNumber,
+                    AssetName = account.AccountName,
+                    Cost = cost,
+                    AccumulatedDepreciation = 0,
+                    NetBookValue = cost
+                });
+            }
+
+            foreach (var account in assets
+                .Where(a => fixedAssetGlAccountIds.Contains(a.AccountId) &&
+                            string.Equals(a.NormalBalance, "CREDIT", StringComparison.OrdinalIgnoreCase))
+                .OrderBy(a => a.AccountNumber))
+            {
+                var accumDep = -await GetAccountBalanceAsync(account.AccountId, asOfDate);
+
+                if (Math.Abs(accumDep) <= 0.01m)
+                    continue;
+
+                fixedAssetAccountGroup.Assets.Add(new FixedAssetLineItem
+                {
+                    AssetId = 0,
+                    AssetCode = account.AccountNumber,
+                    AssetName = account.AccountName,
+                    Cost = 0,
+                    AccumulatedDepreciation = accumDep,
+                    NetBookValue = -accumDep
+                });
+            }
+
+            if (fixedAssetAccountGroup.Assets.Any())
+            {
+                report.FixedAssetGroups.Add(fixedAssetAccountGroup);
+                report.TotalFixedAssetsCost = fixedAssetAccountGroup.TotalCost;
+                report.TotalAccumDepreciation = fixedAssetAccountGroup.TotalAccumDep;
+                report.TotalFixedAssets = fixedAssetAccountGroup.TotalNBV;
+            }
+
+            // --- Current Assets ---
+            var currentAssetSubtypes = new[]
+            {
+                "CURRENT_ASSET", "Cash", "Accounts Receivable", "Inventory", "Prepaid Expenses"
+            };
+
+            foreach (var account in assets.Where(a =>
+                currentAssetSubtypes.Contains(a.AccountSubtype, StringComparer.OrdinalIgnoreCase) &&
+                !fixedAssetGlAccountIds.Contains(a.AccountId)))
+            {
+                if (accountBalances.TryGetValue(account.AccountId, out var data) &&
+                    Math.Abs(data.Balance) > 0.01m)
                 {
                     report.CurrentAssets.Add(new AccountLineItem
                     {
@@ -88,35 +157,29 @@ namespace PrimeAppBooks.Services
                 }
             }
 
-            // Fixed Assets (includes intangible)
-            foreach (var account in assets.Where(a =>
-                a.AccountSubtype == "FIXED_ASSET" || a.AccountSubtype == "INTANGIBLE_ASSET"))
-            {
-                if (accountBalances.TryGetValue(account.AccountId, out var data) && Math.Abs(data.Balance) > 0.01m)
-                {
-                    report.FixedAssets.Add(new AccountLineItem
-                    {
-                        AccountId = account.AccountId,
-                        AccountNumber = account.AccountNumber,
-                        AccountName = account.AccountName,
-                        AccountType = account.AccountType,
-                        AccountSubtype = account.AccountSubtype,
-                        NormalBalance = account.NormalBalance,
-                        Amount = data.Balance
-                    });
-                    report.TotalFixedAssets += data.Balance;
-                }
-            }
+            // Exclude fixed asset GL accounts from the account balances dictionary
+            // so they cannot be picked up by any other section (current assets, etc.)
+            foreach (var id in fixedAssetGlAccountIds)
+                accountBalances.Remove(id);
 
             report.TotalAssets = report.TotalCurrentAssets + report.TotalFixedAssets;
 
             // === LIABILITIES ===
-            var liabilities = accounts.Where(a => a.AccountType == "LIABILITY").ToList();
+            var liabilities = accounts
+                .Where(a => string.Equals(a.AccountType, "LIABILITY", StringComparison.OrdinalIgnoreCase))
+                .ToList();
 
-            // Current Liabilities
-            foreach (var account in liabilities.Where(a => a.AccountSubtype == "CURRENT_LIABILITY"))
+            // --- Current Liabilities ---
+            var currentLiabilitySubtypes = new[]
             {
-                if (accountBalances.TryGetValue(account.AccountId, out var data) && Math.Abs(data.Balance) > 0.01m)
+                "CURRENT_LIABILITY", "Accounts Payable", "Accrued Liabilities"
+            };
+
+            foreach (var account in liabilities.Where(a =>
+                currentLiabilitySubtypes.Contains(a.AccountSubtype, StringComparer.OrdinalIgnoreCase)))
+            {
+                if (accountBalances.TryGetValue(account.AccountId, out var data) &&
+                    Math.Abs(data.Balance) > 0.01m)
                 {
                     report.CurrentLiabilities.Add(new AccountLineItem
                     {
@@ -132,10 +195,14 @@ namespace PrimeAppBooks.Services
                 }
             }
 
-            // Long-term Liabilities
-            foreach (var account in liabilities.Where(a => a.AccountSubtype == "LONG_TERM_LIABILITY"))
+            // --- Long-term Liabilities ---
+            var longTermLiabilitySubtypes = new[] { "LONG_TERM_LIABILITY", "Long Term Debt" };
+
+            foreach (var account in liabilities.Where(a =>
+                longTermLiabilitySubtypes.Contains(a.AccountSubtype, StringComparer.OrdinalIgnoreCase)))
             {
-                if (accountBalances.TryGetValue(account.AccountId, out var data) && Math.Abs(data.Balance) > 0.01m)
+                if (accountBalances.TryGetValue(account.AccountId, out var data) &&
+                    Math.Abs(data.Balance) > 0.01m)
                 {
                     report.LongTermLiabilities.Add(new AccountLineItem
                     {
@@ -151,15 +218,43 @@ namespace PrimeAppBooks.Services
                 }
             }
 
+            // --- Other Liabilities (catch-all for any unclassified liability accounts) ---
+            foreach (var account in liabilities)
+            {
+                if (report.CurrentLiabilities.Any(i => i.AccountId == account.AccountId) ||
+                    report.LongTermLiabilities.Any(i => i.AccountId == account.AccountId))
+                    continue;
+
+                if (accountBalances.TryGetValue(account.AccountId, out var data) &&
+                    Math.Abs(data.Balance) > 0.01m)
+                {
+                    report.LongTermLiabilities.Add(new AccountLineItem
+                    {
+                        AccountId = account.AccountId,
+                        AccountNumber = account.AccountNumber,
+                        AccountName = account.AccountName + " (Other Liability)",
+                        AccountType = account.AccountType,
+                        AccountSubtype = account.AccountSubtype,
+                        NormalBalance = account.NormalBalance,
+                        Amount = data.Balance
+                    });
+                    report.TotalLongTermLiabilities += data.Balance;
+                }
+            }
+
             report.TotalLiabilities = report.TotalCurrentLiabilities + report.TotalLongTermLiabilities;
 
             // === EQUITY ===
-            var equity = accounts.Where(a => a.AccountType == "EQUITY").ToList();
+            var equity = accounts
+                .Where(a => string.Equals(a.AccountType, "EQUITY", StringComparison.OrdinalIgnoreCase))
+                .ToList();
 
-            // Capital accounts (Common Stock, Preferred Stock, APIC)
-            foreach (var account in equity.Where(a => a.AccountSubtype == "CAPITAL"))
+            // --- Capital ---
+            foreach (var account in equity.Where(a =>
+                string.Equals(a.AccountSubtype, "CAPITAL", StringComparison.OrdinalIgnoreCase)))
             {
-                if (accountBalances.TryGetValue(account.AccountId, out var data) && Math.Abs(data.Balance) > 0.01m)
+                if (accountBalances.TryGetValue(account.AccountId, out var data) &&
+                    Math.Abs(data.Balance) > 0.01m)
                 {
                     report.Equity.Add(new AccountLineItem
                     {
@@ -175,10 +270,12 @@ namespace PrimeAppBooks.Services
                 }
             }
 
-            // Drawings
-            foreach (var account in equity.Where(a => a.AccountSubtype == "Owner's Equity"))
+            // --- Owner's Equity / Drawings ---
+            foreach (var account in equity.Where(a =>
+                string.Equals(a.AccountSubtype, "Owner's Equity", StringComparison.OrdinalIgnoreCase)))
             {
-                if (accountBalances.TryGetValue(account.AccountId, out var data) && Math.Abs(data.Balance) > 0.01m)
+                if (accountBalances.TryGetValue(account.AccountId, out var data) &&
+                    Math.Abs(data.Balance) > 0.01m)
                 {
                     report.Equity.Add(new AccountLineItem
                     {
@@ -193,19 +290,19 @@ namespace PrimeAppBooks.Services
                     report.TotalEquity += data.Balance;
                 }
             }
-            // Calculate Net Income for previous years (which should be in Retained Earnings)
-            // If books haven't been closed, we need to calculate this manually
+
+            // --- Retained Earnings ---
+            // Historical net income (all years before the current fiscal year) is folded
+            // into the Retained Earnings account balance because books are not formally closed.
             var fiscalYearStart = GetFiscalYearStart(asOfDate);
             var historicalNetIncome = await CalculateNetIncomeAsync(new DateTime(1900, 1, 1), fiscalYearStart.AddDays(-1));
-
             bool retainedEarningsAdded = false;
 
-            // Retained Earnings
-            foreach (var account in equity.Where(a => a.AccountSubtype == "RETAINED_EARNINGS"))
+            foreach (var account in equity.Where(a =>
+                string.Equals(a.AccountSubtype, "RETAINED_EARNINGS", StringComparison.OrdinalIgnoreCase)))
             {
                 if (accountBalances.TryGetValue(account.AccountId, out var data))
                 {
-                    // Even if balance is 0, we might need to show it if we have historical net income to add
                     decimal finalAmount = data.Balance;
 
                     if (!retainedEarningsAdded)
@@ -231,7 +328,7 @@ namespace PrimeAppBooks.Services
                 }
             }
 
-            // If we have historical net income but no Retained Earnings account was found (or added), add a line for it
+            // If no Retained Earnings account exists but we have prior-year income, show a calculated line
             if (!retainedEarningsAdded && Math.Abs(historicalNetIncome) > 0.01m)
             {
                 report.Equity.Add(new AccountLineItem
@@ -246,10 +343,8 @@ namespace PrimeAppBooks.Services
                 report.TotalEquity += historicalNetIncome;
             }
 
-            // Calculate Net Income for current fiscal year
-            // fiscalYearStart is already calculated above
+            // --- Net Income (current fiscal year, books not yet closed) ---
             var netIncome = await CalculateNetIncomeAsync(fiscalYearStart, asOfDate);
-
             if (Math.Abs(netIncome) > 0.01m)
             {
                 report.Equity.Add(new AccountLineItem
@@ -264,10 +359,12 @@ namespace PrimeAppBooks.Services
                 report.TotalEquity += netIncome;
             }
 
-            // Dividends (reduces equity)
-            foreach (var account in equity.Where(a => a.AccountSubtype == "DIVIDENDS"))
+            // --- Dividends (reduces equity) ---
+            foreach (var account in equity.Where(a =>
+                string.Equals(a.AccountSubtype, "DIVIDENDS", StringComparison.OrdinalIgnoreCase)))
             {
-                if (accountBalances.TryGetValue(account.AccountId, out var data) && Math.Abs(data.Balance) > 0.01m)
+                if (accountBalances.TryGetValue(account.AccountId, out var data) &&
+                    Math.Abs(data.Balance) > 0.01m)
                 {
                     report.Equity.Add(new AccountLineItem
                     {
@@ -277,16 +374,18 @@ namespace PrimeAppBooks.Services
                         AccountType = account.AccountType,
                         AccountSubtype = account.AccountSubtype,
                         NormalBalance = account.NormalBalance,
-                        Amount = data.Balance // Will be negative, reducing equity
+                        Amount = data.Balance // negative — reduces equity
                     });
                     report.TotalEquity += data.Balance;
                 }
             }
 
-            // Treasury Stock (reduces equity)
-            foreach (var account in equity.Where(a => a.AccountSubtype == "TREASURY_STOCK"))
+            // --- Treasury Stock (reduces equity) ---
+            foreach (var account in equity.Where(a =>
+                string.Equals(a.AccountSubtype, "TREASURY_STOCK", StringComparison.OrdinalIgnoreCase)))
             {
-                if (accountBalances.TryGetValue(account.AccountId, out var data) && Math.Abs(data.Balance) > 0.01m)
+                if (accountBalances.TryGetValue(account.AccountId, out var data) &&
+                    Math.Abs(data.Balance) > 0.01m)
                 {
                     report.Equity.Add(new AccountLineItem
                     {
@@ -296,7 +395,7 @@ namespace PrimeAppBooks.Services
                         AccountType = account.AccountType,
                         AccountSubtype = account.AccountSubtype,
                         NormalBalance = account.NormalBalance,
-                        Amount = data.Balance // Will be negative, reducing equity
+                        Amount = data.Balance // negative — reduces equity
                     });
                     report.TotalEquity += data.Balance;
                 }
@@ -322,27 +421,25 @@ namespace PrimeAppBooks.Services
 
             // Get all revenue and expense accounts
             var accounts = await _context.ChartOfAccounts
-                .Where(a => a.IsActive && (a.AccountType == "REVENUE" || a.AccountType == "EXPENSE"))
+                .Where(a => a.IsActive &&
+                           (a.AccountType == "REVENUE" || a.AccountType == "EXPENSE"))
                 .ToListAsync();
 
-            // Calculate activity for the period
+            // Calculate activity for the period and convert to display sign
             var accountBalances = new Dictionary<int, decimal>();
             foreach (var account in accounts)
             {
                 var balance = await GetAccountBalanceForPeriodAsync(account.AccountId, startDate, endDate);
 
-                // Convert based on account type
                 decimal displayBalance;
                 if (account.AccountType == "REVENUE")
                 {
-                    // Revenue has CREDIT normal balance
-                    // We stored debit-credit, so flip to show credit-debit (positive revenue)
+                    // Revenue: CREDIT normal balance — flip debit-credit to show positive
                     displayBalance = -balance;
                 }
-                else // EXPENSE
+                else
                 {
-                    // Expenses have DEBIT normal balance
-                    // debit-credit is already correct (positive expenses)
+                    // Expense: DEBIT normal balance — debit-credit is already positive
                     displayBalance = balance;
                 }
 
@@ -350,11 +447,23 @@ namespace PrimeAppBooks.Services
             }
 
             // === REVENUE ===
-            var revenueAccounts = accounts.Where(a => a.AccountType == "REVENUE" &&
-                                                      a.AccountSubtype != "CONTRA_REVENUE").ToList();
+            // Other Income subtypes are excluded here; they appear below Gross Profit
+            var otherIncomeSubtypes = new[]
+            {
+                "OTHER_INCOME", "Other Income", "Other Revenue",
+                "Uncategorized Revenue", "Fee Income", "Miscellaneous Income"
+            };
+
+            var revenueAccounts = accounts
+                .Where(a => a.AccountType == "REVENUE" &&
+                            !string.Equals(a.AccountSubtype, "CONTRA_REVENUE", StringComparison.OrdinalIgnoreCase) &&
+                            !otherIncomeSubtypes.Contains(a.AccountSubtype, StringComparer.OrdinalIgnoreCase))
+                .ToList();
+
             foreach (var account in revenueAccounts)
             {
-                if (accountBalances.TryGetValue(account.AccountId, out var balance) && Math.Abs(balance) > 0.01m)
+                if (accountBalances.TryGetValue(account.AccountId, out var balance) &&
+                    Math.Abs(balance) > 0.01m)
                 {
                     report.Revenue.Add(new AccountLineItem
                     {
@@ -369,24 +478,55 @@ namespace PrimeAppBooks.Services
                 }
             }
 
-            // Contra Revenue (Sales Returns, Discounts)
-            var contraRevenue = accounts.Where(a => a.AccountType == "REVENUE" &&
-                                                   a.AccountSubtype == "CONTRA_REVENUE").ToList();
+            // Contra Revenue (Sales Returns, Discounts) — reduces TotalRevenue
+            var contraRevenue = accounts
+                .Where(a => a.AccountType == "REVENUE" &&
+                            string.Equals(a.AccountSubtype, "CONTRA_REVENUE", StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
             foreach (var account in contraRevenue)
             {
-                if (accountBalances.TryGetValue(account.AccountId, out var balance) && Math.Abs(balance) > 0.01m)
+                if (accountBalances.TryGetValue(account.AccountId, out var balance) &&
+                    Math.Abs(balance) > 0.01m)
                 {
-                    // Contra revenue reduces total revenue
                     report.TotalRevenue -= Math.Abs(balance);
                 }
             }
 
+            // === OTHER INCOME ===
+            // Collected separately — added to income AFTER Gross Profit (below operating expenses)
+            var otherIncomeAccounts = accounts
+                .Where(a => a.AccountType == "REVENUE" &&
+                            otherIncomeSubtypes.Contains(a.AccountSubtype, StringComparer.OrdinalIgnoreCase))
+                .ToList();
+
+            foreach (var account in otherIncomeAccounts)
+            {
+                if (accountBalances.TryGetValue(account.AccountId, out var balance) &&
+                    Math.Abs(balance) > 0.01m)
+                {
+                    report.OtherIncome.Add(new AccountLineItem
+                    {
+                        AccountId = account.AccountId,
+                        AccountNumber = account.AccountNumber,
+                        AccountName = account.AccountName,
+                        AccountType = account.AccountType,
+                        AccountSubtype = account.AccountSubtype,
+                        Amount = balance
+                    });
+                    report.TotalOtherIncome += balance;
+                }
+            }
+
             // === COST OF GOODS SOLD ===
-            var cogsAccounts = accounts.Where(a => a.AccountType == "EXPENSE" &&
-                                                  a.AccountSubtype == "COGS").ToList();
+            var cogsAccounts = accounts
+                .Where(a => a.AccountType == "EXPENSE" && a.AccountSubtype == "COGS")
+                .ToList();
+
             foreach (var account in cogsAccounts)
             {
-                if (accountBalances.TryGetValue(account.AccountId, out var balance) && Math.Abs(balance) > 0.01m)
+                if (accountBalances.TryGetValue(account.AccountId, out var balance) &&
+                    Math.Abs(balance) > 0.01m)
                 {
                     report.CostOfGoodsSold.Add(new AccountLineItem
                     {
@@ -401,15 +541,19 @@ namespace PrimeAppBooks.Services
                 }
             }
 
+            // Gross Profit = Core Revenue - COGS only.
+            // Other Income is intentionally excluded here; it belongs below Operating Income.
             report.GrossProfit = report.TotalRevenue - report.TotalCOGS;
 
             // === OPERATING EXPENSES ===
-            var opeAccounts = accounts.Where(a => a.AccountType == "EXPENSE" &&
-                                                  a.AccountSubtype == "OPERATING_EXPENSE").ToList();
+            var opeAccounts = accounts
+                .Where(a => a.AccountType == "EXPENSE" && a.AccountSubtype == "OPERATING_EXPENSE")
+                .ToList();
+
             foreach (var account in opeAccounts)
             {
-                //if (account.AccountId == 62) _messageBoxService.ShowMessage($"Captured account data: {account.AccountName} : Account type {account.AccountType} Account amount {account.NormalBalance}", "Error", "ErrorOutline");
-                if (accountBalances.TryGetValue(account.AccountId, out var balance) && Math.Abs(balance) > 0.01m)
+                if (accountBalances.TryGetValue(account.AccountId, out var balance) &&
+                    Math.Abs(balance) > 0.01m)
                 {
                     report.OperatingExpenses.Add(new AccountLineItem
                     {
@@ -426,34 +570,18 @@ namespace PrimeAppBooks.Services
 
             report.OperatingIncome = report.GrossProfit - report.TotalOperatingExpenses;
 
-            // === OTHER INCOME ===
-            var otherIncomeAccounts = accounts.Where(a => a.AccountType == "REVENUE" &&
-                                                         a.AccountSubtype == "OTHER_INCOME").ToList();
-            foreach (var account in otherIncomeAccounts)
-            {
-                if (accountBalances.TryGetValue(account.AccountId, out var balance) && Math.Abs(balance) > 0.01m)
-                {
-                    report.OtherIncome.Add(new AccountLineItem
-                    {
-                        AccountId = account.AccountId,
-                        AccountNumber = account.AccountNumber,
-                        AccountName = account.AccountName,
-                        AccountType = account.AccountType,
-                        AccountSubtype = account.AccountSubtype,
-                        Amount = balance
-                    });
-                    report.TotalOtherIncome += balance;
-                }
-            }
-
             // === OTHER EXPENSES ===
-            var otherExpenseAccounts = accounts.Where(a => a.AccountType == "EXPENSE" &&
-                                                          (a.AccountSubtype == "OTHER_EXPENSE" ||
-                                                           a.AccountSubtype == "FINANCIAL_EXPENSE" ||
-                                                           a.AccountSubtype == "TAX_EXPENSE")).ToList();
+            var otherExpenseAccounts = accounts
+                .Where(a => a.AccountType == "EXPENSE" &&
+                           (a.AccountSubtype == "OTHER_EXPENSE" ||
+                            a.AccountSubtype == "FINANCIAL_EXPENSE" ||
+                            a.AccountSubtype == "TAX_EXPENSE"))
+                .ToList();
+
             foreach (var account in otherExpenseAccounts)
             {
-                if (accountBalances.TryGetValue(account.AccountId, out var balance) && Math.Abs(balance) > 0.01m)
+                if (accountBalances.TryGetValue(account.AccountId, out var balance) &&
+                    Math.Abs(balance) > 0.01m)
                 {
                     report.OtherExpenses.Add(new AccountLineItem
                     {
@@ -469,8 +597,10 @@ namespace PrimeAppBooks.Services
             }
 
             // === NET INCOME ===
-            report.NetIncome = report.TotalRevenue - report.TotalCOGS - report.TotalOperatingExpenses +
-                             report.TotalOtherIncome - report.TotalOtherExpenses;
+            // Waterfall: Revenue - COGS = Gross Profit
+            //            Gross Profit - Operating Expenses = Operating Income
+            //            Operating Income + Other Income - Other Expenses = Net Income
+            report.NetIncome = report.OperatingIncome + report.TotalOtherIncome - report.TotalOtherExpenses;
 
             return report;
         }
@@ -481,7 +611,7 @@ namespace PrimeAppBooks.Services
 
         public async Task<TrialBalanceData> GenerateTrialBalanceAsync(DateTime asOfDate)
         {
-            var asOfDateUtc = ToUtc(asOfDate);
+            var asOfDateUtc = ToUtc(asOfDate, isEndDate: true);
 
             var report = new TrialBalanceData
             {
@@ -497,46 +627,31 @@ namespace PrimeAppBooks.Services
 
             foreach (var account in accounts)
             {
-                // Get opening balance
                 var openingBalance = account.OpeningBalance;
 
-                // Get period activity
                 var debitActivity = await _context.JournalLines
                     .Include(l => l.JournalEntry)
                     .Where(l => l.AccountId == account.AccountId &&
                                l.LineDate <= asOfDateUtc &&
                                l.JournalEntry.Status == "POSTED")
-                    .SumAsync(l => l.DebitAmount);
+                    .SumAsync(l => (decimal?)l.DebitAmount) ?? 0;
 
                 var creditActivity = await _context.JournalLines
                     .Include(l => l.JournalEntry)
                     .Where(l => l.AccountId == account.AccountId &&
                                l.LineDate <= asOfDateUtc &&
                                l.JournalEntry.Status == "POSTED")
-                    .SumAsync(l => l.CreditAmount);
+                    .SumAsync(l => (decimal?)l.CreditAmount) ?? 0;
 
-                // Calculate total debits and credits including opening balance
                 decimal totalDebits = debitActivity;
                 decimal totalCredits = creditActivity;
 
-                // Add opening balance to appropriate side
-                if (account.NormalBalance == "DEBIT")
-                {
-                    if (openingBalance >= 0)
-                        totalDebits += openingBalance;
-                    else
-                        totalCredits += Math.Abs(openingBalance);
-                }
-                else // CREDIT
-                {
-                    if (openingBalance >= 0)
-                        totalCredits += openingBalance;
-                    else
-                        totalDebits += Math.Abs(openingBalance);
-                }
+                if (account.NormalBalance == "CREDIT")
+                    totalCredits += openingBalance;
+                else
+                    totalDebits += openingBalance;
 
-                // Only include if there's activity
-                if (Math.Abs(totalDebits) > 0.01m || Math.Abs(totalCredits) > 0.01m)
+                if (Math.Abs(totalDebits) > 0.001m || Math.Abs(totalCredits) > 0.001m)
                 {
                     report.Accounts.Add(new TrialBalanceLineItem
                     {
@@ -559,6 +674,64 @@ namespace PrimeAppBooks.Services
 
         #endregion Trial Balance
 
+        #region Asset Register
+
+        public async Task<AssetRegisterReportData> GenerateAssetRegisterAsync(DateTime asOfDate)
+        {
+            var report = new AssetRegisterReportData
+            {
+                ReportTitle = "Asset Register",
+                StartDate = asOfDate,
+                EndDate = asOfDate
+            };
+
+            var assets = await _context.FixedAssets
+                .Include(a => a.Category)
+                .Include(a => a.AssetAccount)
+                .Where(a => a.IsActive && a.PurchaseDate <= ToUtc(asOfDate, true))
+                .OrderBy(a => a.Category.CategoryName)
+                .ThenBy(a => a.AssetCode)
+                .ThenBy(a => a.AssetName)
+                .ToListAsync();
+
+            foreach (var group in assets.GroupBy(a => a.Category?.CategoryName ?? "Uncategorised"))
+            {
+                var categoryGroup = new AssetRegisterCategoryGroup
+                {
+                    CategoryName = group.Key
+                };
+
+                foreach (var asset in group)
+                {
+                    categoryGroup.Assets.Add(new AssetRegisterLineItem
+                    {
+                        AssetCode = asset.AssetCode,
+                        AssetName = asset.AssetName,
+                        PurchaseDate = asset.PurchaseDate,
+                        PurchaseCost = asset.PurchaseCost,
+                        AccumulatedDepreciation = asset.AccumulatedDepreciation,
+                        BookValue = asset.BookValue,
+                        ResidualValue = asset.ResidualValue,
+                        UsefulLifeYears = asset.UsefulLifeYears,
+                        DepreciationMethod = asset.DepreciationMethod,
+                        Status = asset.Status,
+                        AssetAccountName = asset.AssetAccount?.AccountName ?? string.Empty
+                    });
+                }
+
+                report.CategoryGroups.Add(categoryGroup);
+            }
+
+            report.TotalAssets = assets.Count;
+            report.TotalCost = report.CategoryGroups.Sum(g => g.TotalCost);
+            report.TotalAccumulatedDepreciation = report.CategoryGroups.Sum(g => g.TotalAccumulatedDepreciation);
+            report.TotalBookValue = report.CategoryGroups.Sum(g => g.TotalBookValue);
+
+            return report;
+        }
+
+        #endregion Asset Register
+
         #region Cash Flow Statement
 
         public async Task<CashFlowData> GenerateCashFlowAsync(DateTime startDate, DateTime endDate)
@@ -570,14 +743,13 @@ namespace PrimeAppBooks.Services
                 EndDate = endDate
             };
 
-            // Get cash accounts
+            // Identify cash and bank accounts
             var cashAccounts = await _context.ChartOfAccounts
                 .Where(a => a.IsActive &&
                            a.AccountType == "ASSET" &&
                            (a.AccountName.Contains("Cash") || a.AccountName.Contains("Bank")))
                 .ToListAsync();
 
-            // Calculate beginning and ending cash
             decimal beginningCash = 0;
             decimal endingCash = 0;
 
@@ -592,7 +764,6 @@ namespace PrimeAppBooks.Services
 
             // === OPERATING ACTIVITIES (Indirect Method) ===
 
-            // Start with Net Income
             var netIncome = await CalculateNetIncomeAsync(startDate, endDate);
             report.OperatingActivities.Add(new CashFlowLineItem
             {
@@ -603,9 +774,11 @@ namespace PrimeAppBooks.Services
 
             var operatingTotal = netIncome;
 
-            // Add back non-cash expenses (Depreciation frequently named accounts)
+            // Add back non-cash charges (depreciation / amortisation)
             var depreciationAccounts = await _context.ChartOfAccounts
-                .Where(a => a.IsActive && a.AccountType == "EXPENSE" && (a.AccountName.Contains("Depreciation") || a.AccountName.Contains("Amortization")))
+                .Where(a => a.IsActive &&
+                           a.AccountType == "EXPENSE" &&
+                           (a.AccountName.Contains("Depreciation") || a.AccountName.Contains("Amortization")))
                 .ToListAsync();
 
             foreach (var depAcc in depreciationAccounts)
@@ -615,21 +788,20 @@ namespace PrimeAppBooks.Services
                 {
                     report.OperatingActivities.Add(new CashFlowLineItem
                     {
-                        Description = depAcc.AccountName,
-                        Amount = amount, // Positive for expense (debit)
+                        Description = $"Add back: {depAcc.AccountName}",
+                        Amount = amount,
                         Category = "OPERATING"
                     });
                     operatingTotal += amount;
                 }
             }
 
-            // Changes in working capital (Operating Assets & Liabilities)
-            // We include all active Assets and Liabilities, but exclude fixed assets and long-term debt.
-            // This is more robust than checking for specific "CURRENT_*" subtypes which might be missing.
+            // Changes in working capital
+            // Include current assets & liabilities; exclude fixed assets, intangibles, and long-term debt
             var workingCapitalAccounts = await _context.ChartOfAccounts
-                .Where(a => a.IsActive && 
+                .Where(a => a.IsActive &&
                            (a.AccountType == "ASSET" || a.AccountType == "LIABILITY") &&
-                           a.AccountSubtype != "FIXED_ASSET" && 
+                           a.AccountSubtype != "FIXED_ASSET" &&
                            a.AccountSubtype != "INTANGIBLE_ASSET" &&
                            a.AccountSubtype != "LONG_TERM_LIABILITY" &&
                            a.AccountSubtype != "Fixed Assets" &&
@@ -638,20 +810,15 @@ namespace PrimeAppBooks.Services
 
             foreach (var acc in workingCapitalAccounts)
             {
-                // Skip Cash and Bank accounts (they are the target, not the change component)
+                // Cash/bank accounts are the target — exclude from adjustments
                 if (cashAccounts.Any(c => c.AccountId == acc.AccountId)) continue;
 
                 var change = await GetAccountBalanceChangeAsync(acc.AccountId, startDate, endDate);
                 if (Math.Abs(change) > 0.01m)
                 {
-                    // For both asset and liability adjustments in indirect method:
-                    // Change = DebitBalance_End - DebitBalance_Start
-                    // Cash Impact = -Change
-                    
-                    // Logic check:
-                    // Asset increase (Debit up) -> Change(+), Cash Outflow(-) -> Correct (Amount = -change)
-                    // Liability increase (Credit up, Debit down) -> Change(-), Cash Inflow(+) -> Correct (Amount = -change)
-
+                    // Indirect method sign logic:
+                    // Asset increases use cash (outflow)  → Amount = -change
+                    // Liability increases free cash (inflow) → Amount = -change (change is negative for liabilities)
                     report.OperatingActivities.Add(new CashFlowLineItem
                     {
                         Description = $"Change in {acc.AccountName}",
@@ -665,19 +832,14 @@ namespace PrimeAppBooks.Services
             report.NetCashFromOperating = operatingTotal;
 
             // === INVESTING ACTIVITIES ===
-            // (Simplified - in production, analyze fixed asset purchases/sales)
-
             report.NetCashFromInvesting = report.InvestingActivities.Sum(a => a.Amount);
 
             // === FINANCING ACTIVITIES ===
-            // (Simplified - in production, analyze loan proceeds, repayments, dividends)
-
             report.NetCashFromFinancing = report.FinancingActivities.Sum(a => a.Amount);
 
-            // Calculate net change
             report.NetChangeInCash = report.NetCashFromOperating +
-                                    report.NetCashFromInvesting +
-                                    report.NetCashFromFinancing;
+                                     report.NetCashFromInvesting +
+                                     report.NetCashFromFinancing;
 
             return report;
         }
@@ -688,7 +850,7 @@ namespace PrimeAppBooks.Services
 
         private async Task<decimal> GetAccountBalanceAsync(int accountId, DateTime asOfDate)
         {
-            var asOfDateUtc = ToUtc(asOfDate);
+            var asOfDateUtc = ToUtc(asOfDate, isEndDate: true);
 
             var account = await _context.ChartOfAccounts.FindAsync(accountId);
             var openingBalance = account?.OpeningBalance ?? 0;
@@ -698,22 +860,31 @@ namespace PrimeAppBooks.Services
                 .Where(l => l.AccountId == accountId &&
                            l.LineDate <= asOfDateUtc &&
                            l.JournalEntry.Status == "POSTED")
-                .SumAsync(l => l.DebitAmount);
+                .SumAsync(l => (decimal?)l.DebitAmount) ?? 0;
 
             var creditTotal = await _context.JournalLines
                 .Include(l => l.JournalEntry)
                 .Where(l => l.AccountId == accountId &&
                            l.LineDate <= asOfDateUtc &&
                            l.JournalEntry.Status == "POSTED")
-                .SumAsync(l => l.CreditAmount);
+                .SumAsync(l => (decimal?)l.CreditAmount) ?? 0;
 
-            return openingBalance + (debitTotal - creditTotal);
+            if (account?.NormalBalance == "CREDIT")
+            {
+                // Opening balance is a credit; return debit-credit net minus opening
+                return (debitTotal - creditTotal) - openingBalance;
+            }
+            else
+            {
+                // Opening balance is a debit; add it to debit-credit net
+                return openingBalance + (debitTotal - creditTotal);
+            }
         }
 
         private async Task<decimal> GetAccountBalanceForPeriodAsync(int accountId, DateTime startDate, DateTime endDate)
         {
             var startDateUtc = ToUtc(startDate);
-            var endDateUtc = ToUtc(endDate);
+            var endDateUtc = ToUtc(endDate, isEndDate: true);
 
             var debitTotal = await _context.JournalLines
                 .Include(l => l.JournalEntry)
@@ -737,9 +908,8 @@ namespace PrimeAppBooks.Services
         private async Task<decimal> CalculateNetIncomeAsync(DateTime startDate, DateTime endDate)
         {
             var startDateUtc = ToUtc(startDate);
-            var endDateUtc = ToUtc(endDate);
+            var endDateUtc = ToUtc(endDate, isEndDate: true);
 
-            // Revenue (CREDIT normal balance) - we want credit - debit to show positive revenue
             var revenue = await _context.JournalLines
                 .Include(l => l.ChartOfAccount)
                 .Include(l => l.JournalEntry)
@@ -749,7 +919,6 @@ namespace PrimeAppBooks.Services
                            l.JournalEntry.Status == "POSTED")
                 .SumAsync(l => l.CreditAmount - l.DebitAmount);
 
-            // Expenses (DEBIT normal balance) - we want debit - credit to show positive expenses
             var expenses = await _context.JournalLines
                 .Include(l => l.ChartOfAccount)
                 .Include(l => l.JournalEntry)
@@ -764,9 +933,6 @@ namespace PrimeAppBooks.Services
 
         private async Task<decimal> GetAccountActivitySumAsync(string accountName, DateTime startDate, DateTime endDate)
         {
-            var startDateUtc = ToUtc(startDate);
-            var endDateUtc = ToUtc(endDate);
-
             var account = await _context.ChartOfAccounts
                 .FirstOrDefaultAsync(a => a.AccountName.Contains(accountName));
 
@@ -795,13 +961,16 @@ namespace PrimeAppBooks.Services
 
         private DateTime GetFiscalYearStart(DateTime date)
         {
-            // Assuming fiscal year = calendar year
-            // Adjust if your fiscal year starts on a different month
+            // Calendar year assumed. Adjust month if your fiscal year differs.
             return new DateTime(date.Year, 1, 1);
         }
 
-        private DateTime ToUtc(DateTime dateTime)
+        private DateTime ToUtc(DateTime dateTime, bool isEndDate = false)
         {
+            // For end-date queries, push to 23:59:59.9999999 so the full day is included
+            if (isEndDate && dateTime.TimeOfDay == TimeSpan.Zero)
+                dateTime = dateTime.Date.AddDays(1).AddTicks(-1);
+
             if (dateTime.Kind == DateTimeKind.Utc)
                 return dateTime;
 

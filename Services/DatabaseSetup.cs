@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 using PrimeAppBooks.Data;
@@ -83,7 +83,33 @@ namespace PrimeAppBooks.Services
             await PopulateStudentGradesAsync(context);
             await context.SaveChangesAsync();
 
+            await PopulateAssetCategoriesAsync(context);
+            await context.SaveChangesAsync();
+
+            await EnsureDefaultAdminUserAsync(context);
+            await context.SaveChangesAsync();
+
             await CreateAccountingTriggersAsync(context);
+        }
+
+        private async Task EnsureDefaultAdminUserAsync(AppDbContext context)
+        {
+            if (!await context.Users.AnyAsync())
+            {
+                ReportProgress("Seeding default admin user account...");
+                var adminUser = new User
+                {
+                    Username = "admin",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin123!"),
+                    AccountName = "System",
+                    AccountSurname = "Administrator",
+                    AccountTitle = "System Administrator",
+                    AccountType = "Admin",
+                    AccountDepartment = "Executive",
+                    AccountTasks = true
+                };
+                context.Users.Add(adminUser);
+            }
         }
 
         private async Task PopulateChartOfAccountsAsync(AppDbContext context)
@@ -134,6 +160,7 @@ namespace PrimeAppBooks.Services
                 new() { AccountNumber = "3010", AccountName = "Preferred Stock", AccountType = "EQUITY", AccountSubtype = "CAPITAL", NormalBalance = "CREDIT", IsSystemAccount = true },
                 new() { AccountNumber = "3020", AccountName = "Additional Paid-in Capital", AccountType = "EQUITY", AccountSubtype = "CAPITAL", NormalBalance = "CREDIT", IsSystemAccount = true },
                 new() { AccountNumber = "3100", AccountName = "Retained Earnings", AccountType = "EQUITY", AccountSubtype = "RETAINED_EARNINGS", NormalBalance = "CREDIT", IsSystemAccount = true },
+                new() { AccountNumber = "3110", AccountName = "Drawings", AccountType = "EQUITY", AccountSubtype = "Owner's Equity", NormalBalance = "DEBIT", Description = "Withdrawals by the CEO of the school", IsSystemAccount = false },
                 new() { AccountNumber = "3200", AccountName = "Current Year Earnings", AccountType = "EQUITY", AccountSubtype = "NET_INCOME", NormalBalance = "CREDIT", IsSystemAccount = true },
                 new() { AccountNumber = "3300", AccountName = "Dividends", AccountType = "EQUITY", AccountSubtype = "DIVIDENDS", NormalBalance = "DEBIT", IsSystemAccount = true },
                 new() { AccountNumber = "3400", AccountName = "Treasury Stock", AccountType = "EQUITY", AccountSubtype = "TREASURY_STOCK", NormalBalance = "DEBIT", IsSystemAccount = true },
@@ -142,6 +169,7 @@ namespace PrimeAppBooks.Services
                 new() { AccountNumber = "4000", AccountName = "Sales Revenue", AccountType = "REVENUE", AccountSubtype = "OPERATING_REVENUE", NormalBalance = "CREDIT", IsSystemAccount = true },
                 new() { AccountNumber = "4010", AccountName = "Product Sales", AccountType = "REVENUE", AccountSubtype = "OPERATING_REVENUE", NormalBalance = "CREDIT", IsSystemAccount = true },
                 new() { AccountNumber = "4100", AccountName = "Service Revenue", AccountType = "REVENUE", AccountSubtype = "OPERATING_REVENUE", NormalBalance = "CREDIT", IsSystemAccount = true },
+                new() { AccountNumber = "4110", AccountName = "Registration Fees Income", AccountType = "REVENUE", AccountSubtype = "OPERATING_REVENUE", NormalBalance = "CREDIT", IsSystemAccount = false, Description = "Student registration fees recorded separately from the students fees account" },
                 new() { AccountNumber = "4200", AccountName = "Interest Income", AccountType = "REVENUE", AccountSubtype = "OTHER_INCOME", NormalBalance = "CREDIT", IsSystemAccount = true },
                 new() { AccountNumber = "4210", AccountName = "Dividend Income", AccountType = "REVENUE", AccountSubtype = "OTHER_INCOME", NormalBalance = "CREDIT", IsSystemAccount = true },
                 new() { AccountNumber = "4220", AccountName = "Gain on Sale of Assets", AccountType = "REVENUE", AccountSubtype = "OTHER_INCOME", NormalBalance = "CREDIT", IsSystemAccount = true },
@@ -163,8 +191,16 @@ namespace PrimeAppBooks.Services
                 new() { AccountNumber = "5300", AccountName = "Utilities Expense", AccountType = "EXPENSE", AccountSubtype = "OPERATING_EXPENSE", NormalBalance = "DEBIT", IsSystemAccount = true },
                 new() { AccountNumber = "5310", AccountName = "Telephone Expense", AccountType = "EXPENSE", AccountSubtype = "OPERATING_EXPENSE", NormalBalance = "DEBIT", IsSystemAccount = true },
                 new() { AccountNumber = "5320", AccountName = "Internet Expense", AccountType = "EXPENSE", AccountSubtype = "OPERATING_EXPENSE", NormalBalance = "DEBIT", IsSystemAccount = true },
+                new() { AccountNumber = "5330", AccountName = "Food and Gas", AccountType = "EXPENSE", AccountSubtype = "OPERATING_EXPENSE", NormalBalance = "DEBIT", IsSystemAccount = false, Description = "Account for the school food and kitchen gas" },
+                new() { AccountNumber = "5340", AccountName = "Transport and Fuel", AccountType = "EXPENSE", AccountSubtype = "OPERATING_EXPENSE", NormalBalance = "DEBIT", IsSystemAccount = false, Description = "School transport costs" },
+                new() { AccountNumber = "5350", AccountName = "Student Welfare Expense", AccountType = "EXPENSE", AccountSubtype = "OPERATING_EXPENSE", NormalBalance = "DEBIT", IsSystemAccount = false, Description = "Student hygiene and immediate well being supplies" },
+                new() { AccountNumber = "5360", AccountName = "Public Relations and Community Outreach", AccountType = "EXPENSE", AccountSubtype = "OPERATING_EXPENSE", NormalBalance = "DEBIT", IsSystemAccount = false },
+                new() { AccountNumber = "5370", AccountName = "Teachers Relief Allowance", AccountType = "EXPENSE", AccountSubtype = "OPERATING_EXPENSE", NormalBalance = "DEBIT", IsSystemAccount = false },
+                new() { AccountNumber = "5380", AccountName = "Cleaning and Janitorial Supplies", AccountType = "EXPENSE", AccountSubtype = "OPERATING_EXPENSE", NormalBalance = "DEBIT", IsSystemAccount = false },
+                new() { AccountNumber = "5390", AccountName = "Stationery Expense", AccountType = "EXPENSE", AccountSubtype = "OPERATING_EXPENSE", NormalBalance = "DEBIT", IsSystemAccount = false },
                 new() { AccountNumber = "5400", AccountName = "Depreciation Expense", AccountType = "EXPENSE", AccountSubtype = "OPERATING_EXPENSE", NormalBalance = "DEBIT", IsSystemAccount = true },
                 new() { AccountNumber = "5410", AccountName = "Amortization Expense", AccountType = "EXPENSE", AccountSubtype = "OPERATING_EXPENSE", NormalBalance = "DEBIT", IsSystemAccount = true },
+                new() { AccountNumber = "5420", AccountName = "Sports Fees", AccountType = "EXPENSE", AccountSubtype = "OPERATING_EXPENSE", NormalBalance = "DEBIT", IsSystemAccount = false },
                 new() { AccountNumber = "5500", AccountName = "Office Supplies", AccountType = "EXPENSE", AccountSubtype = "OPERATING_EXPENSE", NormalBalance = "DEBIT", IsSystemAccount = true },
                 new() { AccountNumber = "5600", AccountName = "Insurance Expense", AccountType = "EXPENSE", AccountSubtype = "OPERATING_EXPENSE", NormalBalance = "DEBIT", IsSystemAccount = true },
                 new() { AccountNumber = "5700", AccountName = "Advertising Expense", AccountType = "EXPENSE", AccountSubtype = "OPERATING_EXPENSE", NormalBalance = "DEBIT", IsSystemAccount = true },
@@ -352,6 +388,45 @@ namespace PrimeAppBooks.Services
             // to service-level logic in JournalServices.cs for better status control (Posted vs Draft).
             // This method is now obsolete but kept as a placeholder if other triggers are needed.
             await Task.CompletedTask;
+        }
+
+        private async Task PopulateAssetCategoriesAsync(AppDbContext context)
+        {
+            // Fetch default GL account IDs from the already-seeded chart of accounts
+            var accumDepnAccount = await context.ChartOfAccounts
+                .FirstOrDefaultAsync(a => a.AccountNumber == "1500");
+            var depnExpenseAccount = await context.ChartOfAccounts
+                .FirstOrDefaultAsync(a => a.AccountNumber == "5400");
+
+            var categories = new[]
+            {
+                new { Name = "Buildings",           AccountNo = "1420", Life = 40m, Method = "STRAIGHT_LINE" },
+                new { Name = "Vehicles",             AccountNo = "1440", Life = 5m,  Method = "REDUCING_BALANCE" },
+                new { Name = "Computer Equipment",   AccountNo = "1430", Life = 3m,  Method = "REDUCING_BALANCE" },
+                new { Name = "Office Furniture",     AccountNo = "1450", Life = 10m, Method = "STRAIGHT_LINE" },
+                new { Name = "Machinery",            AccountNo = "1430", Life = 10m, Method = "STRAIGHT_LINE" },
+                new { Name = "Other Equipment",      AccountNo = "1430", Life = 5m,  Method = "STRAIGHT_LINE" },
+            };
+
+            foreach (var cat in categories)
+            {
+                if (!await context.AssetCategories.AnyAsync(c => c.CategoryName == cat.Name))
+                {
+                    var assetAccount = await context.ChartOfAccounts
+                        .FirstOrDefaultAsync(a => a.AccountNumber == cat.AccountNo);
+
+                    await context.AssetCategories.AddAsync(new PrimeAppBooks.Models.Pages.TransactionsModels.AssetCategory
+                    {
+                        CategoryName = cat.Name,
+                        DefaultUsefulLifeYears = cat.Life,
+                        DefaultDepreciationMethod = cat.Method,
+                        DefaultAssetAccountId = assetAccount?.AccountId,
+                        DefaultAccumDepnAccountId = accumDepnAccount?.AccountId,
+                        DefaultDepnExpenseAccountId = depnExpenseAccount?.AccountId,
+                        IsActive = true
+                    });
+                }
+            }
         }
     }
 }

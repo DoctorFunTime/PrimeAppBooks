@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PrimeAppBooks.Interfaces;
 using PrimeAppBooks.Services;
@@ -25,6 +25,9 @@ namespace PrimeAppBooks.ViewModels.Windows
 
         [ObservableProperty]
         private bool _isChartOfAccountsSelected;
+
+        [ObservableProperty]
+        private bool _isInventorySelected;
 
         [ObservableProperty]
         private bool _isTransactionsSelected;
@@ -89,8 +92,12 @@ namespace PrimeAppBooks.ViewModels.Windows
         [ObservableProperty]
         private bool _isCustomerAnalyticsSelected;
 
+        [ObservableProperty]
+        private bool _isAssetRegisterSelected;
+
         // Expansion state properties
         private bool _isSalesExpanded = false;
+
         public bool IsSalesExpanded
         {
             get => _isSalesExpanded;
@@ -109,6 +116,7 @@ namespace PrimeAppBooks.ViewModels.Windows
         }
 
         private bool _isPurchasesExpanded = false;
+
         public bool IsPurchasesExpanded
         {
             get => _isPurchasesExpanded;
@@ -127,6 +135,7 @@ namespace PrimeAppBooks.ViewModels.Windows
         }
 
         private bool _isTransactionsExpanded = false;
+
         public bool IsTransactionsExpanded
         {
             get => _isTransactionsExpanded;
@@ -162,12 +171,31 @@ namespace PrimeAppBooks.ViewModels.Windows
         [ObservableProperty]
         private bool _isLoading = false;
 
+        [ObservableProperty]
+        private string _currentUserName = "User";
+
+        [ObservableProperty]
+        private string _currentUserTitle = "User Account";
+
+        [ObservableProperty]
+        private string _currentUserRole = "Client";
+
         public MainWindowViewModel(INavigationService navigationService, SplashscreenInitialisations splashscreenInitialisations)
         {
             _navigationService = navigationService;
             _splashscreenInitialisations = splashscreenInitialisations;
             _navigationService.PageNavigated += OnPageNavigated;
             _navigationService.LoadingStateChanged += OnLoadingStateChanged;
+
+            LoadCurrentUserData();
+
+            MyAppContext.StaticPropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(MyAppContext.CurrentLogin))
+                {
+                    LoadCurrentUserData();
+                }
+            };
 
             // Navigate to dashboard by default - but don't set navigation state here
             // The OnPageNavigated event handler will handle the state setting
@@ -176,9 +204,21 @@ namespace PrimeAppBooks.ViewModels.Windows
             TestConnection();
         }
 
+        private void LoadCurrentUserData()
+        {
+            var user = MyAppContext.CurrentLogin;
+            if (user != null)
+            {
+                string fullName = $"{user.AccountName} {user.AccountSurname}".Trim();
+                CurrentUserName = string.IsNullOrWhiteSpace(fullName) ? user.Username : fullName;
+                CurrentUserTitle = string.IsNullOrWhiteSpace(user.AccountTitle) ? (string.IsNullOrWhiteSpace(user.AccountType) ? "User Account" : user.AccountType) : user.AccountTitle;
+                CurrentUserRole = string.IsNullOrWhiteSpace(user.AccountType) ? "Client" : user.AccountType;
+            }
+        }
+
         private void TestConnection()
         {
-            _splashscreenInitialisations.TestConnectionToDatabase();
+            //_splashscreenInitialisations.TestConnectionToDatabase();
         }
 
         [RelayCommand]
@@ -201,6 +241,18 @@ namespace PrimeAppBooks.ViewModels.Windows
         private void NavigateToChartOfAccounts()
         {
             _navigationService.NavigateTo<ChartOfAccountsPage>();
+        }
+
+        [RelayCommand]
+        private void NavigateToInventory()
+        {
+            _navigationService.NavigateTo<InventoryListPage>();
+        }
+
+        [RelayCommand]
+        private void NavigateToAssetRegister()
+        {
+            _navigationService.NavigateTo<AssetRegisterPage>();
         }
 
         [RelayCommand]
@@ -264,6 +316,12 @@ namespace PrimeAppBooks.ViewModels.Windows
         }
 
         [RelayCommand]
+        private void NavigateToUserManagement()
+        {
+            _navigationService.NavigateTo<UserManagementPage>();
+        }
+
+        [RelayCommand]
         private void NavigateToCustomers()
         {
             _navigationService.NavigateTo<CustomersPage>();
@@ -315,6 +373,7 @@ namespace PrimeAppBooks.ViewModels.Windows
         {
             IsDashboardSelected = false;
             IsChartOfAccountsSelected = false;
+            IsInventorySelected = false;
             IsTransactionsSelected = false;
             IsGeneralLedgerSelected = false;
             IsJournalEntriesSelected = false;
@@ -336,6 +395,7 @@ namespace PrimeAppBooks.ViewModels.Windows
             IsPayablesSelected = false;
             IsDebitNotesSelected = false;
             IsCustomerAnalyticsSelected = false;
+            IsAssetRegisterSelected = false;
         }
 
         private void OnPageNavigated(object sender, Page page)
@@ -351,6 +411,16 @@ namespace PrimeAppBooks.ViewModels.Windows
 
                 case ChartOfAccountsPage:
                     IsChartOfAccountsSelected = true;
+                    break;
+
+                case InventoryListPage:
+                    IsInventorySelected = true;
+                    break;
+
+                case AssetRegisterPage:
+                case AddEditAssetPage:
+                case DepreciationRunPage:
+                    IsAssetRegisterSelected = true;
                     break;
 
                 case TransactionsPage:
@@ -393,6 +463,10 @@ namespace PrimeAppBooks.ViewModels.Windows
                     IsSettingsSelected = true;
                     break;
 
+                case UserManagementPage:
+                    IsUserManagementSelected = true;
+                    break;
+
                 case SalesInvoicesPage:
                     IsSalesSelected = true;
                     break;
@@ -428,7 +502,7 @@ namespace PrimeAppBooks.ViewModels.Windows
                     IsSalesExpanded = true;
                     OnPropertyChanged(nameof(SalesExpandedVisibility));
                     break;
-                
+
                 case VendorsPage:
                     IsVendorsSelected = true;
                     IsPurchasesExpanded = true;

@@ -91,6 +91,7 @@ namespace PrimeAppBooks.Services.DbServices
                     {
                         Description = line.Description,
                         AccountId = line.AccountId,
+                        ItemId = line.ItemId,   // Fix: carry ItemId so COGS fires on posting
                         Quantity = line.Quantity,
                         UnitPrice = line.UnitPrice,
                         Amount = line.Amount
@@ -203,9 +204,10 @@ namespace PrimeAppBooks.Services.DbServices
                 CreatedAt = DateTime.UtcNow
             });
 
-            // Credit Revenue Accounts from Lines
+            // Credit Revenue Accounts from Lines & Handle Inventory
             foreach (var line in invoice.Lines)
             {
+                // Revenue Entry
                 journalEntry.JournalLines.Add(new JournalLine
                 {
                     AccountId = line.AccountId,
@@ -221,6 +223,76 @@ namespace PrimeAppBooks.Services.DbServices
                     ExchangeRate = invoice.ExchangeRate,
                     CreatedAt = DateTime.UtcNow
                 });
+
+                // INVENTORY & COGS LOGIC
+                if (line.ItemId.HasValue)
+                {
+                    var item = await _context.InventoryItems.FindAsync(line.ItemId.Value);
+                    if (item != null)
+                    {
+                        // 1. Reduce Stock
+                        item.QuantityOnHand -= line.Quantity;
+                        item.UpdatedAt = DateTime.UtcNow;
+
+                        // 2. Record Transaction History
+                        var invTransaction = new InventoryTransaction
+                        {
+                            ItemId = item.ItemId,
+                            TransactionType = "SALE",
+                            InvoiceId = invoice.SalesInvoiceId,
+                            QuantityChange = -line.Quantity,
+                            UnitCost = item.PurchaseCost,
+                            TotalCost = -line.Quantity * item.PurchaseCost,
+                            TransactionDate = DateTime.UtcNow,
+                            CreatedBy = invoice.CreatedBy
+                        };
+                        _context.InventoryTransactions.Add(invTransaction);
+
+                        // 3. Add COGS Journal Entries (Dr COGS, Cr Inventory Asset)
+                        decimal cogsAmount = line.Quantity * item.PurchaseCost;
+
+                        if (cogsAmount > 0)
+                        {
+                            // Guard: ensure both GL accounts are mapped on the item
+                            if (item.ExpenseAccountId <= 0)
+                                throw new Exception($"Item '{item.ItemName}' has no COGS account mapped. Please edit the item and assign an Expense (COGS) account.");
+
+                            if (item.AssetAccountId <= 0)
+                                throw new Exception($"Item '{item.ItemName}' has no Inventory Asset account mapped. Please edit the item and assign an Asset account.");
+
+                            // Debit COGS
+                            journalEntry.JournalLines.Add(new JournalLine
+                            {
+                                AccountId = item.ExpenseAccountId,
+                                Description = $"Cost of Goods Sold: {item.ItemName}",
+                                DebitAmount = cogsAmount,
+                                CreditAmount = 0,
+                                LineDate = invoice.InvoiceDate,
+                                CreatedAt = DateTime.UtcNow
+                            });
+
+                            // Credit Inventory Asset
+                            journalEntry.JournalLines.Add(new JournalLine
+                            {
+                                AccountId = item.AssetAccountId,
+                                Description = $"Inventory Relief: {item.ItemName}",
+                                DebitAmount = 0,
+                                CreditAmount = cogsAmount,
+                                LineDate = invoice.InvoiceDate,
+                                CreatedAt = DateTime.UtcNow
+                            });
+                        }
+                        else if (item.PurchaseCost == 0)
+                        {
+                            // PurchaseCost not set — stock is reduced but no COGS entry is made.
+                            // This is intentional for zero-cost items (e.g. samples, gifts).
+                            // If unintentional, edit the item and set a Purchase Cost.
+                            System.Diagnostics.Debug.WriteLine(
+                                $"[COGS Warning] Item '{item.ItemName}' (ID: {item.ItemId}) has PurchaseCost = 0. " +
+                                $"Stock reduced by {line.Quantity} but no COGS journal entry was created.");
+                        }
+                    }
+                }
             }
 
             _context.JournalEntries.Add(journalEntry);
@@ -247,7 +319,12 @@ namespace PrimeAppBooks.Services.DbServices
             var invoice = await _context.SalesInvoices.FindAsync(id);
             if (invoice == null) return false;
 
-            _context.SalesInvoices.Remove(invoice);
+            if (invoice.Status == "POSTED")
+                throw new Exception("Posted invoices cannot be deleted. Void the invoice instead to preserve journal history.");
+
+            // Soft delete — preserves audit trail and any linked journal entries
+            invoice.Status = "VOID";
+            invoice.UpdatedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
             return true;
         }

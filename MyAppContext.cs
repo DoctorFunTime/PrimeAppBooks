@@ -1,12 +1,9 @@
-﻿using HandyControl.Controls;
+using HandyControl.Controls;
+using PrimeAppBooks.Models;
 using PrimeAppBooks.Models.APIs;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PrimeAppBooks
 {
@@ -17,9 +14,16 @@ namespace PrimeAppBooks
         public static TokenResponse TermSettings
         {
             get => _tokenResponse;
+            set { _tokenResponse = value; OnStaticPropertyChanged(); }
+        }
+
+        private static User? _currentLogin;
+        public static User? CurrentLogin
+        {
+            get => _currentLogin;
             set
             {
-                _tokenResponse = value;
+                _currentLogin = value;
                 OnStaticPropertyChanged();
             }
         }

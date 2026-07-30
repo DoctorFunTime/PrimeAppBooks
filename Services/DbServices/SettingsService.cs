@@ -32,6 +32,21 @@ namespace PrimeAppBooks.Services.DbServices
             return value;
         }
 
+        public async Task<T> GetSettingAsync<T>(string key, T defaultValue = default)
+        {
+            var value = await GetSettingAsync(key);
+            if (string.IsNullOrEmpty(value)) return defaultValue;
+
+            try
+            {
+                return (T)Convert.ChangeType(value, typeof(T));
+            }
+            catch
+            {
+                return defaultValue;
+            }
+        }
+
         public async Task<int> GetIntSettingAsync(string key, int defaultValue = 0)
         {
             var value = await GetSettingAsync(key);
@@ -87,6 +102,11 @@ namespace PrimeAppBooks.Services.DbServices
             }
 
             return 0;
+        }
+
+        public async Task SetBaseCurrencyIdAsync(int currencyId)
+        {
+            await SetSettingAsync(SettingConstants.BaseCurrencyId, currencyId.ToString(), "The primary currency used for accounting operations.");
         }
     }
 }

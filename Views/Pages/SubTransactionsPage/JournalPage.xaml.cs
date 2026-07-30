@@ -31,7 +31,7 @@ namespace PrimeAppBooks.Views.Pages.SubTransactionsPage
             // Set custom animation properties for journal page
             // Slide from right to feel like opening a drawer
             SetAnimationDirection(AnimationDirection.FromRight);
-            SetAnimationDuration(300);
+            SetAnimationDuration(200);
             SetAnimationEasing(AnimationEasing.EaseOut);
             SetAnimateOut(true);
 

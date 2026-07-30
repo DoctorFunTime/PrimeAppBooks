@@ -9,7 +9,7 @@
     xmlns:pages="clr-namespace:PrimeAppBooks.ViewModels.Pages"
     d:DataContext="{d:DesignInstance Type=pages:AddCustomerPageViewModel}"
     d:DesignHeight="9000"
-    d:DesignWidth="1280"
+    d:DesignWidth="1100"
     Background="Transparent"
     mc:Ignorable="d">
 
@@ -24,7 +24,7 @@
             <Border
                 Grid.Row="0"
                 Margin="0,0,0,20"
-                Style="{StaticResource ModernCardStyle}">
+                Style="{StaticResource ModernCardStyle}" Width="1040">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -55,8 +55,8 @@
             <StackPanel Grid.Row="1">
 
                 <!--  Basic Information  -->
-                <Border Margin="0,0,0,20" Style="{StaticResource ModernCardStyle}">
-                    <StackPanel Margin="25">
+                <Border  Margin="0,0,0,20" Style="{StaticResource ModernCardStyle}" Width="1040">
+                    <StackPanel Margin="10">
                         <TextBlock
                             Margin="0,0,0,20"
                             Style="{StaticResource SectionHeaderText}"
@@ -65,17 +65,17 @@
                         <!--  Name and Code  -->
                         <Grid Style="{StaticResource SettingsRowStyle}">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="150" />
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="20" />
-                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="150" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
                             <TextBlock
                                 Grid.Column="0"
                                 Style="{StaticResource SettingsLabelStyle}"
                                 Text="Customer Name: *" />
-                            <hc:TextBox
+                            <TextBox
                                 Grid.Column="1"
                                 hc:InfoElement.Placeholder="Full legal name"
                                 Style="{StaticResource ModernTextBoxStyle}"
@@ -176,8 +176,8 @@
                 </Border>
 
                 <!--  Student/Personal Information  -->
-                <Border Margin="0,0,0,20" Style="{StaticResource ModernCardStyle}">
-                    <StackPanel Margin="25">
+                <Border Margin="0,0,0,20" Style="{StaticResource ModernCardStyle}" Width="1040">
+                    <StackPanel Margin="10">
                         <TextBlock
                             Margin="0,0,0,20"
                             Style="{StaticResource SectionHeaderText}"
@@ -277,8 +277,8 @@
                 </Border>
 
                 <!--  Guardian Information  -->
-                <Border Margin="0,0,0,20" Style="{StaticResource ModernCardStyle}">
-                    <StackPanel Margin="25">
+                <Border Margin="0,0,0,20" Style="{StaticResource ModernCardStyle}" Width="1040">
+                    <StackPanel Margin="10">
                         <TextBlock
                             Margin="0,0,0,20"
                             Style="{StaticResource SectionHeaderText}"
@@ -333,8 +333,8 @@
                 </Border>
 
                 <!--  Addresses  -->
-                <Border Margin="0,0,0,20" Style="{StaticResource ModernCardStyle}">
-                    <StackPanel Margin="25">
+                <Border Margin="0,0,0,20" Style="{StaticResource ModernCardStyle}" Width="1040">
+                    <StackPanel Margin="10">
                         <TextBlock
                             Margin="0,0,0,20"
                             Style="{StaticResource SectionHeaderText}"
@@ -383,8 +383,8 @@
                 </Border>
 
                 <!--  Auto-Invoice Configuration  -->
-                <Border Margin="0,0,0,20" Style="{StaticResource ModernCardStyle}">
-                    <StackPanel Margin="25">
+                <Border Margin="0,0,0,20" Style="{StaticResource ModernCardStyle}" Width="1040">
+                    <StackPanel Margin="10">
                         <Grid Margin="0,0,0,20">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
@@ -509,8 +509,8 @@
                 </Border>
 
                 <!--  Additional Notes  -->
-                <Border Margin="0,0,0,20" Style="{StaticResource ModernCardStyle}">
-                    <StackPanel Margin="25">
+                <Border Margin="0,0,0,20" Style="{StaticResource ModernCardStyle}" Width="1040">
+                    <StackPanel Margin="10">
                         <TextBlock
                             Margin="0,0,0,20"
                             Style="{StaticResource SectionHeaderText}"
@@ -541,7 +541,7 @@
             </StackPanel>
 
             <!--  Loading Overlay  -->
-            <Border
+            <!--<Border
                 Grid.RowSpan="2"
                 Background="#80000000"
                 Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
@@ -557,7 +557,7 @@
                         Style="{StaticResource DetailValueText}"
                         Text="Saving Customer..." />
                 </StackPanel>
-            </Border>
+            </Border>-->
         </Grid>
     </ScrollViewer>
 </base:BaseAnimatedPage>
